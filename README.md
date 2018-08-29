@@ -1,2 +1,2 @@
 # unity-mod-manager
-UnityModManager
+This mod adds modding support for games created on Unity engine.
