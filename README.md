@@ -1,0 +1,2 @@
+# unity-mod-manager
+UnityModManager
