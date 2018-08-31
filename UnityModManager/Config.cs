@@ -16,7 +16,7 @@ namespace UnityModManagerNet.Installer
         public string ModsDirectory;
         public string ModInfo;
         public string AssemblyName;
-        public string PatchMethod;
+        public string PatchTarget;
 
         public override string ToString()
         {
@@ -48,7 +48,7 @@ namespace UnityModManagerNet.Installer
                                 ModsDirectory = "Mods",
                                 ModInfo = "Info.json",
                                 AssemblyName = "Assembly-CSharp.dll",
-                                PatchMethod = "App.Awake"
+                                PatchTarget = "App.Awake"
                             }
                         }
                     };

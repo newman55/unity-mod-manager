@@ -240,7 +240,6 @@ namespace UnityModManagerNet.Installer
             {
                 inputLog.Clear();
                 param.SaveGamePath(selectedGame.Name, folderBrowserDialog.SelectedPath);
-                //Log.Print(folderBrowserDialog.SelectedPath);
                 CheckState();
             }
         }
@@ -285,45 +284,30 @@ namespace UnityModManagerNet.Installer
                 string methodName = null;
                 string placeType = null;
 
-                var pos = selectedGame.PatchMethod.LastIndexOf('.');
+                var pos = selectedGame.PatchTarget.LastIndexOf('.');
                 if (pos != -1)
                 {
-                    className = selectedGame.PatchMethod.Substring(0, pos);
+                    className = selectedGame.PatchTarget.Substring(0, pos);
 
-                    var pos2 = selectedGame.PatchMethod.LastIndexOf(':');
+                    var pos2 = selectedGame.PatchTarget.LastIndexOf(':');
                     if (pos2 != -1)
                     {
-                        methodName = selectedGame.PatchMethod.Substring(pos + 1, pos2 - pos - 1);
-                        placeType = selectedGame.PatchMethod.Substring(pos2 + 1).ToLower();
+                        methodName = selectedGame.PatchTarget.Substring(pos + 1, pos2 - pos - 1);
+                        placeType = selectedGame.PatchTarget.Substring(pos2 + 1).ToLower();
 
                         if (placeType != "after" && placeType != "before")
-                            Log.Print($"Parameter '{placeType}' in '{selectedGame.PatchMethod}' is unknown.");
+                            Log.Print($"Parameter '{placeType}' in '{selectedGame.PatchTarget}' is unknown.");
                     }
                     else
                     {
-                        methodName = selectedGame.PatchMethod.Substring(pos + 1);
+                        methodName = selectedGame.PatchTarget.Substring(pos + 1);
                     }
                 }
                 else
                 {
-                    Log.Print($"Function name error '{selectedGame.PatchMethod}'.");
+                    Log.Print($"Function name error '{selectedGame.PatchTarget}'.");
                     return false;
                 }
-
-                //            var array = selectedGame.PatchMethod.Split('.');
-                //if (array != null && array.Length > 1)
-                //{
-                //	if (array.Length == 2)
-                //	{
-                //		className = array[0];
-                //		methodName = array[1];
-                //	}
-                //	else if (array.Length == 3)
-                //	{
-                //		className = $"{array[0]}.{array[1]}";
-                //		methodName = array[2];
-                //	}
-                //}
 
                 var targetClass = assembly.Types.FirstOrDefault(x => x.FullName == className);
                 if (targetClass == null)
