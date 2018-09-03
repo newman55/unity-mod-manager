@@ -10,9 +10,9 @@ using UnityEngine;
 
 namespace UnityModManagerNet
 {
-    public class UnityModManager
+    public partial class UnityModManager
     {
-        public const string version = "0.8.1";
+        public const string version = "0.9.0";
         public const string modsDirname = "Mods";
         public const string infoFilename = "info.json";
 
@@ -60,8 +60,10 @@ namespace UnityModManagerNet
             bool mErrorOnLoading = false;
             public bool ErrorOnLoading => mErrorOnLoading;
 
-            //bool mEnabled = true;
-            //public bool Enabled => mEnabled;
+            public bool Enabled = true;
+            //public bool Enabled => Enabled;
+
+            public bool Toggleable => OnToggle != null;
 
             bool mActive = false;
             public bool Active
@@ -79,35 +81,23 @@ namespace UnityModManagerNet
                             if (mActive)
                                 return;
 
-                            if (OnToggle != null)
+                            if (OnToggle == null || OnToggle(this, true))
                             {
-                                if (OnToggle(this, true))
-                                {
-                                    mActive = true;
-                                    this.Logger.Log($"Active.");
-                                }
-                                return;
+                                mActive = true;
+                                this.Logger.Log($"Active.");
                             }
-                            this.Logger.Log($"Active.");
                         }
                         else
                         {
                             if (!mActive)
                                 return;
 
-                            if (OnToggle != null)
+                            if (OnToggle != null && OnToggle(this, false))
                             {
-                                if (OnToggle(this, false))
-                                {
-                                    mActive = false;
-                                    this.Logger.Log($"Inactive.");
-                                }
-                                return;
+                                mActive = false;
+                                this.Logger.Log($"Inactive.");
                             }
-                            this.Logger.Log($"Inactive.");
                         }
-
-                        mActive = value;
                     }
                     catch (Exception e)
                     {
@@ -136,7 +126,8 @@ namespace UnityModManagerNet
                             Requirements.Add(match.Groups[1].Value, ParseVersion(match.Groups[2].Value));
                             continue;
                         }
-                        Requirements.Add(id, null);
+                        if (!Requirements.ContainsKey(id))
+                            Requirements.Add(id, null);
                     }
                 }
             }
@@ -187,10 +178,10 @@ namespace UnityModManagerNet
                             mErrorOnLoading = true;
                             this.Logger.Error($"Required mod '{id}' not loaded.");
                         }
-                        //else if (!mod.Params.Enabled)
+                        //else if (!mod.Enabled)
                         //{
+                        //    mErrorOnLoading = true;
                         //    this.Logger.Error($"Required mod '{id}' disabled.");
-                        //    return false;
                         //}
                         else if (!mod.Active)
                         {
@@ -228,7 +219,7 @@ namespace UnityModManagerNet
 
                     object[] param = new object[] { this };
                     Type[] types = new Type[] { typeof(ModEntry) };
-                    if (FindMethod(Info.EntryMethod, types) == null)
+                    if (FindMethod(Info.EntryMethod, types, false) == null)
                     {
                         param = null;
                         types = null;
@@ -242,7 +233,7 @@ namespace UnityModManagerNet
 
                     mStarted = true;
 
-                    if (!mErrorOnLoading)
+                    if (!mErrorOnLoading && Enabled)
                     {
                         Active = true;
                         return true;
@@ -257,12 +248,7 @@ namespace UnityModManagerNet
                 return false;
             }
 
-            public bool Invoke(string namespaceClassnameMethodname, out object result)
-            {
-                return Invoke(namespaceClassnameMethodname, out result, null, new Type[0]);
-            }
-
-            public bool Invoke(string namespaceClassnameMethodname, out object result, object[] param, Type[] types)
+            public bool Invoke(string namespaceClassnameMethodname, out object result, object[] param = null, Type[] types = null)
             {
                 result = null;
                 try
@@ -284,7 +270,7 @@ namespace UnityModManagerNet
                 return false;
             }
 
-            MethodInfo FindMethod(string namespaceClassnameMethodname, Type[] types)
+            MethodInfo FindMethod(string namespaceClassnameMethodname, Type[] types, bool showLog = true)
             {
                 long key = namespaceClassnameMethodname.GetHashCode();
                 if (types != null)
@@ -309,10 +295,11 @@ namespace UnityModManagerNet
                         }
                         else
                         {
-                            this.Logger.Error($"Function name error '{namespaceClassnameMethodname}'.");
-                            return null;
-                        }
+                            if (showLog)
+                                this.Logger.Error($"Function name error '{namespaceClassnameMethodname}'.");
 
+                            goto Exit;
+                        }
                         var type = mAssembly.GetType(classString);
                         if (type != null)
                         {
@@ -320,19 +307,34 @@ namespace UnityModManagerNet
                                 types = new Type[0];
 
                             methodInfo = type.GetMethod(methodString, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, types, new ParameterModifier[0]);
-
                             if (methodInfo == null)
-                                this.Logger.Error($"Method '{namespaceClassnameMethodname}' not found.");
+                            {
+                                if (showLog)
+                                {
+                                    if (types.Length > 0)
+                                    {
+                                        this.Logger.Log($"Method '{namespaceClassnameMethodname}[{string.Join(", ", types.Select(x => x.Name).ToArray())}]' not found.");
+                                    }
+                                    else
+                                    {
+                                        this.Logger.Log($"Method '{namespaceClassnameMethodname}' not found.");
+                                    }
+                                }
+                            }
                         }
                         else
                         {
-                            this.Logger.Error($"Class '{classString}' not found.");
+                            if (showLog)
+                                this.Logger.Error($"Class '{classString}' not found.");
                         }
                     }
                     else
                     {
-                        UnityModManager.Logger.Error($"Can't find method '{namespaceClassnameMethodname}'. Mod '{Info.Id}' is not loaded.");
+                        if (showLog)
+                            UnityModManager.Logger.Error($"Can't find method '{namespaceClassnameMethodname}'. Mod '{Info.Id}' is not loaded.");
                     }
+
+                    Exit:
 
                     mCache[key] = methodInfo;
                 }
@@ -380,6 +382,9 @@ namespace UnityModManagerNet
         public static readonly List<ModEntry> modEntries = new List<ModEntry>();
         public static readonly string modsPath = Path.Combine(Environment.CurrentDirectory, modsDirname);
 
+        static Param mParams = new Param();
+        public static Param Params => mParams;
+
         public static bool isStarted = false;
 
         public static void Start()
@@ -390,16 +395,7 @@ namespace UnityModManagerNet
                 return;
             }
 
-            if (File.Exists(Logger.LogPath))
-            {
-                try
-                {
-                    File.Delete(Logger.LogPath);
-                }
-                catch (Exception e)
-                {
-                }
-            }
+            Logger.Clear();
 
             Console.WriteLine();
             Console.WriteLine();
@@ -458,6 +454,8 @@ namespace UnityModManagerNet
                     Logger.Log($"Sorting mods.");
                     modEntries.Sort(Compare);
 
+                    mParams = Param.Load();
+
                     Logger.Log($"Loading mods.");
                     foreach (var mod in modEntries)
                     {
@@ -472,6 +470,11 @@ namespace UnityModManagerNet
             else
             {
                 Directory.CreateDirectory(modsPath);
+            }
+
+            if (!UI.Load())
+            {
+                Logger.Error($"Can't load UI.");
             }
 
             isStarted = true;
@@ -514,11 +517,77 @@ namespace UnityModManagerNet
             return ParseVersion(version);
         }
 
+        public class Param
+        {
+            [Serializable]
+            public class Mod
+            {
+                [XmlAttribute]
+                public string Id;
+                [XmlAttribute]
+                public bool Enabled = true;
+            }
+
+            public List<Mod> ModParams = new List<Mod>();
+
+            public static readonly string filepath = Path.Combine(modsPath, "UnityModManager.xml");
+
+            public void Save()
+            {
+                try
+                {
+                    ModParams.Clear();
+                    foreach (var mod in modEntries)
+                    {
+                        ModParams.Add(new Mod { Id = mod.Info.Id, Enabled = mod.Enabled });
+                    }
+                    using (var writer = new StreamWriter(filepath))
+                    {
+                        var serializer = new XmlSerializer(typeof(Param));
+                        serializer.Serialize(writer, this);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e.Message);
+                }
+            }
+
+            public static Param Load()
+            {
+                if (File.Exists(filepath))
+                {
+                    try
+                    {
+                        using (var stream = File.OpenRead(filepath))
+                        {
+                            var serializer = new XmlSerializer(typeof(Param));
+                            var result = serializer.Deserialize(stream) as Param;
+                            foreach (var item in result.ModParams)
+                            {
+                                var mod = FindMod(item.Id);
+                                if (mod != null)
+                                {
+                                    mod.Enabled = item.Enabled;
+                                }
+                            }
+                            return result;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error(e.Message);
+                    }
+                }
+                return new Param();
+            }
+        }
+
         public static class Logger
         {
-            const string Prefix = "[UnityModManager] ";
-            const string PrefixError = "[UnityModManager] [Error] ";
-            public static readonly string LogPath = Path.Combine(modsPath, "UnityModManager.log");
+            const string Prefix = "[Manager] ";
+            const string PrefixError = "[Manager] [Error] ";
+            public static readonly string filepath = Path.Combine(modsPath, "UnityModManager.log");
 
             public static void Log(string str)
             {
@@ -546,13 +615,32 @@ namespace UnityModManagerNet
 
                 try
                 {
-                    using (StreamWriter writer = File.AppendText(LogPath))
+                    using (StreamWriter writer = File.AppendText(filepath))
                     {
                         writer.WriteLine(str);
                     }
                 }
                 catch (Exception e)
                 {
+                    Debug.LogException(e);
+                }
+            }
+
+            public static void Clear()
+            {
+                if (File.Exists(filepath))
+                {
+                    try
+                    {
+                        File.Delete(filepath);
+                        using (File.Create(filepath))
+                        {
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
                 }
             }
         }

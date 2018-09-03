@@ -302,6 +302,9 @@ namespace UnityModManagerNet.Installer
                     {
                         methodName = selectedGame.PatchTarget.Substring(pos + 1);
                     }
+
+                    if (methodName == "ctor")
+                        methodName = ".ctor";
                 }
                 else
                 {
