@@ -28,7 +28,7 @@ namespace UnityModManagerNet
             private bool mOpened = false;
 
             private float mWindowWidth = 960f;
-            private Rect mWindowRect = new Rect(20, 20, 0, 0);
+            private Rect mWindowRect = new Rect(0, 0, 0, 0);
 
             private void Awake()
             {
@@ -46,7 +46,7 @@ namespace UnityModManagerNet
                 if (mOpened)
                 {
                     GUI.backgroundColor = Color.black;
-                    mWindowRect = GUILayout.Window(0, mWindowRect, WindowFunction, "Mod Manager", GUILayout.Height(Screen.height - 40));
+                    mWindowRect = GUILayout.Window(0, mWindowRect, WindowFunction, "Mod Manager", GUILayout.Height(Screen.height - 200));
                 }
             }
 
@@ -58,6 +58,7 @@ namespace UnityModManagerNet
                 {"Name", 150f},
                 {"Version", 60f},
                 {"Requirements", 150f},
+                {"Settings", 100f},
                 {"On/Off", 50f},
                 {"Status", 50f}
             };
@@ -67,9 +68,11 @@ namespace UnityModManagerNet
             private Vector2 mScrollPositionTab1;
             private Vector2 mScrollPositionTab2;
 
+            private int showModSettings = -1;
+
             private void CalculateWindowPos()
             {
-                mWindowRect = new Rect((Screen.width - mWindowWidth) / 2f, 20f, 0, 0);
+                mWindowRect = new Rect((Screen.width - mWindowWidth) / 2f, 100f, 0, 0);
             }
 
             private void WindowFunction(int windowId)
@@ -108,7 +111,9 @@ namespace UnityModManagerNet
                             for (int i = 0, c = mods.Count; i < c; i++)
                             {
                                 int k = -1;
-                                GUILayout.BeginHorizontal("box");
+                                GUILayout.BeginVertical("box");
+                                GUILayout.BeginHorizontal();
+                                
                                 GUILayout.Label(mods[i].Info.DisplayName, colWidth[++k]);
                                 GUILayout.Label(mods[i].Info.Version, colWidth[++k]);
 
@@ -119,6 +124,18 @@ namespace UnityModManagerNet
                                 else
                                 {
                                     GUILayout.Label("-", colWidth[++k]);
+                                }
+
+                                if (mods[i].OnGUI != null)
+                                {
+                                    if (GUILayout.Button("Settings", colWidth[++k]))
+                                    {
+                                        showModSettings = (showModSettings == i) ? -1 : i;
+                                    }
+                                }
+                                else
+                                {
+                                    GUILayout.Label("", colWidth[++k]);
                                 }
 
                                 var action = mods[i].Enabled;
@@ -138,8 +155,18 @@ namespace UnityModManagerNet
                                 {
                                     GUILayout.Label("Inactive", colWidth[++k]);
                                 }
-
+                                
                                 GUILayout.EndHorizontal();
+
+                                if (showModSettings == i)
+                                {
+                                    //GUILayout.BeginHorizontal();
+                                    GUILayout.Label("Settings");
+                                    mods[i].OnGUI(mods[i]);
+                                    //GUILayout.EndHorizontal();
+                                }
+
+                                GUILayout.EndVertical();
                             }
 
                             GUILayout.EndVertical();
@@ -190,22 +217,29 @@ namespace UnityModManagerNet
                         }
                 }
 
+                GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Close", GUILayout.Width(150)))
                 {
                     ToggleWindow(!mOpened);
                 }
+                if (GUILayout.Button("Save", GUILayout.Width(150)))
+                {
+                    SaveSettingsAndParams();
+                }
+                GUILayout.EndHorizontal();
             }
 
             public void ToggleWindow(bool value)
             {
                 mOpened = value;
                 BlockGameUI(value);
-                if (!mOpened)
-                {
-#if !UNITY_EDITOR
-                    Params.Save();
-#endif
-                }
+                showModSettings = -1;
+//                if (!mOpened)
+//                {
+//#if !UNITY_EDITOR
+//                    SaveSettingsAndParams();
+//#endif
+//                }
             }
 
             private void Update()
@@ -219,7 +253,7 @@ namespace UnityModManagerNet
             private void OnDestroy()
             {
 #if !UNITY_EDITOR
-                Params.Save();
+                SaveSettingsAndParams();
 #endif
             }
 

@@ -12,9 +12,65 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        public const string version = "0.9.0";
+        public const string version = "0.9.1";
         public const string modsDirname = "Mods";
         public const string infoFilename = "info.json";
+        
+        public class ModSettings
+        {
+            public virtual void Save(ModEntry modEntry)
+            {
+                Save(this, modEntry);
+            }
+
+            public virtual string GetPath(ModEntry modEntry)
+            {
+                return Path.Combine(modEntry.Path, "Settings.xml");
+            }
+
+            public static void Save<T>(T data, ModEntry modEntry) where T : ModSettings, new()
+            {
+                var filepath = data.GetPath(modEntry);
+                try
+                {
+                    using (var writer = new StreamWriter(filepath))
+                    {
+                        var serializer = new XmlSerializer(typeof(T));
+                        serializer.Serialize(writer, data);
+                    }
+                }
+                catch (Exception e)
+                {
+                    modEntry.Logger.Error($"Can't save {filepath}.");
+                    modEntry.Logger.Error(e.Message);
+                }
+            }
+
+            public static T Load<T>(ModEntry modEntry) where T : ModSettings, new()
+            {
+                var t = new T();
+                var filepath = t.GetPath(modEntry);
+                if (File.Exists(filepath))
+                {
+                    try
+                    {
+                        using (var stream = File.OpenRead(filepath))
+                        {
+                            var serializer = new XmlSerializer(typeof(T));
+                            var result = (T)serializer.Deserialize(stream);
+                            return result;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        modEntry.Logger.Error($"Can't read {filepath}.");
+                        modEntry.Logger.Error(e.Message);
+                    }
+                }
+                
+                return t;
+            }
+        }
 
         public class ModInfo
         {
@@ -26,7 +82,7 @@ namespace UnityModManagerNet
 
             public string Version;
 
-            public string ModManager;
+            public string ManagerVersion;
 
             public string[] Requirements;
 
@@ -50,7 +106,13 @@ namespace UnityModManagerNet
 
             public readonly ModLogger Logger = null;
 
+            //public ModSettings Settings = null;
+
             public Func<ModEntry, bool, bool> OnToggle = null;
+
+            public Action<ModEntry> OnGUI = null;
+
+            public Action<ModEntry> OnSaveGUI = null;
 
             Dictionary<long, MethodInfo> mCache = new Dictionary<long, MethodInfo>();
 
@@ -157,13 +219,13 @@ namespace UnityModManagerNet
                     this.Logger.Error($"{nameof(Info.EntryMethod)} is null.");
                 }
 
-                if (!string.IsNullOrEmpty(Info.ModManager))
+                if (!string.IsNullOrEmpty(Info.ManagerVersion))
                 {
-                    var needVersion = ParseVersion(Info.ModManager);
+                    var needVersion = ParseVersion(Info.ManagerVersion);
                     if (needVersion > GetVersion())
                     {
                         mErrorOnLoading = true;
-                        this.Logger.Error($"ModManager must be version '{Info.ModManager}' or higher.");
+                        this.Logger.Error($"ModManager must be version '{Info.ManagerVersion}' or higher.");
                     }
                 }
 
@@ -383,7 +445,7 @@ namespace UnityModManagerNet
         public static readonly string modsPath = Path.Combine(Environment.CurrentDirectory, modsDirname);
 
         static Param mParams = new Param();
-        public static Param Params => mParams;
+        //private static Param Params => mParams;
 
         public static bool isStarted = false;
 
@@ -445,7 +507,7 @@ namespace UnityModManagerNet
                     }
                     else
                     {
-                        Logger.Error($"'{jsonPath}' not found.");
+                        Logger.Log($"'{jsonPath}' not found.");
                     }
                 }
 
@@ -515,6 +577,16 @@ namespace UnityModManagerNet
         public static Version GetVersion()
         {
             return ParseVersion(version);
+        }
+
+        public static void SaveSettingsAndParams()
+        {
+            mParams.Save();
+            foreach(var mod in modEntries)
+            {
+                if (mod.OnSaveGUI != null)
+                    mod.OnSaveGUI(mod);
+            }
         }
 
         public class Param

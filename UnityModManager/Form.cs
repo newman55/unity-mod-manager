@@ -111,7 +111,7 @@ namespace UnityModManagerNet.Installer
             }
 
             currentGamePath = "";
-            if (!param.ExtractGamePath(selectedGame.Name, out var result))
+            if (!param.ExtractGamePath(selectedGame.Name, out var result) || !Directory.Exists(result))
             {
                 result = FindGameFolder(selectedGame.Folder);
                 if (string.IsNullOrEmpty(result))
@@ -132,7 +132,7 @@ namespace UnityModManagerNet.Installer
             }
             currentGamePath = result;
             btnOpenFolder.ForeColor = System.Drawing.Color.Black;
-            btnOpenFolder.Text = selectedGame.Folder;
+            btnOpenFolder.Text = new DirectoryInfo(result).Name;
             folderBrowserDialog.SelectedPath = currentGamePath;
             currentManagedPath = FindManagedFolder(currentGamePath);
 
@@ -250,6 +250,7 @@ namespace UnityModManagerNet.Installer
             var selected = (GameInfo)((ComboBox)sender).SelectedItem;
             if (selected != null)
                 Log.Print($"Game changed to '{selected.Name}'.");
+            param.LastGameSelected = selected.Name;
 
             CheckState();
         }
