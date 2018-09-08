@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 
 namespace UnityModManagerNet.Installer
@@ -92,34 +93,25 @@ namespace UnityModManagerNet.Installer
         {
             [XmlAttribute]
             public string Name;
+            [XmlAttribute]
             public string Path;
         }
 
-        public string LastGameSelected;
+        public string LastSelectedGame;
         public List<GamePath> GamePaths = new List<GamePath>();
 
-        public const string filename = "UnityModManagerParams.xml";
+        public const string filename = "Params.xml";
 
         public void SaveGamePath(string name, string path)
         {
-            bool needSave = false;
             var item = GamePaths.FirstOrDefault(x => x.Name == name);
             if (item != null)
             {
-                if (item.Path != path)
-                {
-                    item.Path = path;
-                    needSave = true;
-                }
+                item.Path = path;
             }
             else
             {
                 GamePaths.Add(new GamePath { Name = name, Path = path });
-                needSave = true;
-            }
-            if (needSave)
-            {
-                //Save();
             }
         }
 
@@ -141,9 +133,10 @@ namespace UnityModManagerNet.Installer
 
         public void Save()
         {
+            var path = Path.Combine(Application.LocalUserAppDataPath, filename);
             try
             {
-                using (var writer = new StreamWriter(filename))
+                using (var writer = new StreamWriter(path))
                 {
                     var serializer = new XmlSerializer(typeof(Param));
                     serializer.Serialize(writer, this);
@@ -157,11 +150,12 @@ namespace UnityModManagerNet.Installer
 
         public static Param Load()
         {
-            if (File.Exists(filename))
+            var path = Path.Combine(Application.LocalUserAppDataPath, filename);
+            if (File.Exists(path))
             {
                 try
                 {
-                    using (var stream = File.OpenRead(filename))
+                    using (var stream = File.OpenRead(path))
                     {
                         var serializer = new XmlSerializer(typeof(Param));
                         return serializer.Deserialize(stream) as Param;

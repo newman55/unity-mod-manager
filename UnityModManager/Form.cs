@@ -15,6 +15,7 @@ namespace UnityModManagerNet.Installer
         {
             InitializeComponent();
             Init();
+            InitPageMods();
         }
 
         public static UnityModManagerForm instance = null;
@@ -39,7 +40,7 @@ namespace UnityModManagerNet.Installer
             var modManager = modManagerDef.Types.First(x => x.Name == modManagerType.Name);
             var versionString = modManager.Fields.First(x => x.Name == nameof(UnityModManager.version)).Constant.Value.ToString();
             currentVersion.Text = versionString;
-            version = UnityModManager.ParseVersion(versionString);
+            version = ParseVersion(versionString);
 
             config = Config.Load();
             param = Param.Load();
@@ -48,9 +49,9 @@ namespace UnityModManagerNet.Installer
             {
                 gameList.Items.AddRange(config.GameInfo);
                 GameInfo selected = null;
-                if (!string.IsNullOrEmpty(param.LastGameSelected))
+                if (!string.IsNullOrEmpty(param.LastSelectedGame))
                 {
-                    selected = config.GameInfo.FirstOrDefault(x => x.Name == param.LastGameSelected);
+                    selected = config.GameInfo.FirstOrDefault(x => x.Name == param.LastSelectedGame);
                 }
                 gameList.SelectedItem = selected ?? config.GameInfo.First();
             }
@@ -64,6 +65,7 @@ namespace UnityModManagerNet.Installer
 
         private void UnityModLoaderForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            //Properties.Settings.Default.Save();
             param.Save();
         }
 
@@ -71,13 +73,14 @@ namespace UnityModManagerNet.Installer
         {
             btnInstall.Enabled = false;
             btnRemove.Enabled = false;
+            tabControl.TabPages[1].Enabled = false;
         }
 
         private bool IsValid(GameInfo gameIfno)
         {
             if (selectedGame == null)
             {
-                Log.Print("Game is null.");
+                Log.Print("Select a game.");
                 return false;
             }
 
@@ -89,7 +92,7 @@ namespace UnityModManagerNet.Installer
                     var value = field.GetValue(gameIfno);
                     if (value == null || value.ToString() == "")
                     {
-                        output += $"{field.Name} is null.";
+                        output += $"Field '{field.Name}' is null. ";
                     }
                 }
             }
@@ -159,6 +162,8 @@ namespace UnityModManagerNet.Installer
                 return;
             }
 
+            tabControl.TabPages[1].Enabled = true;
+
             var modManagerType = typeof(UnityModManager);
             var modManagerDefInjected = assembly.Types.FirstOrDefault(x => x.Name == modManagerType.Name);
             if (modManagerDefInjected != null)
@@ -167,7 +172,7 @@ namespace UnityModManagerNet.Installer
                 btnRemove.Enabled = true;
 
                 var versionString = modManagerDefInjected.Fields.First(x => x.Name == nameof(UnityModManager.version)).Constant.Value.ToString();
-                var version2 = UnityModManager.ParseVersion(versionString);
+                var version2 = ParseVersion(versionString);
                 installedVersion.Text = versionString;
                 if (version != version2)
                     btnInstall.Enabled = true;
@@ -238,7 +243,7 @@ namespace UnityModManagerNet.Installer
             var result = folderBrowserDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                inputLog.Clear();
+                //inputLog.Clear();
                 param.SaveGamePath(selectedGame.Name, folderBrowserDialog.SelectedPath);
                 CheckState();
             }
@@ -246,13 +251,15 @@ namespace UnityModManagerNet.Installer
 
         private void gameList_Changed(object sender, EventArgs e)
         {
-            inputLog.Clear();
+            //inputLog.Clear();
             var selected = (GameInfo)((ComboBox)sender).SelectedItem;
             if (selected != null)
                 Log.Print($"Game changed to '{selected.Name}'.");
-            param.LastGameSelected = selected.Name;
+
+            param.LastSelectedGame = selected.Name;
 
             CheckState();
+
         }
 
         enum Actions
@@ -497,6 +504,29 @@ namespace UnityModManagerNet.Installer
 
         private void folderBrowserDialog_HelpRequest(object sender, EventArgs e)
         {
+        }
+
+        private void tabs_Changed(object sender, EventArgs e)
+        {
+            switch (tabControl.SelectedIndex)
+            {
+                case 1: // Mods
+                    LoadMods();
+                    RefreshModList();
+                    break;
+            }
+        }
+
+        public static Version ParseVersion(string str)
+        {
+            var array = str.Split('.', ',');
+            if (array.Length >= 3)
+            {
+                return new Version(int.Parse(array[0]), int.Parse(array[1]), int.Parse(array[2]));
+            }
+
+            Log.Print($"Error parsing version '{str}'.");
+            return new Version();
         }
     }
 }
