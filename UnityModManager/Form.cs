@@ -522,7 +522,8 @@ namespace UnityModManagerNet.Installer
             var array = str.Split('.', ',');
             if (array.Length >= 3)
             {
-                return new Version(int.Parse(array[0]), int.Parse(array[1]), int.Parse(array[2]));
+                var regex = new Regex(@"\D");
+                return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")), int.Parse(regex.Replace(array[2], "")));
             }
 
             Log.Print($"Error parsing version '{str}'.");

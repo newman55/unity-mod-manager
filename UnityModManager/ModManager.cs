@@ -12,10 +12,12 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        public const string version = "0.10.0";
+        public const string version = "0.10.1";
         public const string modsDirname = "Mods";
         public const string infoFilename = "info.json";
-        
+
+        private static Version mVersion = new Version();
+
         public class ModSettings
         {
             public virtual void Save(ModEntry modEntry)
@@ -102,6 +104,8 @@ namespace UnityModManagerNet
 
             public readonly Version Version = null;
 
+            public readonly Version ManagerVersion = null;
+
             public readonly Dictionary<string, Version> Requirements = new Dictionary<string, Version>();
 
             public readonly ModLogger Logger = null;
@@ -176,6 +180,7 @@ namespace UnityModManagerNet
                 Path = path;
                 Logger = new ModLogger(Info.Id);
                 Version = ParseVersion(info.Version);
+                ManagerVersion = !string.IsNullOrEmpty(info.ManagerVersion) ? ParseVersion(info.ManagerVersion) : new Version();
 
                 if (info.Requirements != null && info.Requirements.Length > 0)
                 {
@@ -221,11 +226,10 @@ namespace UnityModManagerNet
 
                 if (!string.IsNullOrEmpty(Info.ManagerVersion))
                 {
-                    var needVersion = ParseVersion(Info.ManagerVersion);
-                    if (needVersion > GetVersion())
+                    if (ManagerVersion > GetVersion())
                     {
                         mErrorOnLoading = true;
-                        this.Logger.Error($"ModManager must be version '{Info.ManagerVersion}' or higher.");
+                        this.Logger.Error($"Mod Manager must be version '{Info.ManagerVersion}' or higher.");
                     }
                 }
 
@@ -444,8 +448,8 @@ namespace UnityModManagerNet
         public static readonly List<ModEntry> modEntries = new List<ModEntry>();
         public static readonly string modsPath = Path.Combine(Environment.CurrentDirectory, modsDirname);
 
-        static Param mParams = new Param();
-        //private static Param Params => mParams;
+        private static Param mParams = new Param();
+        public static Param Params => mParams;
 
         public static bool isStarted = false;
 
@@ -456,6 +460,8 @@ namespace UnityModManagerNet
                 Logger.Log($"Cancel start. Already started.");
                 return;
             }
+
+            mVersion = ParseVersion(version);
 
             Logger.Clear();
 
@@ -567,7 +573,8 @@ namespace UnityModManagerNet
             var array = str.Split('.', ',');
             if (array.Length >= 3)
             {
-                return new Version(int.Parse(array[0]), int.Parse(array[1]), int.Parse(array[2]));
+                var regex = new Regex(@"\D");
+                return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")), int.Parse(regex.Replace(array[2], "")));
             }
 
             Logger.Error($"Error parsing version {str}");
@@ -576,7 +583,7 @@ namespace UnityModManagerNet
 
         public static Version GetVersion()
         {
-            return ParseVersion(version);
+            return mVersion;
         }
 
         public static void SaveSettingsAndParams()
@@ -599,6 +606,8 @@ namespace UnityModManagerNet
                 [XmlAttribute]
                 public bool Enabled = true;
             }
+
+            public int ShortcutKeyId = 0;
 
             public List<Mod> ModParams = new List<Mod>();
 
