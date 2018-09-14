@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UnityModManagerForm));
             this.panelMain = new System.Windows.Forms.Panel();
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
@@ -46,12 +47,17 @@
             this.listMods = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.inputLog = new System.Windows.Forms.TextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ModcontextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelMain.SuspendLayout();
             this.splitContainerMain.Panel1.SuspendLayout();
             this.splitContainerMain.Panel2.SuspendLayout();
@@ -63,6 +69,7 @@
             this.splitContainerMods.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            this.ModcontextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelMain
@@ -128,7 +135,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 28);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(318, 342);
+            this.tabPage1.Size = new System.Drawing.Size(318, 310);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Install";
             // 
@@ -251,7 +258,7 @@
             this.splitContainerMods.Panel2.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("splitContainerMods.Panel2.BackgroundImage")));
             this.splitContainerMods.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.splitContainerMods.Size = new System.Drawing.Size(312, 336);
-            this.splitContainerMods.SplitterDistance = 179;
+            this.splitContainerMods.SplitterDistance = 190;
             this.splitContainerMods.TabIndex = 0;
             // 
             // listMods
@@ -259,14 +266,16 @@
             this.listMods.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
-            this.columnHeader3});
+            this.columnHeader3,
+            this.columnHeader4});
+            this.listMods.ContextMenuStrip = this.ModcontextMenuStrip1;
             this.listMods.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listMods.FullRowSelect = true;
             this.listMods.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listMods.Location = new System.Drawing.Point(0, 0);
             this.listMods.MultiSelect = false;
             this.listMods.Name = "listMods";
-            this.listMods.Size = new System.Drawing.Size(312, 179);
+            this.listMods.Size = new System.Drawing.Size(312, 190);
             this.listMods.TabIndex = 0;
             this.listMods.UseCompatibleStateImageBehavior = false;
             this.listMods.View = System.Windows.Forms.View.Details;
@@ -274,12 +283,21 @@
             // columnHeader1
             // 
             this.columnHeader1.Text = "Name";
-            this.columnHeader1.Width = 150;
+            this.columnHeader1.Width = 100;
             // 
             // columnHeader2
             // 
             this.columnHeader2.Text = "Version";
-            this.columnHeader2.Width = 50;
+            this.columnHeader2.Width = 49;
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Manager Version";
+            this.columnHeader3.Width = 93;
+            // 
+            // columnHeader4
+            // 
+            this.columnHeader4.Text = "status";
             // 
             // tabPage3
             // 
@@ -328,10 +346,36 @@
             this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             this.folderBrowserDialog.HelpRequest += new System.EventHandler(this.folderBrowserDialog_HelpRequest);
             // 
-            // columnHeader3
+            // ModcontextMenuStrip1
             // 
-            this.columnHeader3.Text = "Manager Version";
-            this.columnHeader3.Width = 100;
+            this.ModcontextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.installToolStripMenuItem,
+            this.updateToolStripMenuItem,
+            this.uninstallToolStripMenuItem});
+            this.ModcontextMenuStrip1.Name = "ModcontextMenuStrip1";
+            this.ModcontextMenuStrip1.Size = new System.Drawing.Size(181, 92);
+            this.ModcontextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.ModcontextMenuStrip1_Opening);
+            // 
+            // updateToolStripMenuItem
+            // 
+            this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
+            this.updateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.updateToolStripMenuItem.Text = "update";
+            this.updateToolStripMenuItem.Click += new System.EventHandler(this.updateToolStripMenuItem_Click);
+            // 
+            // uninstallToolStripMenuItem
+            // 
+            this.uninstallToolStripMenuItem.Name = "uninstallToolStripMenuItem";
+            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.uninstallToolStripMenuItem.Text = "uninstall";
+            this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
+            // 
+            // installToolStripMenuItem
+            // 
+            this.installToolStripMenuItem.Name = "installToolStripMenuItem";
+            this.installToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.installToolStripMenuItem.Text = "install";
+            this.installToolStripMenuItem.Click += new System.EventHandler(this.installToolStripMenuItem_Click);
             // 
             // UnityModManagerForm
             // 
@@ -361,6 +405,7 @@
             this.tabPage3.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.ModcontextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -389,6 +434,11 @@
         public System.Windows.Forms.ToolStripStatusLabel statusLabel;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ColumnHeader columnHeader3;
+        private System.Windows.Forms.ColumnHeader columnHeader4;
+        private System.Windows.Forms.ContextMenuStrip ModcontextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem updateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem installToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem uninstallToolStripMenuItem;
     }
 }
 

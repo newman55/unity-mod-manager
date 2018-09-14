@@ -48,6 +48,15 @@ namespace UnityModManagerNet.Installer
             if (config != null && config.GameInfo != null && config.GameInfo.Length > 0)
             {
                 gameList.Items.AddRange(config.GameInfo);
+
+                foreach(var game in config.GameInfo) {
+                    var modsPath = Path.Combine(Application.StartupPath, game.Name);
+                    if (!Directory.Exists(modsPath))
+                    {
+                        Directory.CreateDirectory(modsPath);
+                    }
+                }
+
                 GameInfo selected = null;
                 if (!string.IsNullOrEmpty(param.LastSelectedGame))
                 {
@@ -175,7 +184,10 @@ namespace UnityModManagerNet.Installer
                 var version2 = ParseVersion(versionString);
                 installedVersion.Text = versionString;
                 if (version != version2)
+                { 
                     btnInstall.Enabled = true;
+                    btnInstall.Text = "update";
+                }
             }
             else
             {
@@ -511,7 +523,9 @@ namespace UnityModManagerNet.Installer
             switch (tabControl.SelectedIndex)
             {
                 case 1: // Mods
+                    mods.Clear();
                     LoadMods();
+                    LoadProgramDirMods();
                     RefreshModList();
                     break;
             }
@@ -528,6 +542,51 @@ namespace UnityModManagerNet.Installer
 
             Log.Print($"Error parsing version '{str}'.");
             return new Version();
+        }
+
+        private void ModcontextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
+            installToolStripMenuItem.Visible = false;
+            uninstallToolStripMenuItem.Visible = false;
+            updateToolStripMenuItem.Visible = false;
+
+            var modName = listMods.SelectedItems[0].Text;
+
+            var modInfoCurrent = mods.Find(m => m.DisplayName == modName);
+
+            if (modInfoCurrent.status.Contains("update"))
+            {
+                updateToolStripMenuItem.Text = modInfoCurrent.status;
+                updateToolStripMenuItem.Visible = true;
+                uninstallToolStripMenuItem.Visible = true;
+            }
+
+            if (modInfoCurrent.status == "not installed")
+            {
+                installToolStripMenuItem.Visible = true;
+            }
+
+            if (modInfoCurrent.status == "installed")
+            {
+                uninstallToolStripMenuItem.Visible = true;
+            }
+
+        }
+
+        private void installToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            InstallMod(mods.Find(m => m.DisplayName == listMods.SelectedItems[0].Text).ZipPath);
+        }
+
+        private void updateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            InstallMod(mods.Find(m => m.DisplayName == listMods.SelectedItems[0].Text).ZipPath);
+        }
+
+        private void uninstallToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            UninstallMod(mods.Find(m => m.DisplayName == listMods.SelectedItems[0].Text).Id);
         }
     }
 }
