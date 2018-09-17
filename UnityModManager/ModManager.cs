@@ -91,6 +91,10 @@ namespace UnityModManagerNet
             public string AssemblyName;
 
             public string EntryMethod;
+
+            public string status;
+
+            public string ZipPath;
         }
 
         public class ModEntry
