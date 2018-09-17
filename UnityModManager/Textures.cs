@@ -40,7 +40,7 @@ namespace UnityModManagerNet
                 }
 
                 var version = ParseVersion(Application.unityVersion);
-                if (version.Major >= 2018)
+                if (version.Major >= 2017)
                 {
                     var assembly = Assembly.Load("UnityEngine.ImageConversionModule");
                     var LoadImage = assembly.GetType("UnityEngine.ImageConversion").GetMethod("LoadImage", new Type[] { typeof(Texture2D), typeof(byte[]) });

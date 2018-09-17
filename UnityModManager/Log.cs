@@ -46,7 +46,7 @@ namespace UnityModManagerNet.Installer
 
         public static void Append(string str)
         {
-            Print(str);
+            Print(str, true);
         }
 
         public static void Init()

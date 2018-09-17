@@ -13,16 +13,13 @@ namespace UnityModManagerNet.Installer
 {
     public partial class UnityModManagerForm : Form
     {
-        List<UnityModManager.ModInfo> mods = new List<UnityModManager.ModInfo>();
+        List<ModInfo> mods = new List<ModInfo>();
 
         private void InitPageMods()
         {
             splitContainerMods.Panel2.AllowDrop = true;
             splitContainerMods.Panel2.DragEnter += new DragEventHandler(Mods_DragEnter);
             splitContainerMods.Panel2.DragDrop += new DragEventHandler(Mods_DragDrop);
-
-            //LoadMods();
-            //RefreshModList();
         }
 
         private void Mods_DragEnter(object sender, DragEventArgs e)
@@ -33,24 +30,83 @@ namespace UnityModManagerNet.Installer
 
         private void Mods_DragDrop(object sender, DragEventArgs e)
         {
+            var modsPath = Path.Combine(Application.StartupPath, selectedGame.Name);
+            var installedList = new List<ModInfo>();
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string file in files)
+            foreach (string filepath in files)
             {
-
-                var modsPath = Path.Combine(Application.StartupPath, selectedGame.Name);
-                if (!Directory.Exists(modsPath))
+                try
                 {
-                    Directory.CreateDirectory(modsPath);
+                    if (Path.GetExtension(filepath) == ".zip")
+                    {
+                        using (var zip = ZipFile.Read(filepath))
+                        {
+                            InstallMod(zip, false);
+                            var modInfo = ReadModInfoFromZip(zip);
+                            if (modInfo)
+                            {
+                                installedList.Add(modInfo);
+                                var dir = Path.Combine(modsPath, modInfo.Id);
+                                if (!Directory.Exists(dir))
+                                {
+                                    Directory.CreateDirectory(dir);
+                                }
+                                var target = Path.Combine(dir, Path.GetFileName(filepath));
+                                if (filepath != target)
+                                    File.Copy(filepath, target, true);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Log.Print($"Only zip files are possible.");
+                    }
                 }
-
-                var target = Path.Combine(modsPath, Path.GetFileName(file));
-                File.Copy(file, target);
-
-                InstallMod(target);
-
+                catch (Exception ex)
+                {
+                    Log.Print(ex.Message);
+                    Log.Print($"Error when installing file '{Path.GetFileName(filepath)}'.");
+                }
             }
+
+            // delete old zip files if count > 2
+            if (installedList.Count > 0)
+            {
+                foreach (var modInfo in installedList)
+                {
+                    var tempList = new List<ModInfo>();
+                    foreach (var filepath in Directory.GetFiles(Path.Combine(modsPath, modInfo.Id), "*.zip", SearchOption.AllDirectories))
+                    {
+                        var mod = ReadModInfoFromZip(filepath);
+                        if (mod && !mod.EqualsVersion(modInfo))
+                        {
+                            mod.temporary = filepath;
+                            tempList.Add(mod);
+                        }
+                    }
+                    tempList = tempList.OrderBy(x => x.parsedVersion).ToList();
+                    while (tempList.Count > 2)
+                    {
+                        var item = tempList.First();
+                        try
+                        {
+                            tempList.Remove(item);
+                            File.Delete(item.temporary as string);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Print(ex.Message);
+                            Log.Print($"Can't delete old temp file '{item.temporary as string}'.");
+                            break;
+                        }
+                    }
+                }
+            }
+
+            ReloadMods();
+            RefreshModList();
         }
-        
+
         private void UninstallMod(string name)
         {
             if (selectedGame == null)
@@ -82,16 +138,32 @@ namespace UnityModManagerNet.Installer
                 }
             }
 
-            mods.Clear();
-            LoadMods();
-            LoadProgramDirMods();
+            ReloadMods();
             RefreshModList();
-
         }
 
-        private void InstallMod(string file)
+        private void InstallMod(string filepath)
         {
+            if (!File.Exists(filepath))
+            {
+                Log.Print($"File not found '{Path.GetFileName(filepath)}'.");
+            }
+            try
+            {
+                using (var zip = ZipFile.Read(filepath))
+                {
+                    InstallMod(zip);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Print(e.Message);
+                Log.Print($"Error when installing '{Path.GetFileName(filepath)}'.");
+            }
+        }
 
+        private void InstallMod(ZipFile zip, bool reloadMods = true)
+        {
             if (selectedGame == null)
             {
                 Log.Print("Select a game.");
@@ -105,34 +177,28 @@ namespace UnityModManagerNet.Installer
                 return;
             }
 
-            if (Path.GetExtension(file) == ".zip")
+            try
             {
-                try
-                {
-                    ZipFile zip = ZipFile.Read(file);
-                    zip.ExtractAll(modsPath, ExtractExistingFileAction.OverwriteSilently);
-                    Log.Print($"Unpack '{Path.GetFileName(file)}' - success.");
-                }
-                catch (Exception ex)
-                {
-                    Log.Print(ex.Message);
-                    Log.Print($"Error when unpacking '{Path.GetFileName(file)}'.");
-                }
+                zip.ExtractAll(modsPath, ExtractExistingFileAction.OverwriteSilently);
+                Log.Print($"Unpacking '{Path.GetFileName(zip.Name)}' - success.");
             }
-            else
+            catch (Exception ex)
             {
-                Log.Print($"Only zip files are possible.");
+                Log.Print(ex.Message);
+                Log.Print($"Error when unpacking '{Path.GetFileName(zip.Name)}'.");
             }
 
-            mods.Clear();
-            LoadMods();
-            LoadProgramDirMods();
-            RefreshModList();
+            if (reloadMods)
+            {
+                ReloadMods();
+                RefreshModList();
+            }
         }
 
-        private void LoadMods()
+        private void ReloadMods()
         {
             mods.Clear();
+
             if (selectedGame == null)
                 return;
 
@@ -146,9 +212,12 @@ namespace UnityModManagerNet.Installer
                     {
                         try
                         {
-                            var modInfo = JsonConvert.DeserializeObject<UnityModManager.ModInfo>(File.ReadAllText(jsonPath));
-                            modInfo.status = "installed";
-                            mods.Add(modInfo);
+                            var modInfo = JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(jsonPath));
+                            if (modInfo && modInfo.IsValid())
+                            {
+                                modInfo.Status = ModStatus.Installed;
+                                mods.Add(modInfo);
+                            }
                         }
                         catch (Exception e)
                         {
@@ -158,56 +227,42 @@ namespace UnityModManagerNet.Installer
                     }
                 }
             }
+
+            LoadZipMods();
         }
 
-        private void LoadProgramDirMods()
+        private void LoadZipMods()
         {
             if (selectedGame == null)
                 return;
 
-            var modsList = Directory.GetFiles(Path.Combine(Application.StartupPath, selectedGame.Name), "*.zip",SearchOption.AllDirectories);
+            var dir = Path.Combine(Application.StartupPath, selectedGame.Name);
+            if (!Directory.Exists(dir))
+                return;
 
-            foreach (var modzip in modsList)
+            foreach (var filepath in Directory.GetFiles(dir, "*.zip", SearchOption.AllDirectories))
             {
-                try { 
-                    ZipFile zip = ZipFile.Read(modzip);
+                var modInfo = ReadModInfoFromZip(filepath);
+                if (!modInfo)
+                    continue;
 
-                    foreach (ZipEntry e in zip)
-                    {
-                        if (e.FileName.EndsWith(selectedGame.ModInfo))
-                        {
-                            using (StreamReader s = new StreamReader(e.OpenReader()))
-                            {
-                                var modInfo = JsonConvert.DeserializeObject<UnityModManager.ModInfo>(s.ReadToEnd());
-                                modInfo.status = "not installed";
-                                modInfo.ZipPath = modzip;
-
-                                var modInfoCurrent = mods.FindIndex(m => m.DisplayName == modInfo.DisplayName);
-                                
-                                if(modInfoCurrent == -1) {
-                                    mods.Add(modInfo);
-                                } else if (ParseVersion(mods[modInfoCurrent].Version) < ParseVersion(modInfo.Version))
-                                {
-                                    if(mods[modInfoCurrent].status == "installed")
-                                    {
-                                        mods[modInfoCurrent].status = $"update to {modInfo.Version}";
-                                        mods[modInfoCurrent].ZipPath = modzip;
-                                    }
-                                }
-                                
-
-                            }
-                        }
-                    }
-                }
-                catch (Exception e)
+                var index = mods.FindIndex(m => m.Id == modInfo.Id);
+                if (index == -1)
                 {
-                    Log.Print(e.Message);
-                    Log.Print($"Error parsing file '{modzip}'.");
+                    modInfo.Status = ModStatus.NotInstalled;
+                    modInfo.AvailableVersions.Add(modInfo.parsedVersion, filepath);
+                    mods.Add(modInfo);
+                }
+                else 
+                {
+                    if (!mods[index].AvailableVersions.ContainsKey(modInfo.parsedVersion))
+                    {
+                        mods[index].AvailableVersions.Add(modInfo.parsedVersion, filepath);
+                    }
                 }
             }
         }
-        
+
         private void RefreshModList()
         {
             listMods.Items.Clear();
@@ -217,22 +272,95 @@ namespace UnityModManagerNet.Installer
 
             mods.Sort((x, y) => x.DisplayName.CompareTo(y.DisplayName));
 
-            foreach (var mod in mods)
+            foreach (var modInfo in mods)
             {
-                var listItem = new ListViewItem(mod.DisplayName);
-                listItem.SubItems.Add(mod.Version);
-                if (!string.IsNullOrEmpty(mod.ManagerVersion))
+                string status;
+                if (modInfo.Status == ModStatus.Installed)
                 {
-                    listItem.SubItems.Add(mod.ManagerVersion);
-                    if (version < ParseVersion(mod.ManagerVersion))
+                    var newest = modInfo.AvailableVersions.Keys.Max(x => x);
+                    if (newest != null && newest > modInfo.parsedVersion)
+                    {
+                        status = $"Newest {newest}";
+                    }
+                    else
+                    {
+                        status = "OK";
+                    }
+                }
+                else if (modInfo.Status == ModStatus.NotInstalled)
+                {
+                    status = "";
+                }
+                else
+                {
+                    status = "";
+                }
+
+                var listItem = new ListViewItem(modInfo.DisplayName);
+                listItem.SubItems.Add(modInfo.Version);
+                if (!string.IsNullOrEmpty(modInfo.ManagerVersion))
+                {
+                    listItem.SubItems.Add(modInfo.ManagerVersion);
+                    if (version < Utils.ParseVersion(modInfo.ManagerVersion))
+                    {
                         listItem.ForeColor = System.Drawing.Color.FromArgb(192, 0, 0);
-                } else
+                        status = "Need to update UMM.";
+                    }
+                }
+                else
                 {
                     listItem.SubItems.Add("");
                 }
-                listItem.SubItems.Add(mod.status);
+                listItem.SubItems.Add(status);
                 listMods.Items.Add(listItem);
             }
+        }
+
+        private ModInfo ReadModInfoFromZip(string filepath)
+        {
+            try
+            {
+                using (var zip = ZipFile.Read(filepath))
+                {
+                    return ReadModInfoFromZip(zip);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Print(e.Message);
+                Log.Print($"Error parsing file '{Path.GetFileName(filepath)}'.");
+            }
+
+            return null;
+        }
+
+        private ModInfo ReadModInfoFromZip(ZipFile zip)
+        {
+            try
+            {
+                foreach (ZipEntry e in zip)
+                {
+                    if (e.FileName.EndsWith(selectedGame.ModInfo))
+                    {
+                        using (var s = new StreamReader(e.OpenReader()))
+                        {
+                            var modInfo = JsonConvert.DeserializeObject<ModInfo>(s.ReadToEnd());
+                            if (modInfo.IsValid())
+                            {
+                                return modInfo;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Print(e.Message);
+                Log.Print($"Error parsing file '{Path.GetFileName(zip.Name)}'.");
+            }
+
+            return null;
         }
     }
 }

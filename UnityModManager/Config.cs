@@ -5,9 +5,50 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using Newtonsoft.Json;
 
 namespace UnityModManagerNet.Installer
 {
+    public enum ModStatus { NotInstalled, Installed }
+
+    public class ModInfo : UnityModManager.ModInfo
+    {
+        [JsonIgnore]
+        public ModStatus Status;
+
+        [JsonIgnore]
+        public Dictionary<Version, string> AvailableVersions = new Dictionary<Version, string>();
+
+        [JsonIgnore]
+        public Version parsedVersion;
+
+        [JsonIgnore]
+        public object temporary;
+
+        public bool IsValid()
+        {
+            if (string.IsNullOrEmpty(Id))
+            {
+                return false;
+            }
+            if (string.IsNullOrEmpty(DisplayName))
+            {
+                DisplayName = Id;
+            }
+            if (parsedVersion == null)
+            {
+                parsedVersion = Utils.ParseVersion(Version);
+            }
+
+            return true;
+        }
+
+        public bool EqualsVersion(ModInfo other)
+        {
+            return other != null && Id.Equals(other.Id) && Version.Equals(other.Version);
+        }
+    }
+
     [Serializable]
     public class GameInfo
     {

@@ -92,9 +92,29 @@ namespace UnityModManagerNet
 
             public string EntryMethod;
 
-            public string status;
+            public static implicit operator bool(ModInfo exists)
+            {
+                return exists != null;
+            }
 
-            public string ZipPath;
+            public bool Equals(ModInfo other)
+            {
+                return Id.Equals(other.Id);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                {
+                    return false;
+                }
+                return obj is ModInfo modInfo && Equals(modInfo);
+            }
+
+            public override int GetHashCode()
+            {
+                return Id.GetHashCode();
+            }
         }
 
         public class ModEntry

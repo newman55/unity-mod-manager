@@ -27,6 +27,7 @@ namespace UnityModManagerNet.Installer
         static string currentManagedPath = null;
 
         GameInfo selectedGame => (GameInfo)gameList.SelectedItem;
+        ModInfo selectedMod => listMods.SelectedItems.Count > 0 ? mods.Find(x => x.DisplayName == listMods.SelectedItems[0].Text) : null;
 
         private void Init()
         {
@@ -40,7 +41,7 @@ namespace UnityModManagerNet.Installer
             var modManager = modManagerDef.Types.First(x => x.Name == modManagerType.Name);
             var versionString = modManager.Fields.First(x => x.Name == nameof(UnityModManager.version)).Constant.Value.ToString();
             currentVersion.Text = versionString;
-            version = ParseVersion(versionString);
+            version = Utils.ParseVersion(versionString);
 
             config = Config.Load();
             param = Param.Load();
@@ -48,14 +49,6 @@ namespace UnityModManagerNet.Installer
             if (config != null && config.GameInfo != null && config.GameInfo.Length > 0)
             {
                 gameList.Items.AddRange(config.GameInfo);
-
-                foreach(var game in config.GameInfo) {
-                    var modsPath = Path.Combine(Application.StartupPath, game.Name);
-                    if (!Directory.Exists(modsPath))
-                    {
-                        Directory.CreateDirectory(modsPath);
-                    }
-                }
 
                 GameInfo selected = null;
                 if (!string.IsNullOrEmpty(param.LastSelectedGame))
@@ -181,7 +174,7 @@ namespace UnityModManagerNet.Installer
                 btnRemove.Enabled = true;
 
                 var versionString = modManagerDefInjected.Fields.First(x => x.Name == nameof(UnityModManager.version)).Constant.Value.ToString();
-                var version2 = ParseVersion(versionString);
+                var version2 = Utils.ParseVersion(versionString);
                 installedVersion.Text = versionString;
                 if (version != version2)
                 { 
@@ -523,70 +516,86 @@ namespace UnityModManagerNet.Installer
             switch (tabControl.SelectedIndex)
             {
                 case 1: // Mods
-                    mods.Clear();
-                    LoadMods();
-                    LoadProgramDirMods();
+                    ReloadMods();
                     RefreshModList();
                     break;
             }
         }
 
-        public static Version ParseVersion(string str)
-        {
-            var array = str.Split('.', ',');
-            if (array.Length >= 3)
-            {
-                var regex = new Regex(@"\D");
-                return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")), int.Parse(regex.Replace(array[2], "")));
-            }
-
-            Log.Print($"Error parsing version '{str}'.");
-            return new Version();
-        }
-
         private void ModcontextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
             installToolStripMenuItem.Visible = false;
             uninstallToolStripMenuItem.Visible = false;
             updateToolStripMenuItem.Visible = false;
+            revertToolStripMenuItem.Visible = false;
 
-            var modName = listMods.SelectedItems[0].Text;
-
-            var modInfoCurrent = mods.Find(m => m.DisplayName == modName);
-
-            if (modInfoCurrent.status.Contains("update"))
+            var modInfo = selectedMod;
+            if (!modInfo)
             {
-                updateToolStripMenuItem.Text = modInfoCurrent.status;
-                updateToolStripMenuItem.Visible = true;
-                uninstallToolStripMenuItem.Visible = true;
+                e.Cancel = true;
+                return;
             }
 
-            if (modInfoCurrent.status == "not installed")
+            if (modInfo.Status == ModStatus.Installed)
+            {
+                uninstallToolStripMenuItem.Visible = true;
+                var newest = modInfo.AvailableVersions.Keys.Max(x => x);
+                if (newest != null && newest > modInfo.parsedVersion)
+                {
+                    updateToolStripMenuItem.Text = $"Update to {newest}";
+                    updateToolStripMenuItem.Visible = true;
+                }
+                var previous = modInfo.AvailableVersions.Keys.Where(x => x < modInfo.parsedVersion).Max(x => x);
+                if (previous != null)
+                {
+                    revertToolStripMenuItem.Text = $"Revert to {previous}";
+                    revertToolStripMenuItem.Visible = true;
+                }
+            }
+            else if (modInfo.Status == ModStatus.NotInstalled)
             {
                 installToolStripMenuItem.Visible = true;
             }
-
-            if (modInfoCurrent.status == "installed")
-            {
-                uninstallToolStripMenuItem.Visible = true;
-            }
-
         }
 
         private void installToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            InstallMod(mods.Find(m => m.DisplayName == listMods.SelectedItems[0].Text).ZipPath);
+            var modInfo = selectedMod;
+            if (modInfo)
+            {
+                var newest = modInfo.AvailableVersions.OrderByDescending(x => x.Key).FirstOrDefault();
+                if (!string.IsNullOrEmpty(newest.Value))
+                {
+                    InstallMod(newest.Value);
+                }
+            }
         }
 
         private void updateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            InstallMod(mods.Find(m => m.DisplayName == listMods.SelectedItems[0].Text).ZipPath);
+            installToolStripMenuItem_Click(sender, e);
         }
 
         private void uninstallToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            UninstallMod(mods.Find(m => m.DisplayName == listMods.SelectedItems[0].Text).Id);
+            var modInfo = selectedMod;
+            if (modInfo)
+            {
+                UninstallMod(modInfo.Id);
+            }
+        }
+
+        private void revertToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var modInfo = selectedMod;
+            if (modInfo)
+            {
+                var previous = modInfo.AvailableVersions.Where(x => x.Key < modInfo.parsedVersion).OrderByDescending(x => x.Key).FirstOrDefault();
+                if (!string.IsNullOrEmpty(previous.Value))
+                {
+                    InstallMod(previous.Value);
+                }
+            }
         }
     }
 }
