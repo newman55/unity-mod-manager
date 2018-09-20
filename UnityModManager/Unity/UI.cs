@@ -113,8 +113,6 @@ namespace UnityModManagerNet
                 {
                     ToggleWindow(!mOpened);
                 }
-
-                ParseJsonResult();
             }
 
             private void OnDestroy()
