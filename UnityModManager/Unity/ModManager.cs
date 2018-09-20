@@ -12,11 +12,43 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        public const string version = "0.10.1";
+        public const string version = "0.11.0";
         public const string modsDirname = "Mods";
         public const string infoFilename = "info.json";
 
         private static Version mVersion = new Version();
+
+        public class Repository 
+        {
+            [Serializable]
+            public class Release : IEquatable<Release>
+            {
+                public string Id;
+                public string Version;
+                //public string DownloadUrl;
+
+                public bool Equals(Release other)
+                {
+                    return Id.Equals(other.Id);
+                }
+
+                public override bool Equals(object obj)
+                {
+                    if (ReferenceEquals(null, obj))
+                    {
+                        return false;
+                    }
+                    return obj is Release obj2 && Equals(obj2);
+                }
+
+                public override int GetHashCode()
+                {
+                    return Id.GetHashCode();
+                }
+            }
+
+            public Release[] Releases;
+        }
 
         public class ModSettings
         {
@@ -44,7 +76,7 @@ namespace UnityModManagerNet
                 catch (Exception e)
                 {
                     modEntry.Logger.Error($"Can't save {filepath}.");
-                    modEntry.Logger.Error(e.Message);
+                    modEntry.Logger.Error(e.ToString());
                 }
             }
 
@@ -66,7 +98,7 @@ namespace UnityModManagerNet
                     catch (Exception e)
                     {
                         modEntry.Logger.Error($"Can't read {filepath}.");
-                        modEntry.Logger.Error(e.Message);
+                        modEntry.Logger.Error(e.ToString());
                     }
                 }
                 
@@ -74,7 +106,7 @@ namespace UnityModManagerNet
             }
         }
 
-        public class ModInfo
+        public class ModInfo : IEquatable<ModInfo>
         {
             public string Id;
 
@@ -91,6 +123,10 @@ namespace UnityModManagerNet
             public string AssemblyName;
 
             public string EntryMethod;
+
+            public string HomePage;
+
+            public string Repository;
 
             public static implicit operator bool(ModInfo exists)
             {
@@ -130,9 +166,13 @@ namespace UnityModManagerNet
 
             public readonly Version ManagerVersion = null;
 
+            public Version NewestVersion;
+
             public readonly Dictionary<string, Version> Requirements = new Dictionary<string, Version>();
 
             public readonly ModLogger Logger = null;
+
+            public bool HasUpdate = false;
 
             //public ModSettings Settings = null;
 
@@ -192,8 +232,7 @@ namespace UnityModManagerNet
                     catch (Exception e)
                     {
                         this.Logger.Error($"Error trying to call 'OnToggle' function.");
-                        //this.Logger.Error(e.Message);
-                        Debug.LogException(e);
+                        this.Logger.Error(e.ToString());
                     }
                 }
             }
@@ -303,7 +342,7 @@ namespace UnityModManagerNet
                     {
                         mErrorOnLoading = true;
                         this.Logger.Error($"Error loading file '{assemblyPath}'.");
-                        this.Logger.Error(exception.Message);
+                        this.Logger.Error(exception.ToString());
                         return false;
                     }
 
@@ -516,12 +555,8 @@ namespace UnityModManagerNet
                             }
                             if (modEntries.Exists(x => x.Info.Id == modInfo.Id))
                             {
-                                modInfo.Id += "." + modInfo.Author;
-                                if (modEntries.Exists(x => x.Info.Id == modInfo.Id))
-                                {
-                                    Logger.Log($"Id '{modInfo.Id}' already uses another mod.");
-                                    continue;
-                                }
+                                Logger.Error($"Id '{modInfo.Id}' already uses another mod.");
+                                continue;
                             }
                             if (string.IsNullOrEmpty(modInfo.AssemblyName))
                                 modInfo.AssemblyName = modInfo.Id + ".dll";
@@ -537,7 +572,7 @@ namespace UnityModManagerNet
                     }
                     else
                     {
-                        Logger.Log($"'{jsonPath}' not found.");
+                        //Logger.Log($"File not found '{jsonPath}'.");
                     }
                 }
 
@@ -632,6 +667,7 @@ namespace UnityModManagerNet
             }
 
             public int ShortcutKeyId = 0;
+            public int CheckUpdates = 1;
 
             public List<Mod> ModParams = new List<Mod>();
 
@@ -654,7 +690,7 @@ namespace UnityModManagerNet
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e.Message);
+                    Logger.Error(e.ToString());
                 }
             }
 
@@ -681,7 +717,7 @@ namespace UnityModManagerNet
                     }
                     catch (Exception e)
                     {
-                        Logger.Error(e.Message);
+                        Logger.Error(e.ToString());
                     }
                 }
                 return new Param();

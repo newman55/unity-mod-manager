@@ -34,6 +34,8 @@
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.availableVersion = new System.Windows.Forms.Label();
+            this.availableVersionLabel = new System.Windows.Forms.Label();
             this.btnRemove = new System.Windows.Forms.Button();
             this.btnOpenFolder = new System.Windows.Forms.Button();
             this.gameList = new System.Windows.Forms.ComboBox();
@@ -52,13 +54,14 @@
             this.ModcontextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.revertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.inputLog = new System.Windows.Forms.TextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.revertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.wwwToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.panelMain.SuspendLayout();
             this.splitContainerMain.Panel1.SuspendLayout();
             this.splitContainerMain.Panel2.SuspendLayout();
@@ -124,6 +127,8 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.Controls.Add(this.availableVersion);
+            this.tabPage1.Controls.Add(this.availableVersionLabel);
             this.tabPage1.Controls.Add(this.btnRemove);
             this.tabPage1.Controls.Add(this.btnOpenFolder);
             this.tabPage1.Controls.Add(this.gameList);
@@ -139,6 +144,27 @@
             this.tabPage1.Size = new System.Drawing.Size(318, 342);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Install";
+            // 
+            // availableVersion
+            // 
+            this.availableVersion.AutoSize = true;
+            this.availableVersion.ForeColor = System.Drawing.Color.ForestGreen;
+            this.availableVersion.Location = new System.Drawing.Point(275, 138);
+            this.availableVersion.Name = "availableVersion";
+            this.availableVersion.Size = new System.Drawing.Size(10, 13);
+            this.availableVersion.TabIndex = 11;
+            this.availableVersion.Text = "-";
+            // 
+            // availableVersionLabel
+            // 
+            this.availableVersionLabel.AutoSize = true;
+            this.availableVersionLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.availableVersionLabel.ForeColor = System.Drawing.Color.ForestGreen;
+            this.availableVersionLabel.Location = new System.Drawing.Point(187, 138);
+            this.availableVersionLabel.Name = "availableVersionLabel";
+            this.availableVersionLabel.Size = new System.Drawing.Size(91, 13);
+            this.availableVersionLabel.TabIndex = 10;
+            this.availableVersionLabel.Text = "Available Version:";
             // 
             // btnRemove
             // 
@@ -195,7 +221,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(191, 125);
+            this.label3.Location = new System.Drawing.Point(187, 120);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(87, 13);
             this.label3.TabIndex = 7;
@@ -204,7 +230,7 @@
             // currentVersion
             // 
             this.currentVersion.AutoSize = true;
-            this.currentVersion.Location = new System.Drawing.Point(270, 105);
+            this.currentVersion.Location = new System.Drawing.Point(266, 102);
             this.currentVersion.Name = "currentVersion";
             this.currentVersion.Size = new System.Drawing.Size(31, 13);
             this.currentVersion.TabIndex = 4;
@@ -213,7 +239,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(191, 105);
+            this.label2.Location = new System.Drawing.Point(187, 102);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(82, 13);
             this.label2.TabIndex = 6;
@@ -222,7 +248,7 @@
             // installedVersion
             // 
             this.installedVersion.AutoSize = true;
-            this.installedVersion.Location = new System.Drawing.Point(275, 125);
+            this.installedVersion.Location = new System.Drawing.Point(271, 120);
             this.installedVersion.Name = "installedVersion";
             this.installedVersion.Size = new System.Drawing.Size(10, 13);
             this.installedVersion.TabIndex = 5;
@@ -307,29 +333,37 @@
             this.installToolStripMenuItem,
             this.updateToolStripMenuItem,
             this.revertToolStripMenuItem,
-            this.uninstallToolStripMenuItem});
+            this.uninstallToolStripMenuItem,
+            this.wwwToolStripMenuItem1});
             this.ModcontextMenuStrip1.Name = "ModcontextMenuStrip1";
-            this.ModcontextMenuStrip1.Size = new System.Drawing.Size(121, 92);
+            this.ModcontextMenuStrip1.Size = new System.Drawing.Size(153, 136);
             this.ModcontextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.ModcontextMenuStrip1_Opening);
             // 
             // installToolStripMenuItem
             // 
             this.installToolStripMenuItem.Name = "installToolStripMenuItem";
-            this.installToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
+            this.installToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.installToolStripMenuItem.Text = "Install";
             this.installToolStripMenuItem.Click += new System.EventHandler(this.installToolStripMenuItem_Click);
             // 
             // updateToolStripMenuItem
             // 
             this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
-            this.updateToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
+            this.updateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.updateToolStripMenuItem.Text = "Update";
             this.updateToolStripMenuItem.Click += new System.EventHandler(this.updateToolStripMenuItem_Click);
+            // 
+            // revertToolStripMenuItem
+            // 
+            this.revertToolStripMenuItem.Name = "revertToolStripMenuItem";
+            this.revertToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.revertToolStripMenuItem.Text = "Revert";
+            this.revertToolStripMenuItem.Click += new System.EventHandler(this.revertToolStripMenuItem_Click);
             // 
             // uninstallToolStripMenuItem
             // 
             this.uninstallToolStripMenuItem.Name = "uninstallToolStripMenuItem";
-            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
+            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.uninstallToolStripMenuItem.Text = "Uninstall";
             this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
             // 
@@ -381,12 +415,12 @@
             this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             this.folderBrowserDialog.HelpRequest += new System.EventHandler(this.folderBrowserDialog_HelpRequest);
             // 
-            // revertToolStripMenuItem
+            // wwwToolStripMenuItem1
             // 
-            this.revertToolStripMenuItem.Name = "revertToolStripMenuItem";
-            this.revertToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
-            this.revertToolStripMenuItem.Text = "Revert";
-            this.revertToolStripMenuItem.Click += new System.EventHandler(this.revertToolStripMenuItem_Click);
+            this.wwwToolStripMenuItem1.Name = "wwwToolStripMenuItem1";
+            this.wwwToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.wwwToolStripMenuItem1.Text = "Home Page";
+            this.wwwToolStripMenuItem1.Click += new System.EventHandler(this.wwwToolStripMenuItem1_Click);
             // 
             // UnityModManagerForm
             // 
@@ -451,6 +485,9 @@
         private System.Windows.Forms.ToolStripMenuItem installToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uninstallToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem revertToolStripMenuItem;
+        private System.Windows.Forms.Label availableVersion;
+        private System.Windows.Forms.Label availableVersionLabel;
+        private System.Windows.Forms.ToolStripMenuItem wwwToolStripMenuItem1;
     }
 }
 

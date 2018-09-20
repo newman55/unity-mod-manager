@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace UnityModManagerNet.Installer
 {
-    public static class Utils
+    static class Utils
     {
         public static Version ParseVersion(string str)
         {

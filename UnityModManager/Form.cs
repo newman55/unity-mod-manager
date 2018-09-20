@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using System.Net;
 
 namespace UnityModManagerNet.Installer
 {
@@ -63,6 +65,8 @@ namespace UnityModManagerNet.Installer
                 Log.Print($"Error parsing file '{Config.filename}'.");
                 return;
             }
+
+            CheckLastVersion();
         }
 
         private void UnityModLoaderForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -114,6 +118,8 @@ namespace UnityModManagerNet.Installer
                 InactiveForm();
                 return;
             }
+
+            btnInstall.Text = "Install";
 
             currentGamePath = "";
             if (!param.ExtractGamePath(selectedGame.Name, out var result) || !Directory.Exists(result))
@@ -170,6 +176,7 @@ namespace UnityModManagerNet.Installer
             var modManagerDefInjected = assembly.Types.FirstOrDefault(x => x.Name == modManagerType.Name);
             if (modManagerDefInjected != null)
             {
+                btnInstall.Text = "Update";
                 btnInstall.Enabled = false;
                 btnRemove.Enabled = true;
 
@@ -179,7 +186,6 @@ namespace UnityModManagerNet.Installer
                 if (version != version2)
                 { 
                     btnInstall.Enabled = true;
-                    btnInstall.Text = "update";
                 }
             }
             else
@@ -235,12 +241,14 @@ namespace UnityModManagerNet.Installer
 
         private void btnRemove_Click(object sender, EventArgs e)
         {
-            Inject(Actions.Remove);
+            if (Inject(Actions.Remove))
+                btnInstall.Text = "Install";
         }
 
         private void btnInstall_Click(object sender, EventArgs e)
         {
-            Inject(Actions.Install);
+            if (Inject(Actions.Install))
+                btnInstall.Text = "Update";
         }
 
         private void btnOpenFolder_Click(object sender, EventArgs e)
@@ -518,83 +526,9 @@ namespace UnityModManagerNet.Installer
                 case 1: // Mods
                     ReloadMods();
                     RefreshModList();
+                    if (!repositories.ContainsKey(selectedGame))
+                        CheckModUpdates();
                     break;
-            }
-        }
-
-        private void ModcontextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            installToolStripMenuItem.Visible = false;
-            uninstallToolStripMenuItem.Visible = false;
-            updateToolStripMenuItem.Visible = false;
-            revertToolStripMenuItem.Visible = false;
-
-            var modInfo = selectedMod;
-            if (!modInfo)
-            {
-                e.Cancel = true;
-                return;
-            }
-
-            if (modInfo.Status == ModStatus.Installed)
-            {
-                uninstallToolStripMenuItem.Visible = true;
-                var newest = modInfo.AvailableVersions.Keys.Max(x => x);
-                if (newest != null && newest > modInfo.parsedVersion)
-                {
-                    updateToolStripMenuItem.Text = $"Update to {newest}";
-                    updateToolStripMenuItem.Visible = true;
-                }
-                var previous = modInfo.AvailableVersions.Keys.Where(x => x < modInfo.parsedVersion).Max(x => x);
-                if (previous != null)
-                {
-                    revertToolStripMenuItem.Text = $"Revert to {previous}";
-                    revertToolStripMenuItem.Visible = true;
-                }
-            }
-            else if (modInfo.Status == ModStatus.NotInstalled)
-            {
-                installToolStripMenuItem.Visible = true;
-            }
-        }
-
-        private void installToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var modInfo = selectedMod;
-            if (modInfo)
-            {
-                var newest = modInfo.AvailableVersions.OrderByDescending(x => x.Key).FirstOrDefault();
-                if (!string.IsNullOrEmpty(newest.Value))
-                {
-                    InstallMod(newest.Value);
-                }
-            }
-        }
-
-        private void updateToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            installToolStripMenuItem_Click(sender, e);
-        }
-
-        private void uninstallToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var modInfo = selectedMod;
-            if (modInfo)
-            {
-                UninstallMod(modInfo.Id);
-            }
-        }
-
-        private void revertToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var modInfo = selectedMod;
-            if (modInfo)
-            {
-                var previous = modInfo.AvailableVersions.Where(x => x.Key < modInfo.parsedVersion).OrderByDescending(x => x.Key).FirstOrDefault();
-                if (!string.IsNullOrEmpty(previous.Value))
-                {
-                    InstallMod(previous.Value);
-                }
             }
         }
     }

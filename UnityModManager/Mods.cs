@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using dnlib.DotNet;
-using dnlib.DotNet.Emit;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Ionic.Zip;
 
@@ -13,7 +10,7 @@ namespace UnityModManagerNet.Installer
 {
     public partial class UnityModManagerForm : Form
     {
-        List<ModInfo> mods = new List<ModInfo>();
+        readonly List<ModInfo> mods = new List<ModInfo>();
 
         private void InitPageMods()
         {
@@ -31,7 +28,7 @@ namespace UnityModManagerNet.Installer
         private void Mods_DragDrop(object sender, DragEventArgs e)
         {
             var modsPath = Path.Combine(Application.StartupPath, selectedGame.Name);
-            var installedList = new List<ModInfo>();
+            var newMods = new List<ModInfo>();
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string filepath in files)
             {
@@ -45,7 +42,7 @@ namespace UnityModManagerNet.Installer
                             var modInfo = ReadModInfoFromZip(zip);
                             if (modInfo)
                             {
-                                installedList.Add(modInfo);
+                                newMods.Add(modInfo);
                                 var dir = Path.Combine(modsPath, modInfo.Id);
                                 if (!Directory.Exists(dir))
                                 {
@@ -70,9 +67,9 @@ namespace UnityModManagerNet.Installer
             }
 
             // delete old zip files if count > 2
-            if (installedList.Count > 0)
+            if (newMods.Count > 0)
             {
-                foreach (var modInfo in installedList)
+                foreach (var modInfo in newMods)
                 {
                     var tempList = new List<ModInfo>();
                     foreach (var filepath in Directory.GetFiles(Path.Combine(modsPath, modInfo.Id), "*.zip", SearchOption.AllDirectories))
@@ -80,23 +77,22 @@ namespace UnityModManagerNet.Installer
                         var mod = ReadModInfoFromZip(filepath);
                         if (mod && !mod.EqualsVersion(modInfo))
                         {
-                            mod.temporary = filepath;
                             tempList.Add(mod);
                         }
                     }
-                    tempList = tempList.OrderBy(x => x.parsedVersion).ToList();
+                    tempList = tempList.OrderBy(x => x.ParsedVersion).ToList();
                     while (tempList.Count > 2)
                     {
                         var item = tempList.First();
                         try
                         {
                             tempList.Remove(item);
-                            File.Delete(item.temporary as string);
+                            File.Delete(item.Path);
                         }
                         catch (Exception ex)
                         {
                             Log.Print(ex.Message);
-                            Log.Print($"Can't delete old temp file '{item.temporary as string}'.");
+                            Log.Print($"Can't delete old temp file '{item.Path}'.");
                             break;
                         }
                     }
@@ -215,6 +211,7 @@ namespace UnityModManagerNet.Installer
                             var modInfo = JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(jsonPath));
                             if (modInfo && modInfo.IsValid())
                             {
+                                modInfo.Path = dir;
                                 modInfo.Status = ModStatus.Installed;
                                 mods.Add(modInfo);
                             }
@@ -250,14 +247,14 @@ namespace UnityModManagerNet.Installer
                 if (index == -1)
                 {
                     modInfo.Status = ModStatus.NotInstalled;
-                    modInfo.AvailableVersions.Add(modInfo.parsedVersion, filepath);
+                    modInfo.AvailableVersions.Add(modInfo.ParsedVersion, filepath);
                     mods.Add(modInfo);
                 }
                 else 
                 {
-                    if (!mods[index].AvailableVersions.ContainsKey(modInfo.parsedVersion))
+                    if (!mods[index].AvailableVersions.ContainsKey(modInfo.ParsedVersion))
                     {
-                        mods[index].AvailableVersions.Add(modInfo.parsedVersion, filepath);
+                        mods[index].AvailableVersions.Add(modInfo.ParsedVersion, filepath);
                     }
                 }
             }
@@ -267,7 +264,7 @@ namespace UnityModManagerNet.Installer
         {
             listMods.Items.Clear();
 
-            if (mods.Count == 0)
+            if (selectedGame == null || mods.Count == 0 || tabControl.SelectedIndex != 1)
                 return;
 
             mods.Sort((x, y) => x.DisplayName.CompareTo(y.DisplayName));
@@ -277,10 +274,14 @@ namespace UnityModManagerNet.Installer
                 string status;
                 if (modInfo.Status == ModStatus.Installed)
                 {
-                    var newest = modInfo.AvailableVersions.Keys.Max(x => x);
-                    if (newest != null && newest > modInfo.parsedVersion)
+                    var res = repositories.ContainsKey(selectedGame) ? repositories[selectedGame].FirstOrDefault(x => x.Id == modInfo.Id) : null;
+                    var web = !string.IsNullOrEmpty(res?.Version) ? Utils.ParseVersion(res.Version) : new Version();
+                    var local = modInfo.AvailableVersions.Keys.Max(x => x) ?? new Version();
+                    var newest = web > local ? web : local;
+
+                    if (newest > modInfo.ParsedVersion)
                     {
-                        status = $"Newest {newest}";
+                        status = $"Available {newest}";
                     }
                     else
                     {
@@ -347,6 +348,7 @@ namespace UnityModManagerNet.Installer
                             var modInfo = JsonConvert.DeserializeObject<ModInfo>(s.ReadToEnd());
                             if (modInfo.IsValid())
                             {
+                                modInfo.Path = zip.Name;
                                 return modInfo;
                             }
                         }
@@ -361,6 +363,97 @@ namespace UnityModManagerNet.Installer
             }
 
             return null;
+        }
+
+        private void ModcontextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            installToolStripMenuItem.Visible = false;
+            uninstallToolStripMenuItem.Visible = false;
+            updateToolStripMenuItem.Visible = false;
+            revertToolStripMenuItem.Visible = false;
+            wwwToolStripMenuItem1.Visible = false;
+
+            var modInfo = selectedMod;
+            if (!modInfo)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            if (modInfo.Status == ModStatus.Installed)
+            {
+                uninstallToolStripMenuItem.Visible = true;
+                var newest = modInfo.AvailableVersions.Keys.Max(x => x);
+                if (newest != null && newest > modInfo.ParsedVersion)
+                {
+                    updateToolStripMenuItem.Text = $"Update to {newest}";
+                    updateToolStripMenuItem.Visible = true;
+                }
+                var previous = modInfo.AvailableVersions.Keys.Where(x => x < modInfo.ParsedVersion).Max(x => x);
+                if (previous != null)
+                {
+                    revertToolStripMenuItem.Text = $"Revert to {previous}";
+                    revertToolStripMenuItem.Visible = true;
+                }
+            }
+            else if (modInfo.Status == ModStatus.NotInstalled)
+            {
+                installToolStripMenuItem.Visible = true;
+            }
+
+            if (!string.IsNullOrEmpty(modInfo.HomePage))
+            {
+                wwwToolStripMenuItem1.Visible = true;
+            }
+        }
+
+        private void installToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var modInfo = selectedMod;
+            if (modInfo)
+            {
+                var newest = modInfo.AvailableVersions.OrderByDescending(x => x.Key).FirstOrDefault();
+                if (!string.IsNullOrEmpty(newest.Value))
+                {
+                    InstallMod(newest.Value);
+                }
+            }
+        }
+
+        private void updateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            installToolStripMenuItem_Click(sender, e);
+        }
+
+        private void uninstallToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var modInfo = selectedMod;
+            if (modInfo)
+            {
+                UninstallMod(modInfo.Id);
+            }
+        }
+
+        private void revertToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var modInfo = selectedMod;
+            if (modInfo)
+            {
+                var previous = modInfo.AvailableVersions.Where(x => x.Key < modInfo.ParsedVersion).OrderByDescending(x => x.Key).FirstOrDefault();
+                if (!string.IsNullOrEmpty(previous.Value))
+                {
+                    InstallMod(previous.Value);
+                }
+            }
+        }
+
+        private void wwwToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            var modInfo = selectedMod;
+            if (modInfo)
+            {
+                System.Diagnostics.Process.Start(modInfo.HomePage);
+            }
         }
     }
 }

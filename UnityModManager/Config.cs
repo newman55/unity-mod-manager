@@ -20,10 +20,10 @@ namespace UnityModManagerNet.Installer
         public Dictionary<Version, string> AvailableVersions = new Dictionary<Version, string>();
 
         [JsonIgnore]
-        public Version parsedVersion;
+        public Version ParsedVersion;
 
         [JsonIgnore]
-        public object temporary;
+        public string Path;
 
         public bool IsValid()
         {
@@ -35,9 +35,9 @@ namespace UnityModManagerNet.Installer
             {
                 DisplayName = Id;
             }
-            if (parsedVersion == null)
+            if (ParsedVersion == null)
             {
-                parsedVersion = Utils.ParseVersion(Version);
+                ParsedVersion = Utils.ParseVersion(Version);
             }
 
             return true;
@@ -68,6 +68,8 @@ namespace UnityModManagerNet.Installer
 
     public class Config
     {
+        public string CheckUpdateUrl;
+
         [XmlElement]
         public GameInfo[] GameInfo;
 
@@ -211,4 +213,5 @@ namespace UnityModManagerNet.Installer
         }
     }
 
+    
 }
