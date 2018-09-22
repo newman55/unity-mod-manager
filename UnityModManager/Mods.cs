@@ -14,9 +14,23 @@ namespace UnityModManagerNet.Installer
 
         private void InitPageMods()
         {
-            splitContainerMods.Panel2.AllowDrop = true;
-            splitContainerMods.Panel2.DragEnter += new DragEventHandler(Mods_DragEnter);
-            splitContainerMods.Panel2.DragDrop += new DragEventHandler(Mods_DragDrop);
+            splitContainerModsInstall.Panel2.AllowDrop = true;
+            splitContainerModsInstall.Panel2.DragEnter += new DragEventHandler(Mods_DragEnter);
+            splitContainerModsInstall.Panel2.DragDrop += new DragEventHandler(Mods_DragDrop);
+        }
+
+        private void btnModInstall_Click(object sender, EventArgs e)
+        {
+            var result = modInstallFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                if (modInstallFileDialog.FileNames.Length == 0)
+                    return;
+
+                SaveAndInstallZipFiles(modInstallFileDialog.FileNames);
+                ReloadMods();
+                RefreshModList();
+            }
         }
 
         private void Mods_DragEnter(object sender, DragEventArgs e)
@@ -27,9 +41,19 @@ namespace UnityModManagerNet.Installer
 
         private void Mods_DragDrop(object sender, DragEventArgs e)
         {
-            var modsPath = Path.Combine(Application.StartupPath, selectedGame.Name);
-            var newMods = new List<ModInfo>();
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (files.Length == 0)
+                return;
+
+            SaveAndInstallZipFiles(files);
+            ReloadMods();
+            RefreshModList();
+        }
+
+        private void SaveAndInstallZipFiles(string[] files)
+        {
+            var programModsPath = Path.Combine(Application.StartupPath, selectedGame.Name);
+            var newMods = new List<ModInfo>();
             foreach (string filepath in files)
             {
                 try
@@ -43,7 +67,7 @@ namespace UnityModManagerNet.Installer
                             if (modInfo)
                             {
                                 newMods.Add(modInfo);
-                                var dir = Path.Combine(modsPath, modInfo.Id);
+                                var dir = Path.Combine(programModsPath, modInfo.Id);
                                 if (!Directory.Exists(dir))
                                 {
                                     Directory.CreateDirectory(dir);
@@ -72,7 +96,7 @@ namespace UnityModManagerNet.Installer
                 foreach (var modInfo in newMods)
                 {
                     var tempList = new List<ModInfo>();
-                    foreach (var filepath in Directory.GetFiles(Path.Combine(modsPath, modInfo.Id), "*.zip", SearchOption.AllDirectories))
+                    foreach (var filepath in Directory.GetFiles(Path.Combine(programModsPath, modInfo.Id), "*.zip", SearchOption.AllDirectories))
                     {
                         var mod = ReadModInfoFromZip(filepath);
                         if (mod && !mod.EqualsVersion(modInfo))
@@ -98,9 +122,6 @@ namespace UnityModManagerNet.Installer
                     }
                 }
             }
-
-            ReloadMods();
-            RefreshModList();
         }
 
         private void UninstallMod(string name)
@@ -125,7 +146,7 @@ namespace UnityModManagerNet.Installer
                 try
                 {
                     Directory.Delete(modPath, true);
-                    Log.Print($"Deleting '{name}' - success.");
+                    Log.Print($"Deleting '{name}' - SUCCESS.");
                 }
                 catch (Exception ex)
                 {
@@ -175,8 +196,19 @@ namespace UnityModManagerNet.Installer
 
             try
             {
+                foreach(var e in zip.EntriesSorted)
+                {
+                    if (e.IsDirectory)
+                        continue;
+
+                    var filepath = Path.Combine(modsPath, e.FileName);
+                    if (File.Exists(filepath))
+                    {
+                        File.Delete(filepath);
+                    }
+                }
                 zip.ExtractAll(modsPath, ExtractExistingFileAction.OverwriteSilently);
-                Log.Print($"Unpacking '{Path.GetFileName(zip.Name)}' - success.");
+                Log.Print($"Unpacking '{Path.GetFileName(zip.Name)}' - SUCCESS.");
             }
             catch (Exception ex)
             {
@@ -298,14 +330,21 @@ namespace UnityModManagerNet.Installer
                 }
 
                 var listItem = new ListViewItem(modInfo.DisplayName);
-                listItem.SubItems.Add(modInfo.Version);
+                if (modInfo.Status == ModStatus.NotInstalled)
+                {
+                    listItem.SubItems.Add(modInfo.AvailableVersions.Count > 0 ? modInfo.AvailableVersions.Keys.Max(x => x).ToString() : modInfo.Version);
+                }
+                else
+                {
+                    listItem.SubItems.Add(modInfo.Version);
+                }
                 if (!string.IsNullOrEmpty(modInfo.ManagerVersion))
                 {
                     listItem.SubItems.Add(modInfo.ManagerVersion);
                     if (version < Utils.ParseVersion(modInfo.ManagerVersion))
                     {
                         listItem.ForeColor = System.Drawing.Color.FromArgb(192, 0, 0);
-                        status = "Need to update UMM.";
+                        status = "Need to update UMM";
                     }
                 }
                 else

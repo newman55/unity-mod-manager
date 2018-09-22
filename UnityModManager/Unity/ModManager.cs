@@ -12,7 +12,7 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        public const string version = "0.11.0";
+        public const string version = "0.12.0";
         public const string modsDirname = "Mods";
         public const string infoFilename = "info.json";
 
@@ -25,7 +25,7 @@ namespace UnityModManagerNet
             {
                 public string Id;
                 public string Version;
-                //public string DownloadUrl;
+                public string DownloadUrl;
 
                 public bool Equals(Release other)
                 {

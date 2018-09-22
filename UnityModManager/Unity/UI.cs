@@ -252,6 +252,7 @@ namespace UnityModManagerNet
 
                 DrawTab(tabId, ref buttons);
 
+                GUILayout.FlexibleSpace();
                 GUILayout.Space(5);
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Close", GUILayout.Width(150)))
@@ -276,7 +277,7 @@ namespace UnityModManagerNet
                 {
                     case "Mods":
                         {
-                            mScrollPosition[tabId] = GUILayout.BeginScrollView(mScrollPosition[tabId], minWidth);
+                            mScrollPosition[tabId] = GUILayout.BeginScrollView(mScrollPosition[tabId], minWidth, GUILayout.ExpandHeight(false));
 
                             var amountWidth = mColumns.Where(x => !x.skip).Sum(x => x.width);
                             var expandWidth = mColumns.Where(x => x.expand && !x.skip).Sum(x => x.width);
@@ -481,7 +482,6 @@ namespace UnityModManagerNet
                             }
 
                             GUILayout.EndVertical();
-
                             GUILayout.EndScrollView();
 
                             buttons += delegate
@@ -510,7 +510,9 @@ namespace UnityModManagerNet
                             Params.ShortcutKeyId =
                                 GUILayout.Toolbar(Params.ShortcutKeyId, mShortcutNames, GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
+
                             GUILayout.Space(5);
+
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Check updates", GUILayout.ExpandWidth(false));
                             Params.CheckUpdates = GUILayout.Toolbar(Params.CheckUpdates, mCheckUpdateStrings,
@@ -518,7 +520,6 @@ namespace UnityModManagerNet
                             GUILayout.EndHorizontal();
 
                             GUILayout.EndVertical();
-
                             GUILayout.EndScrollView();
 
                             if (GUI.changed)

@@ -8,6 +8,7 @@ using dnlib.DotNet.Emit;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using System.Net;
+using System.Diagnostics;
 
 namespace UnityModManagerNet.Installer
 {
@@ -249,6 +250,15 @@ namespace UnityModManagerNet.Installer
         {
             if (Inject(Actions.Install))
                 btnInstall.Text = "Update";
+        }
+
+        private void btnDownloadUpdate_Click(object sender, EventArgs e)
+        {
+            var downloaderFile = "Downloader.exe";
+            if (File.Exists(downloaderFile))
+            {
+                Process.Start(downloaderFile);
+            }
         }
 
         private void btnOpenFolder_Click(object sender, EventArgs e)
@@ -494,7 +504,8 @@ namespace UnityModManagerNet.Installer
         {
             string[] files = new string[]
             {
-                "0Harmony.dll"
+                //"0Harmony.dll",
+                "0Harmony12.dll"
             };
 
             foreach (var file in files)

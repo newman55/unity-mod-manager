@@ -68,12 +68,12 @@ namespace UnityModManagerNet.Installer
 
     public class Config
     {
-        public string CheckUpdateUrl;
+        public const string filename = "UnityModManagerConfig.xml";
+
+        public string Repository;
 
         [XmlElement]
         public GameInfo[] GameInfo;
-
-        public const string filename = "UnityModManagerConfig.xml";
 
         public static void Create()
         {

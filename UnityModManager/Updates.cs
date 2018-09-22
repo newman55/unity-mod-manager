@@ -92,10 +92,7 @@ namespace UnityModManagerNet.Installer
 
         private void CheckLastVersion()
         {
-            availableVersionLabel.Visible = false;
-            availableVersion.Visible = false;
-
-            if (string.IsNullOrEmpty(config.CheckUpdateUrl))
+            if (string.IsNullOrEmpty(config.Repository))
                 return;
 
             if (!UnityModManager.HasNetworkConnection())
@@ -110,7 +107,7 @@ namespace UnityModManagerNet.Installer
                 {
                     wc.Encoding = System.Text.Encoding.UTF8;
                     wc.DownloadStringCompleted += LastVersion_DownloadStringCompleted;
-                    wc.DownloadStringAsync(new Uri(config.CheckUpdateUrl));
+                    wc.DownloadStringAsync(new Uri(config.Repository));
                 }
             }
             catch (Exception e)
@@ -142,9 +139,8 @@ namespace UnityModManagerNet.Installer
                         var ver = Utils.ParseVersion(release.Version);
                         if (version < ver)
                         {
-                            availableVersionLabel.Visible = true;
-                            availableVersion.Visible = true;
-                            availableVersion.Text = release.Version;
+                            btnDownloadUpdate.Visible = true;
+                            btnDownloadUpdate.Text = $"Download {release.Version}";
                         }
                     }
                 }

@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 
-namespace UnityModManagerNet.Installer
+namespace UnityModManagerNet.Downloader
 {
     static class Utils
     {
@@ -17,8 +18,23 @@ namespace UnityModManagerNet.Installer
                 return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")), int.Parse(regex.Replace(array[2], "")));
             }
 
-            Log.Print($"Error parsing version '{str}'.");
             return new Version();
+        }
+
+        public static bool HasNetworkConnection()
+        {
+            try
+            {
+                using (var ping = new Ping())
+                {
+                    return ping.Send("www.google.com.mx", 1000).Status == IPStatus.Success;
+                }
+            }
+            catch (Exception e)
+            {
+            }
+
+            return false;
         }
     }
 }
