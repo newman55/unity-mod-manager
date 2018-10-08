@@ -52,7 +52,7 @@ namespace UnityModManagerNet.Installer
 
         private void SaveAndInstallZipFiles(string[] files)
         {
-            var programModsPath = Path.Combine(Application.StartupPath, selectedGame.Name);
+            var programModsPath = Path.Combine(Application.StartupPath, selectedGame.Folder);
             var newMods = new List<ModInfo>();
             foreach (string filepath in files)
             {
@@ -265,7 +265,7 @@ namespace UnityModManagerNet.Installer
             if (selectedGame == null)
                 return;
 
-            var dir = Path.Combine(Application.StartupPath, selectedGame.Name);
+            var dir = Path.Combine(Application.StartupPath, selectedGame.Folder);
             if (!Directory.Exists(dir))
                 return;
 
