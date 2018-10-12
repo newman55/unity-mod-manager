@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Harmony12;
 
 namespace UnityModManagerNet
 {
@@ -49,6 +51,7 @@ namespace UnityModManagerNet
             private bool mInit = false;
 
             private bool mOpened = false;
+            public bool Opened { get { return mOpened; } }
 
             private float mWindowWidth = 960f;
             private Rect mWindowRect = new Rect(0, 0, 0, 0);
@@ -58,6 +61,10 @@ namespace UnityModManagerNet
                 mInstance = this;
                 DontDestroyOnLoad(this);
                 Textures.Init();
+                var harmony = HarmonyInstance.Create("UnityModManager.UI");
+                var original = typeof(Screen).GetMethod("set_lockCursor");
+                var prefix = typeof(Screen_lockCursor_Patch).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic);
+                harmony.Patch(original, new HarmonyMethod(prefix));
             }
 
             private void Start()
@@ -111,7 +118,7 @@ namespace UnityModManagerNet
 
                 if (toggle)
                 {
-                    ToggleWindow(!mOpened);
+                    ToggleWindow();
                 }
             }
 
@@ -257,7 +264,7 @@ namespace UnityModManagerNet
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Close", GUILayout.Width(150)))
                 {
-                    ToggleWindow(!mOpened);
+                    ToggleWindow();
                 }
 
                 if (GUILayout.Button("Save", GUILayout.Width(150)))
@@ -535,14 +542,38 @@ namespace UnityModManagerNet
 
             private string[] mShortcutNames = { "CTRL+F10", "ScrollLock", "Num *", "~" };
 
-            public void ToggleWindow(bool value)
+            internal bool GameCursorLocked { get; set; }
+
+            public void ToggleWindow()
             {
-                mOpened = value;
-                BlockGameUI(value);
+                ToggleWindow(!mOpened);
+            }
+
+            public void ToggleWindow(bool open)
+            {
+                mOpened = open;
+                BlockGameUI(open);
                 mShowModSettings = -1;
                 if (!mOpened)
                 {
                     SaveSettingsAndParams();
+                }
+                if (open)
+                {
+                    GameCursorLocked = Cursor.lockState == CursorLockMode.Locked || !Cursor.visible;
+                    if (GameCursorLocked)
+                    {
+                        Cursor.visible = true;
+                        Cursor.lockState = CursorLockMode.None;
+                    }
+                }
+                else
+                {
+                    if (GameCursorLocked)
+                    {
+                        Cursor.visible = false;
+                        Cursor.lockState = CursorLockMode.Locked;
+                    }
                 }
             }
 
@@ -579,6 +610,24 @@ namespace UnityModManagerNet
                 return new RectOffset(x, x, y, y);
             }
         }
+
+        //        [HarmonyPatch(typeof(Screen), "lockCursor", MethodType.Setter)]
+        static class Screen_lockCursor_Patch
+        {
+            static bool Prefix(bool value)
+            {
+                if (UI.Instance != null && UI.Instance.Opened)
+                {
+                    UI.Instance.GameCursorLocked = value;
+                    Cursor.visible = true;
+                    Cursor.lockState = CursorLockMode.None;
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
     }
 }
 

@@ -504,7 +504,6 @@ namespace UnityModManagerNet.Installer
         {
             string[] files = new string[]
             {
-                //"0Harmony.dll",
                 "0Harmony12.dll"
             };
 
