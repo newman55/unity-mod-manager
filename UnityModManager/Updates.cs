@@ -95,9 +95,11 @@ namespace UnityModManagerNet.Installer
             if (string.IsNullOrEmpty(config.Repository))
                 return;
 
+            Log.Print("Checking for updates.");
+
             if (!UnityModManager.HasNetworkConnection())
             {
-                Log.Print("No network connection.");
+                Log.Print("No network connection or firewall blocked.");
                 return;
             }
 
@@ -141,6 +143,11 @@ namespace UnityModManagerNet.Installer
                         {
                             btnDownloadUpdate.Visible = true;
                             btnDownloadUpdate.Text = $"Download {release.Version}";
+                            Log.Print($"Update is available.");
+                        }
+                        else
+                        {
+                            Log.Print($"No updates.");
                         }
                     }
                 }

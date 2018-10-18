@@ -16,9 +16,11 @@ namespace UnityModManagerNet
     {
         private static void CheckModUpdates()
         {
+            Logger.Log("Checking for updates.");
+
             if (!HasNetworkConnection())
             {
-                Logger.Log("No network connection.");
+                Logger.Log("No network connection or firewall blocked.");
                 return;
             }
 

@@ -12,9 +12,10 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        public const string version = "0.12.2";
+        public const string version = "0.12.3";
         public const string modsDirname = "Mods";
         public const string infoFilename = "info.json";
+        public const string patchTarget = "";
 
         private static Version mVersion = new Version();
 
@@ -392,7 +393,7 @@ namespace UnityModManagerNet
                 catch (Exception exception)
                 {
                     this.Logger.Error($"Error trying to call '{namespaceClassnameMethodname}'.");
-                    //this.Logger.Error(exception.Message);
+                    this.Logger.Error($"{exception.GetType().Name} - {exception.Message}");
                     Debug.LogException(exception);
                 }
 

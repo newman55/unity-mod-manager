@@ -6,8 +6,6 @@ using System.Windows.Forms;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using System.Net;
 using System.Diagnostics;
 
 namespace UnityModManagerNet.Installer
@@ -80,6 +78,7 @@ namespace UnityModManagerNet.Installer
         {
             btnInstall.Enabled = false;
             btnRemove.Enabled = false;
+            btnRestore.Enabled = false;
             tabControl.TabPages[1].Enabled = false;
         }
 
@@ -151,6 +150,9 @@ namespace UnityModManagerNet.Installer
             var assemblyPath = Path.Combine(currentManagedPath, selectedGame.AssemblyName);
             ModuleDefMD assembly = null;
 
+            var originalAssemblyPath = $"{assemblyPath}.original_";
+            btnRestore.Enabled = File.Exists(originalAssemblyPath);
+
             if (File.Exists(assemblyPath))
             {
                 try
@@ -195,6 +197,8 @@ namespace UnityModManagerNet.Installer
                 btnInstall.Enabled = true;
                 btnRemove.Enabled = false;
             }
+
+            btnRestore.Enabled = IsDirty(assembly) && btnRestore.Enabled;
         }
 
         private string FindGameFolder(string str)
@@ -252,6 +256,12 @@ namespace UnityModManagerNet.Installer
                 btnInstall.Text = "Update";
         }
 
+        private void btnRestore_Click(object sender, EventArgs e)
+        {
+            if (RestoreOriginal())
+                CheckState();
+        }
+
         private void btnDownloadUpdate_Click(object sender, EventArgs e)
         {
             var downloaderFile = "Downloader.exe";
@@ -266,7 +276,6 @@ namespace UnityModManagerNet.Installer
             var result = folderBrowserDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                //inputLog.Clear();
                 param.SaveGamePath(selectedGame.Name, folderBrowserDialog.SelectedPath);
                 CheckState();
             }
@@ -274,7 +283,6 @@ namespace UnityModManagerNet.Installer
 
         private void gameList_Changed(object sender, EventArgs e)
         {
-            //inputLog.Clear();
             var selected = (GameInfo)((ComboBox)sender).SelectedItem;
             if (selected != null)
                 Log.Print($"Game changed to '{selected.Name}'.");
@@ -282,7 +290,6 @@ namespace UnityModManagerNet.Installer
             param.LastSelectedGame = selected.Name;
 
             CheckState();
-
         }
 
         enum Actions
@@ -294,7 +301,8 @@ namespace UnityModManagerNet.Installer
         private bool Inject(Actions action, ModuleDefMD assembly = null, bool save = true)
         {
             var assemblyPath = Path.Combine(currentManagedPath, selectedGame.AssemblyName);
-            var backupAssemblyPath = $"{assemblyPath}.backup";
+            var backupAssemblyPath = $"{assemblyPath}.backup_";
+            var originalAssemblyPath = $"{assemblyPath}.original_";
 
             if (File.Exists(assemblyPath))
             {
@@ -311,52 +319,6 @@ namespace UnityModManagerNet.Installer
                     }
                 }
 
-                string className = null;
-                string methodName = null;
-                string placeType = null;
-
-                var pos = selectedGame.PatchTarget.LastIndexOf('.');
-                if (pos != -1)
-                {
-                    className = selectedGame.PatchTarget.Substring(0, pos);
-
-                    var pos2 = selectedGame.PatchTarget.LastIndexOf(':');
-                    if (pos2 != -1)
-                    {
-                        methodName = selectedGame.PatchTarget.Substring(pos + 1, pos2 - pos - 1);
-                        placeType = selectedGame.PatchTarget.Substring(pos2 + 1).ToLower();
-
-                        if (placeType != "after" && placeType != "before")
-                            Log.Print($"Parameter '{placeType}' in '{selectedGame.PatchTarget}' is unknown.");
-                    }
-                    else
-                    {
-                        methodName = selectedGame.PatchTarget.Substring(pos + 1);
-                    }
-
-                    if (methodName == "ctor")
-                        methodName = ".ctor";
-                }
-                else
-                {
-                    Log.Print($"Function name error '{selectedGame.PatchTarget}'.");
-                    return false;
-                }
-
-                var targetClass = assembly.Types.FirstOrDefault(x => x.FullName == className);
-                if (targetClass == null)
-                {
-                    Log.Print($"Class '{className}' not found.");
-                    return false;
-                }
-
-                var targetMethod = targetClass.Methods.FirstOrDefault(x => x.Name == methodName);
-                if (targetMethod == null)
-                {
-                    Log.Print($"Method '{methodName}' not found.");
-                    return false;
-                }
-
                 var modManagerType = typeof(UnityModManager);
 
                 switch (action)
@@ -364,8 +326,18 @@ namespace UnityModManagerNet.Installer
                     case Actions.Install:
                         try
                         {
+                            if (!Utils.ParsePatchTarget(assembly, selectedGame.PatchTarget, out var targetMethod, out var insertionPlace))
+                            {
+                                return false;
+                            }
+
                             Log.Print($"Backup for '{selectedGame.AssemblyName}'.");
                             File.Copy(assemblyPath, backupAssemblyPath, true);
+
+                            if (!IsDirty(assembly))
+                            {
+                                File.Copy(assemblyPath, originalAssemblyPath, true);
+                            }
 
                             CopyLibraries();
 
@@ -386,21 +358,29 @@ namespace UnityModManagerNet.Installer
                             }
 
                             Log.Print("Applying patch...");
+
+                            if (!IsDirty(assembly))
+                            {
+                                MakeDirty(assembly);
+                            }
+                            
                             var modManagerDef = ModuleDefMD.Load(modManagerType.Module);
                             var modManager = modManagerDef.Types.First(x => x.Name == modManagerType.Name);
                             var modManagerModsDir = modManager.Fields.First(x => x.Name == nameof(UnityModManager.modsDirname));
                             modManagerModsDir.Constant.Value = selectedGame.ModsDirectory;
                             var modManagerModInfo = modManager.Fields.First(x => x.Name == nameof(UnityModManager.infoFilename));
                             modManagerModInfo.Constant.Value = selectedGame.ModInfo;
+                            var modManagerPatchTarget = modManager.Fields.First(x => x.Name == nameof(UnityModManager.patchTarget));
+                            modManagerPatchTarget.Constant.Value = selectedGame.PatchTarget;
                             modManagerDef.Types.Remove(modManager);
                             assembly.Types.Add(modManager);
 
                             var instr = OpCodes.Call.ToInstruction(modManager.Methods.First(x => x.Name == nameof(UnityModManager.Start)));
-                            if (string.IsNullOrEmpty(placeType) || placeType == "after")
+                            if (string.IsNullOrEmpty(insertionPlace) || insertionPlace == "after")
                             {
                                 targetMethod.Body.Instructions.Insert(targetMethod.Body.Instructions.Count - 1, instr);
                             }
-                            else if (placeType == "before")
+                            else if (insertionPlace == "before")
                             {
                                 targetMethod.Body.Instructions.Insert(0, instr);
                             }
@@ -414,6 +394,7 @@ namespace UnityModManagerNet.Installer
                             installedVersion.Text = currentVersion.Text;
                             btnInstall.Enabled = false;
                             btnRemove.Enabled = true;
+                            btnRestore.Enabled = File.Exists(originalAssemblyPath);
 
                             return true;
                         }
@@ -433,6 +414,17 @@ namespace UnityModManagerNet.Installer
                             if (modManagerInjected != null)
                             {
                                 Log.Print("Removing patch...");
+                                var patchTarget = selectedGame.PatchTarget;
+                                var modManagerPatchTarget = modManagerInjected.Fields.FirstOrDefault(x => x.Name == nameof(UnityModManager.patchTarget));
+                                if (modManagerPatchTarget != null && !string.IsNullOrEmpty((string)modManagerPatchTarget.Constant.Value))
+                                {
+                                    patchTarget = (string)modManagerPatchTarget.Constant.Value;
+                                }
+                                if (!Utils.ParsePatchTarget(assembly, patchTarget, out var targetMethod, out var insertionPlace))
+                                {
+                                    return false;
+                                }
+
                                 var instr = OpCodes.Call.ToInstruction(modManagerInjected.Methods.First(x => x.Name == nameof(UnityModManager.Start)));
                                 for (int i = 0; i < targetMethod.Body.Instructions.Count; i++)
                                 {
@@ -445,6 +437,11 @@ namespace UnityModManagerNet.Installer
                                 }
 
                                 assembly.Types.Remove(modManagerInjected);
+
+                                if (!IsDirty(assembly))
+                                {
+                                    MakeDirty(assembly);
+                                }
 
                                 if (save)
                                 {
@@ -478,10 +475,23 @@ namespace UnityModManagerNet.Installer
             return false;
         }
 
+        private static bool IsDirty(ModuleDefMD assembly)
+        {
+            return assembly.Types.FirstOrDefault(x => x.FullName == typeof(Marks.IsDirty).FullName || x.Name == typeof(UnityModManager).Name) != null;
+        }
+
+        private static void MakeDirty(ModuleDefMD assembly)
+        {
+            var moduleDef = ModuleDefMD.Load(typeof(Marks.IsDirty).Module);
+            var typeDef = moduleDef.Types.FirstOrDefault(x => x.FullName == typeof(Marks.IsDirty).FullName);
+            moduleDef.Types.Remove(typeDef);
+            assembly.Types.Add(typeDef);
+        }
+
         private static bool RestoreBackup()
         {
             var assemblyPath = Path.Combine(currentManagedPath, instance.selectedGame.AssemblyName);
-            var backupAssemblyPath = $"{assemblyPath}.backup";
+            var backupAssemblyPath = $"{assemblyPath}.backup_";
 
             try
             {
@@ -489,6 +499,28 @@ namespace UnityModManagerNet.Installer
                 {
                     File.Copy(backupAssemblyPath, assemblyPath, true);
                     Log.Print("Backup restored.");
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Print(e.Message);
+            }
+
+            return false;
+        }
+
+        private static bool RestoreOriginal()
+        {
+            var assemblyPath = Path.Combine(currentManagedPath, instance.selectedGame.AssemblyName);
+            var originalAssemblyPath = $"{assemblyPath}.original_";
+
+            try
+            {
+                if (File.Exists(originalAssemblyPath))
+                {
+                    File.Copy(originalAssemblyPath, assemblyPath, true);
+                    Log.Print("Original files restored.");
                     return true;
                 }
             }
@@ -517,7 +549,7 @@ namespace UnityModManagerNet.Installer
                     if (dest.Length == source.Length)
                         continue;
 
-                    File.Copy(path, $"{path}.backup", true);
+                    File.Copy(path, $"{path}.backup_", true);
                 }
 
                 File.Copy(file, path, true);

@@ -64,6 +64,7 @@
     <Compile Include="Form.Designer.cs">
       <DependentUpon>Form.cs</DependentUpon>
     </Compile>
+    <Compile Include="Unity\Marks.cs" />
     <Compile Include="Unity\ModManager.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Mods.cs">

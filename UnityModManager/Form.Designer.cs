@@ -34,6 +34,7 @@
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.btnRestore = new System.Windows.Forms.Button();
             this.btnDownloadUpdate = new System.Windows.Forms.Button();
             this.btnRemove = new System.Windows.Forms.Button();
             this.btnOpenFolder = new System.Windows.Forms.Button();
@@ -132,6 +133,7 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.Controls.Add(this.btnRestore);
             this.tabPage1.Controls.Add(this.btnDownloadUpdate);
             this.tabPage1.Controls.Add(this.btnRemove);
             this.tabPage1.Controls.Add(this.btnOpenFolder);
@@ -149,12 +151,27 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Install";
             // 
+            // btnRestore
+            // 
+            this.btnRestore.AutoSize = true;
+            this.btnRestore.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnRestore.Enabled = false;
+            this.btnRestore.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnRestore.Location = new System.Drawing.Point(3, 93);
+            this.btnRestore.Name = "btnRestore";
+            this.btnRestore.Size = new System.Drawing.Size(312, 45);
+            this.btnRestore.TabIndex = 13;
+            this.btnRestore.Text = "Restore original files";
+            this.btnRestore.UseMnemonic = false;
+            this.btnRestore.UseVisualStyleBackColor = true;
+            this.btnRestore.Click += new System.EventHandler(this.btnRestore_Click);
+            // 
             // btnDownloadUpdate
             // 
             this.btnDownloadUpdate.AutoSize = true;
             this.btnDownloadUpdate.BackColor = System.Drawing.Color.PaleGreen;
             this.btnDownloadUpdate.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnDownloadUpdate.Location = new System.Drawing.Point(190, 133);
+            this.btnDownloadUpdate.Location = new System.Drawing.Point(190, 178);
             this.btnDownloadUpdate.Name = "btnDownloadUpdate";
             this.btnDownloadUpdate.Size = new System.Drawing.Size(122, 26);
             this.btnDownloadUpdate.TabIndex = 12;
@@ -181,7 +198,7 @@
             // btnOpenFolder
             // 
             this.btnOpenFolder.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.btnOpenFolder.Location = new System.Drawing.Point(5, 133);
+            this.btnOpenFolder.Location = new System.Drawing.Point(5, 178);
             this.btnOpenFolder.Name = "btnOpenFolder";
             this.btnOpenFolder.Size = new System.Drawing.Size(171, 26);
             this.btnOpenFolder.TabIndex = 9;
@@ -194,7 +211,7 @@
             this.gameList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.gameList.FormattingEnabled = true;
             this.gameList.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.gameList.Location = new System.Drawing.Point(6, 102);
+            this.gameList.Location = new System.Drawing.Point(6, 147);
             this.gameList.Name = "gameList";
             this.gameList.Size = new System.Drawing.Size(169, 21);
             this.gameList.Sorted = true;
@@ -219,7 +236,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(187, 115);
+            this.label3.Location = new System.Drawing.Point(187, 160);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(87, 13);
             this.label3.TabIndex = 7;
@@ -228,7 +245,7 @@
             // currentVersion
             // 
             this.currentVersion.AutoSize = true;
-            this.currentVersion.Location = new System.Drawing.Point(266, 99);
+            this.currentVersion.Location = new System.Drawing.Point(266, 144);
             this.currentVersion.Name = "currentVersion";
             this.currentVersion.Size = new System.Drawing.Size(31, 13);
             this.currentVersion.TabIndex = 4;
@@ -237,7 +254,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(187, 99);
+            this.label2.Location = new System.Drawing.Point(187, 144);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(82, 13);
             this.label2.TabIndex = 6;
@@ -246,7 +263,7 @@
             // installedVersion
             // 
             this.installedVersion.AutoSize = true;
-            this.installedVersion.Location = new System.Drawing.Point(271, 115);
+            this.installedVersion.Location = new System.Drawing.Point(271, 160);
             this.installedVersion.Name = "installedVersion";
             this.installedVersion.Size = new System.Drawing.Size(10, 13);
             this.installedVersion.TabIndex = 5;
@@ -529,6 +546,7 @@
         private System.Windows.Forms.Button btnModInstall;
         private System.Windows.Forms.OpenFileDialog modInstallFileDialog;
         private System.Windows.Forms.Button btnDownloadUpdate;
+        private System.Windows.Forms.Button btnRestore;
     }
 }
 
