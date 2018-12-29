@@ -49,6 +49,7 @@ namespace UnityModManagerNet.Installer
 
             if (config != null && config.GameInfo != null && config.GameInfo.Length > 0)
             {
+                config.GameInfo = config.GameInfo.OrderBy(x => x.Name).ToArray();
                 gameList.Items.AddRange(config.GameInfo);
 
                 GameInfo selected = null;

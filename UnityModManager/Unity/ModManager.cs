@@ -12,10 +12,12 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        public const string version = "0.12.3";
+        public const string version = "0.12.4";
         public const string modsDirname = "Mods";
         public const string infoFilename = "info.json";
         public const string patchTarget = "";
+
+        public static Version unityVersion;
 
         private static Version mVersion = new Version();
 
@@ -526,6 +528,7 @@ namespace UnityModManagerNet
             }
 
             mVersion = ParseVersion(version);
+            unityVersion = ParseVersion(Application.unityVersion);
 
             Logger.Clear();
 

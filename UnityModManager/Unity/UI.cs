@@ -395,7 +395,7 @@ namespace UnityModManagerNet
 
                                 GUILayout.EndHorizontal();
 
-                                if (mShowModSettings == i)
+                                if (mShowModSettings == i && mods[i].Active)
                                 {
                                     GUILayout.Label("Options", h2);
                                     try
@@ -497,6 +497,14 @@ namespace UnityModManagerNet
                                 {
                                     Logger.Clear();
                                 }
+                                if (GUILayout.Button("Open detailed log", GUILayout.Width(150)))
+                                {
+                                    var filepath = Path.Combine((unityVersion.Major >= 2017) ? Application.persistentDataPath : Application.dataPath, "output_log.txt");
+                                    if (File.Exists(filepath))
+                                    {
+                                        Application.OpenURL(filepath);
+                                    }
+                                }
                             };
 
                             if (GUI.changed)
@@ -553,7 +561,6 @@ namespace UnityModManagerNet
             {
                 mOpened = open;
                 BlockGameUI(open);
-                mShowModSettings = -1;
                 if (!mOpened)
                 {
                     SaveSettingsAndParams();
