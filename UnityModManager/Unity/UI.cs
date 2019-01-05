@@ -70,7 +70,10 @@ namespace UnityModManagerNet
             private void Start()
             {
                 CalculateWindowPos();
-                ToggleWindow(true);
+                if (Params.ShowOnStart == 1)
+                {
+                    ToggleWindow(true);
+                }
                 if (Params.CheckUpdates == 1)
                 {
                     CheckModUpdates();
@@ -534,6 +537,12 @@ namespace UnityModManagerNet
                                 GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
 
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Label("Show this window on startup", GUILayout.ExpandWidth(false));
+                            Params.ShowOnStart = GUILayout.Toolbar(Params.ShowOnStart, mShowOnStartStrings,
+                                GUILayout.ExpandWidth(false));
+                            GUILayout.EndHorizontal();
+
                             GUILayout.EndVertical();
                             GUILayout.EndScrollView();
 
@@ -547,6 +556,8 @@ namespace UnityModManagerNet
             }
 
             private string[] mCheckUpdateStrings = { "Never", "Automatic" };
+            
+            private string[] mShowOnStartStrings = { "No", "Yes" };
 
             private string[] mShortcutNames = { "CTRL+F10", "ScrollLock", "Num *", "~" };
 
