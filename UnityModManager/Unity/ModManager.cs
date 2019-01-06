@@ -672,6 +672,7 @@ namespace UnityModManagerNet
 
             public int ShortcutKeyId = 0;
             public int CheckUpdates = 1;
+            public int ShowOnStart = 1; 
 
             public List<Mod> ModParams = new List<Mod>();
 
