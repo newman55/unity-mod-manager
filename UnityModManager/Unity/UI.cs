@@ -524,7 +524,7 @@ namespace UnityModManagerNet
                             GUILayout.BeginVertical("box");
 
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Shortcut Key", GUILayout.ExpandWidth(false));
+                            GUILayout.Label("Hotkey", GUILayout.ExpandWidth(false));
                             Params.ShortcutKeyId =
                                 GUILayout.Toolbar(Params.ShortcutKeyId, mShortcutNames, GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();

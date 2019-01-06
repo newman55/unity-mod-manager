@@ -12,7 +12,7 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        public const string version = "0.12.4";
+        public const string version = "0.12.5";
         public const string modsDirname = "Mods";
         public const string infoFilename = "info.json";
         public const string patchTarget = "";
@@ -536,6 +536,9 @@ namespace UnityModManagerNet
             Console.WriteLine();
             Logger.Log($"Version '{version}'. Initialize.");
 
+            if (!Directory.Exists(modsPath))
+                Directory.CreateDirectory(modsPath);
+
             if (Directory.Exists(modsPath))
             {
                 Logger.Log($"Parsing mods.");
@@ -580,12 +583,12 @@ namespace UnityModManagerNet
                     }
                 }
 
+                mParams = Param.Load();
+
                 if (modEntries.Count > 0)
                 {
                     Logger.Log($"Sorting mods.");
                     modEntries.Sort(Compare);
-
-                    mParams = Param.Load();
 
                     Logger.Log($"Loading mods.");
                     foreach (var mod in modEntries)
@@ -597,10 +600,6 @@ namespace UnityModManagerNet
                 Logger.Log($"Finish. Found {countMods} mods. Successful loaded {modEntries.Count(x => x.Active)} mods.".ToUpper());
                 Console.WriteLine();
                 Console.WriteLine();
-            }
-            else
-            {
-                Directory.CreateDirectory(modsPath);
             }
 
             if (!UI.Load())
