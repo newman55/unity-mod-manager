@@ -587,7 +587,7 @@ namespace UnityModManagerNet
 
                 mParams = Param.Load();
 
-                if (modEntries.Count > 0)
+                if (mods.Count > 0)
                 {
                     Logger.Log($"Sorting mods.");
                     TopoSort(mods);
