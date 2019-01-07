@@ -122,7 +122,20 @@ namespace UnityModManagerNet.Downloader
                     }
                     using (var zip = ZipFile.Read(updateFile))
                     {
-                        zip.ExtractAll(Environment.CurrentDirectory, ExtractExistingFileAction.OverwriteSilently);
+                        foreach (var entry in zip.EntriesSorted)
+                        {
+                            if (entry.IsDirectory)
+                            {
+                                Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, entry.FileName));
+                            }
+                            else
+                            {
+                                using (FileStream fs = new FileStream(Path.Combine(Environment.CurrentDirectory, entry.FileName), FileMode.Create, FileAccess.Write))
+                                {
+                                    entry.Extract(fs);
+                                }
+                            }
+                        }
                     }
                     status.Text = "Done.";
                     success = true;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -73,6 +74,18 @@ namespace UnityModManagerNet.Installer
             }
 
             return true;
+        }
+        public static string ResolveOSXFileUrl(string url)
+        {
+            Process p = new Process();
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.FileName = "osascript";
+            p.StartInfo.Arguments = $"-e \"get posix path of posix file \\\"{url}\\\"\"";
+            p.Start();
+            string output = p.StandardOutput.ReadToEnd();
+            p.WaitForExit();
+            return output.TrimEnd();
         }
     }
 }

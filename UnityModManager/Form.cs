@@ -187,7 +187,7 @@ namespace UnityModManagerNet.Installer
                 var version2 = Utils.ParseVersion(versionString);
                 installedVersion.Text = versionString;
                 if (version != version2)
-                { 
+                {
                     btnInstall.Enabled = true;
                 }
             }
@@ -205,7 +205,13 @@ namespace UnityModManagerNet.Installer
         {
             string[] disks = new string[] { @"C:\", @"D:\", @"E:\", @"F:\" };
             string[] roots = new string[] { "Games", "Program files", "Program files (x86)", "" };
-            string[] folders = new string[] { @"Steam\SteamApps\common", "" };
+            string[] folders = new string[] { @"Steam\SteamApps\common", @"GoG Galaxy\Games", "" };
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                disks = new string[] { Environment.GetEnvironmentVariable("HOME") };
+                roots = new string[] { "Library/Application Support", ".steam" };
+                folders = new string[] { "Steam/SteamApps/common", "steam/steamapps/common" };
+            }
             foreach (var disk in disks)
             {
                 foreach (var root in roots)
@@ -227,9 +233,18 @@ namespace UnityModManagerNet.Installer
 
         private string FindManagedFolder(string str)
         {
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                var gameName = Path.GetFileName(str);
+                var path = Path.Combine(str, $"{gameName}.app/Contents/Resources/Data/Managed");
+                if (Directory.Exists(path))
+                {
+                    return path;
+                }
+            }
             var regex = new Regex(".*_Data$");
-            var dirictory = new DirectoryInfo(str);
-            foreach (var dir in dirictory.GetDirectories())
+            var directory = new DirectoryInfo(str);
+            foreach (var dir in directory.GetDirectories())
             {
                 var match = regex.Match(dir.Name);
                 if (match.Success)
@@ -363,7 +378,7 @@ namespace UnityModManagerNet.Installer
                             {
                                 MakeDirty(assembly);
                             }
-                            
+
                             var modManagerDef = ModuleDefMD.Load(modManagerType.Module);
                             var modManager = modManagerDef.Types.First(x => x.Name == modManagerType.Name);
                             var modManagerModsDir = modManager.Fields.First(x => x.Name == nameof(UnityModManager.modsDirname));
@@ -568,7 +583,7 @@ namespace UnityModManagerNet.Installer
                 case 1: // Mods
                     ReloadMods();
                     RefreshModList();
-                    if (!repositories.ContainsKey(selectedGame))
+                    if (selectedGame != null && !repositories.ContainsKey(selectedGame))
                         CheckModUpdates();
                     break;
             }

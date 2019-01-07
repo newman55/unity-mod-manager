@@ -14,12 +14,12 @@ namespace UnityModManagerNet
     {
         public const string version = "0.12.3";
         public const string modsDirname = "Mods";
-        public const string infoFilename = "info.json";
+        public const string infoFilename = "Info.json";
         public const string patchTarget = "";
 
         private static Version mVersion = new Version();
 
-        public class Repository 
+        public class Repository
         {
             [Serializable]
             public class Release : IEquatable<Release>
@@ -102,7 +102,7 @@ namespace UnityModManagerNet
                         modEntry.Logger.Error(e.ToString());
                     }
                 }
-                
+
                 return t;
             }
         }
@@ -542,6 +542,7 @@ namespace UnityModManagerNet
                 foreach (string dir in Directory.GetDirectories(modsPath))
                 {
                     string jsonPath = Path.Combine(dir, infoFilename);
+                    if (!File.Exists(Path.Combine(dir, infoFilename))) jsonPath = Path.Combine(dir, infoFilename.ToLower());
                     if (File.Exists(jsonPath))
                     {
                         countMods++;
@@ -649,7 +650,7 @@ namespace UnityModManagerNet
         public static void SaveSettingsAndParams()
         {
             mParams.Save();
-            foreach(var mod in modEntries)
+            foreach (var mod in modEntries)
             {
                 if (mod.OnSaveGUI != null)
                     mod.OnSaveGUI(mod);
