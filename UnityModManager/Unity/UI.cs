@@ -70,7 +70,10 @@ namespace UnityModManagerNet
             private void Start()
             {
                 CalculateWindowPos();
-                ToggleWindow(true);
+                if (Params.ShowOnStart == 1)
+                {
+                    ToggleWindow(true);
+                }
                 if (Params.CheckUpdates == 1)
                 {
                     CheckModUpdates();
@@ -395,7 +398,7 @@ namespace UnityModManagerNet
 
                                 GUILayout.EndHorizontal();
 
-                                if (mShowModSettings == i)
+                                if (mShowModSettings == i && mods[i].Active)
                                 {
                                     GUILayout.Label("Options", h2);
                                     try
@@ -497,6 +500,14 @@ namespace UnityModManagerNet
                                 {
                                     Logger.Clear();
                                 }
+                                if (GUILayout.Button("Open detailed log", GUILayout.Width(150)))
+                                {
+                                    var filepath = Path.Combine((unityVersion.Major >= 2017) ? Application.persistentDataPath : Application.dataPath, "output_log.txt");
+                                    if (File.Exists(filepath))
+                                    {
+                                        Application.OpenURL(filepath);
+                                    }
+                                }
                             };
 
                             if (GUI.changed)
@@ -513,7 +524,7 @@ namespace UnityModManagerNet
                             GUILayout.BeginVertical("box");
 
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Shortcut Key", GUILayout.ExpandWidth(false));
+                            GUILayout.Label("Hotkey", GUILayout.ExpandWidth(false));
                             Params.ShortcutKeyId =
                                 GUILayout.Toolbar(Params.ShortcutKeyId, mShortcutNames, GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
@@ -523,6 +534,12 @@ namespace UnityModManagerNet
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Check updates", GUILayout.ExpandWidth(false));
                             Params.CheckUpdates = GUILayout.Toolbar(Params.CheckUpdates, mCheckUpdateStrings,
+                                GUILayout.ExpandWidth(false));
+                            GUILayout.EndHorizontal();
+
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Label("Show this window on startup", GUILayout.ExpandWidth(false));
+                            Params.ShowOnStart = GUILayout.Toolbar(Params.ShowOnStart, mShowOnStartStrings,
                                 GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
 
@@ -539,6 +556,8 @@ namespace UnityModManagerNet
             }
 
             private string[] mCheckUpdateStrings = { "Never", "Automatic" };
+            
+            private string[] mShowOnStartStrings = { "No", "Yes" };
 
             private string[] mShortcutNames = { "CTRL+F10", "ScrollLock", "Num *", "~" };
 
@@ -553,7 +572,6 @@ namespace UnityModManagerNet
             {
                 mOpened = open;
                 BlockGameUI(open);
-                mShowModSettings = -1;
                 if (!mOpened)
                 {
                     SaveSettingsAndParams();

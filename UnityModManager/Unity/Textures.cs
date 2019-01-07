@@ -38,8 +38,7 @@ namespace UnityModManagerNet
                     f.SetValue(null, new Texture2D(2, 2, TextureFormat.ARGB32, false));
                 }
 
-                var version = ParseVersion(Application.unityVersion);
-                if (version.Major >= 2017)
+                if (unityVersion.Major >= 2017)
                 {
                     var assembly = Assembly.Load("UnityEngine.ImageConversionModule");
                     var LoadImage = assembly.GetType("UnityEngine.ImageConversion").GetMethod("LoadImage", new Type[] { typeof(Texture2D), typeof(byte[]) });
