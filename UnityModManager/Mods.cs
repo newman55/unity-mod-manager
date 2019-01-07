@@ -399,7 +399,7 @@ namespace UnityModManagerNet.Installer
             {
                 foreach (ZipEntry e in zip)
                 {
-                    if (e.FileName.EndsWith(selectedGame.ModInfo))
+                    if (e.FileName.EndsWith(selectedGame.ModInfo, StringComparison.InvariantCultureIgnoreCase))
                     {
                         using (var s = new StreamReader(e.OpenReader()))
                         {
