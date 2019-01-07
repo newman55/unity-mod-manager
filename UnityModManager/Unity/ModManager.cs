@@ -14,7 +14,7 @@ namespace UnityModManagerNet
     {
         public const string version = "0.12.5";
         public const string modsDirname = "Mods";
-        public const string infoFilename = "info.json";
+        public const string infoFilename = "Info.json";
         public const string patchTarget = "";
 
         public static Version unityVersion;
@@ -550,6 +550,7 @@ namespace UnityModManagerNet
                 foreach (string dir in Directory.GetDirectories(modsPath))
                 {
                     string jsonPath = Path.Combine(dir, infoFilename);
+                    if (!File.Exists(Path.Combine(dir, infoFilename))) jsonPath = Path.Combine(dir, infoFilename.ToLower());
                     if (File.Exists(jsonPath))
                     {
                         countMods++;

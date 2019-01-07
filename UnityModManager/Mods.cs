@@ -45,6 +45,11 @@ namespace UnityModManagerNet.Installer
             if (files.Length == 0)
                 return;
 
+            //Drag and drop files on OS X are in the format /.file/id=6571367.2773272
+            if (Environment.OSVersion.Platform == PlatformID.Unix && files[0].StartsWith("/.file"))
+            {
+                files = files.Select(f => Utils.ResolveOSXFileUrl(f)).ToArray();
+            }
             SaveAndInstallZipFiles(files);
             ReloadMods();
             RefreshModList();
@@ -207,12 +212,25 @@ namespace UnityModManagerNet.Installer
                         File.Delete(filepath);
                     }
                 }
-                zip.ExtractAll(modsPath, ExtractExistingFileAction.OverwriteSilently);
+                foreach(var entry in zip.EntriesSorted)
+                {
+                    if (entry.IsDirectory)
+                    {
+                        Directory.CreateDirectory(Path.Combine(modsPath, entry.FileName));
+                    } else
+                    {
+                        using (FileStream fs = new FileStream(Path.Combine(modsPath, entry.FileName), FileMode.Create, FileAccess.Write))
+                        {
+                            entry.Extract(fs);
+                        }                       
+                    }
+                }
                 Log.Print($"Unpacking '{Path.GetFileName(zip.Name)}' - SUCCESS.");
             }
             catch (Exception ex)
             {
                 Log.Print(ex.Message);
+                Log.Print(ex.StackTrace);
                 Log.Print($"Error when unpacking '{Path.GetFileName(zip.Name)}'.");
             }
 
@@ -236,6 +254,7 @@ namespace UnityModManagerNet.Installer
                 foreach (var dir in Directory.GetDirectories(modsPath))
                 {
                     string jsonPath = Path.Combine(dir, selectedGame.ModInfo);
+                    if (!File.Exists(jsonPath)) jsonPath = Path.Combine(dir, selectedGame.ModInfo.ToLower());
                     if (File.Exists(jsonPath))
                     {
                         try
@@ -380,7 +399,7 @@ namespace UnityModManagerNet.Installer
             {
                 foreach (ZipEntry e in zip)
                 {
-                    if (e.FileName.EndsWith(selectedGame.ModInfo))
+                    if (e.FileName.EndsWith(selectedGame.ModInfo, StringComparison.InvariantCultureIgnoreCase))
                     {
                         using (var s = new StreamReader(e.OpenReader()))
                         {
