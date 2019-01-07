@@ -100,7 +100,7 @@ namespace UnityModManagerNet
         {
             var www = UnityWebRequest.Get(url);
 
-            yield return www.Send();
+            yield return www.SendWebRequest();
 
             MethodInfo isError;
 
