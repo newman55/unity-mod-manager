@@ -219,6 +219,7 @@ namespace UnityModManagerNet.Installer
                         Directory.CreateDirectory(Path.Combine(modsPath, entry.FileName));
                     } else
                     {
+                        Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(modsPath, entry.FileName)));
                         using (FileStream fs = new FileStream(Path.Combine(modsPath, entry.FileName), FileMode.Create, FileAccess.Write))
                         {
                             entry.Extract(fs);
