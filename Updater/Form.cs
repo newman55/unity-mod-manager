@@ -130,6 +130,7 @@ namespace UnityModManagerNet.Downloader
                             }
                             else
                             {
+                                Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(Environment.CurrentDirectory, entry.FileName)));
                                 using (FileStream fs = new FileStream(Path.Combine(Environment.CurrentDirectory, entry.FileName), FileMode.Create, FileAccess.Write))
                                 {
                                     entry.Extract(fs);
