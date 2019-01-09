@@ -12,7 +12,7 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        public const string version = "0.12.6";
+        public const string version = "0.12.7";
         public const string modsDirname = "Mods";
         public const string infoFilename = "Info.json";
         public const string patchTarget = "";

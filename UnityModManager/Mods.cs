@@ -159,6 +159,10 @@ namespace UnityModManagerNet.Installer
                     Log.Print($"Error when uninstalling '{name}'.");
                 }
             }
+            else
+            {
+                Log.Print($"Directory '{modPath}' - not found.");
+            }
 
             ReloadMods();
             RefreshModList();
