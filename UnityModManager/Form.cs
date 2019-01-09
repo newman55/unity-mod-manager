@@ -236,8 +236,12 @@ namespace UnityModManagerNet.Installer
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                var gameName = Path.GetFileName(str);
-                var path = Path.Combine(str, $"{gameName}.app/Contents/Resources/Data/Managed");
+                var appName = $"{Path.GetFileName(str)}.app";
+                if (!Directory.Exists(Path.Combine(str, appName)))
+                {
+                    appName = Directory.GetDirectories(str).FirstOrDefault(dir => dir.EndsWith(".app"));
+                }
+                var path = Path.Combine(str, $"{appName}/Contents/Resources/Data/Managed");
                 if (Directory.Exists(path))
                 {
                     return path;
