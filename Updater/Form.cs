@@ -5,11 +5,11 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml.Serialization;
-using dnlib.DotNet;
 using Ionic.Zip;
 using Newtonsoft.Json;
 
@@ -19,8 +19,10 @@ namespace UnityModManagerNet.Downloader
     {
         const string updateFile = "update.zip";
         const string configFile = "UnityModManagerConfig.xml";
-        const string unityModManagerFile = "UnityModManager.exe";
-        const string unityModManagerName = "UnityModManager";
+        const string managerName = "UnityModManager";
+        const string managerFile = "UnityModManager.dll";
+        const string managerAppName = "UnityModManager";
+        const string managerAppFile = "UnityModManager.exe";
 
         public DownloaderForm()
         {
@@ -50,7 +52,7 @@ namespace UnityModManagerNet.Downloader
                 }
                 if (config == null || string.IsNullOrEmpty(config.Repository))
                 {
-                    status.Text = $"Error parsing {configFile}";
+                    status.Text = $"Error parsing '{configFile}'.";
                     return;
                 }
                 if (File.Exists(updateFile))
@@ -67,16 +69,14 @@ namespace UnityModManagerNet.Downloader
                 var repository = JsonConvert.DeserializeObject<Repository>(result);
                 if (repository == null || repository.Releases.Length == 0)
                 {
-                    status.Text = $"Error parsing {config.Repository}";
+                    status.Text = $"Error parsing '{config.Repository}'.";
                     return;
                 }
-                var release = repository.Releases.FirstOrDefault(x => x.Id == unityModManagerName);
-                if (File.Exists(unityModManagerFile))
+                var release = repository.Releases.FirstOrDefault(x => x.Id == managerName);
+                if (File.Exists(managerFile))
                 {
-                    var modManagerDef = ModuleDefMD.Load(File.ReadAllBytes(unityModManagerFile));
-                    var modManager = modManagerDef.Types.First(x => x.Name == unityModManagerName);
-                    var versionString = modManager.Fields.First(x => x.Name == "version").Constant.Value.ToString();
-                    if (Utils.ParseVersion(release.Version) <= Utils.ParseVersion(versionString))
+                    var managerAssembly = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(managerFile));
+                    if (Utils.ParseVersion(release.Version) <= managerAssembly.GetName().Version)
                     {
                         status.Text = $"No updates.";
                         return;
@@ -114,7 +114,7 @@ namespace UnityModManagerNet.Downloader
                 var success = false;
                 try
                 {
-                    foreach (var p in Process.GetProcessesByName(unityModManagerName))
+                    foreach (var p in Process.GetProcessesByName(managerAppName))
                     {
                         status.Text = "Waiting for the UnityModManager to close.";
                         p.CloseMainWindow();
@@ -153,11 +153,11 @@ namespace UnityModManagerNet.Downloader
 
                 if (success)
                 {
-                    if (Process.GetProcessesByName(unityModManagerName).Length == 0)
+                    if (!Utils.IsUnixPlatform() && Process.GetProcessesByName(managerAppName).Length == 0)
                     {
-                        if (File.Exists(unityModManagerFile))
+                        if (File.Exists(managerAppFile))
                         {
-                            SetForegroundWindow(Process.Start(unityModManagerFile).MainWindowHandle);
+                            SetForegroundWindow(Process.Start(managerAppFile).MainWindowHandle);
                         }
                     }
                     Application.Exit();

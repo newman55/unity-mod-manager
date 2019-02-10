@@ -1,15 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using dnlib.DotNet;
+using UnityEngine;
 
-namespace UnityModManagerNet.Installer
+namespace UnityModManagerNet
 {
-    static class Utils
+    public partial class UnityModManager
     {
+        public static void OpenUnityFileLog()
+        {
+            var folders = new string[] { Application.persistentDataPath, Application.dataPath };
+            foreach(var folder in folders)
+            {
+                var filepath = Path.Combine(folder, "output_log.txt");
+                if (File.Exists(filepath))
+                {
+                    Application.OpenURL(filepath);
+                    return;
+                }
+            }
+        }
+
         public static Version ParseVersion(string str)
         {
             var array = str.Split('.', ',');
@@ -19,73 +32,14 @@ namespace UnityModManagerNet.Installer
                 return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")), int.Parse(regex.Replace(array[2], "")));
             }
 
-            Log.Print($"Error parsing version '{str}'.");
+            Logger.Error($"Error parsing version {str}");
             return new Version();
         }
 
-        public static bool ParsePatchTarget(ModuleDefMD assembly, string patchTarget, out MethodDef foundMethod, out string insertionPlace)
+        public static bool IsUnixPlatform()
         {
-            foundMethod = null;
-            insertionPlace = null;
-
-            string className = null;
-            string methodName = null;
-
-            var pos = patchTarget.LastIndexOf('.');
-            if (pos != -1)
-            {
-                className = patchTarget.Substring(0, pos);
-
-                var pos2 = patchTarget.LastIndexOf(':');
-                if (pos2 != -1)
-                {
-                    methodName = patchTarget.Substring(pos + 1, pos2 - pos - 1);
-                    insertionPlace = patchTarget.Substring(pos2 + 1).ToLower();
-
-                    if (insertionPlace != "after" && insertionPlace != "before")
-                        Log.Print($"Parameter '{insertionPlace}' in '{patchTarget}' is unknown.");
-                }
-                else
-                {
-                    methodName = patchTarget.Substring(pos + 1);
-                }
-
-                if (methodName == "ctor")
-                    methodName = ".ctor";
-            }
-            else
-            {
-                Log.Print($"Function name error '{patchTarget}'.");
-                return false;
-            }
-
-            var targetClass = assembly.Types.FirstOrDefault(x => x.FullName == className);
-            if (targetClass == null)
-            {
-                Log.Print($"Class '{className}' not found.");
-                return false;
-            }
-
-            foundMethod = targetClass.Methods.FirstOrDefault(x => x.Name == methodName);
-            if (foundMethod == null)
-            {
-                Log.Print($"Method '{methodName}' not found.");
-                return false;
-            }
-
-            return true;
-        }
-        public static string ResolveOSXFileUrl(string url)
-        {
-            Process p = new Process();
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.FileName = "osascript";
-            p.StartInfo.Arguments = $"-e \"get posix path of posix file \\\"{url}\\\"\"";
-            p.Start();
-            string output = p.StandardOutput.ReadToEnd();
-            p.WaitForExit();
-            return output.TrimEnd();
+            int p = (int)Environment.OSVersion.Platform;
+            return (p == 4) || (p == 6) || (p == 128);
         }
     }
 }

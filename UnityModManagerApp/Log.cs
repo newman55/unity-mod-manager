@@ -6,7 +6,7 @@ namespace UnityModManagerNet.Installer
     static class Log
     {
         private static bool firstLine = true;
-        public const string fileLog = "UnityModManager.log";
+        public const string fileLog = "Log.txt";
 
         public static void Print(string str, bool append = false)
         {

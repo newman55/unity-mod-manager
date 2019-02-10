@@ -27,14 +27,20 @@ namespace UnityModManagerNet.Downloader
             {
                 using (var ping = new Ping())
                 {
-                    return ping.Send("www.google.com.mx", 1000).Status == IPStatus.Success;
+                    return ping.Send("www.google.com.mx", 2000).Status == IPStatus.Success;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
 
             return false;
+        }
+
+        public static bool IsUnixPlatform()
+        {
+            int p = (int)Environment.OSVersion.Platform;
+            return (p == 4) || (p == 6) || (p == 128);
         }
     }
 }

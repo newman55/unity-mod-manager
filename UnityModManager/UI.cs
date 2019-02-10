@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -48,6 +45,7 @@ namespace UnityModManagerNet
             private static GUIStyle www = null;
             private static GUIStyle updates = null;
 
+            private bool mFirstLaunch = false;
             private bool mInit = false;
 
             private bool mOpened = false;
@@ -70,9 +68,9 @@ namespace UnityModManagerNet
             private void Start()
             {
                 CalculateWindowPos();
-                if (Params.ShowOnStart == 1)
+                if (Params.ShowOnStart == 1 && string.IsNullOrEmpty(Config.UIStartingPoint))
                 {
-                    ToggleWindow(true);
+                    FirstLaunch();
                 }
                 if (Params.CheckUpdates == 1)
                 {
@@ -80,10 +78,30 @@ namespace UnityModManagerNet
                 }
             }
 
+            private void OnDestroy()
+            {
+                SaveSettingsAndParams();
+                Logger.WriteBuffers();
+            }
+
             private void Update()
             {
-                if (mOpened)
-                    mLogTimer += Time.unscaledDeltaTime;
+                var deltaTime = Time.deltaTime;
+                foreach (var mod in modEntries)
+                {
+                    if (mod.Active && mod.OnUpdate != null)
+                    {
+                        try
+                        {
+                            mod.OnUpdate.Invoke(mod, deltaTime);
+                        }
+                        catch (Exception e)
+                        {
+                            mod.Logger.Error("OnUpdate: " + e.GetType().Name + " - " + e.Message);
+                            Debug.LogException(e);
+                        }
+                    }
+                }
 
                 bool toggle = false;
 
@@ -125,9 +143,46 @@ namespace UnityModManagerNet
                 }
             }
 
-            private void OnDestroy()
+            private void FixedUpdate()
             {
-                SaveSettingsAndParams();
+                var deltaTime = Time.fixedDeltaTime;
+                foreach (var mod in modEntries)
+                {
+                    if (mod.Active && mod.OnFixedUpdate != null)
+                    {
+                        try
+                        {
+                            mod.OnFixedUpdate.Invoke(mod, deltaTime);
+                        }
+                        catch (Exception e)
+                        {
+                            mod.Logger.Error("OnFixedUpdate: " + e.GetType().Name + " - " + e.Message);
+                            Debug.LogException(e);
+                        }
+                    }
+                }
+            }
+
+            private void LateUpdate()
+            {
+                var deltaTime = Time.deltaTime;
+                foreach (var mod in modEntries)
+                {
+                    if (mod.Active && mod.OnLateUpdate != null)
+                    {
+                        try
+                        {
+                            mod.OnLateUpdate.Invoke(mod, deltaTime);
+                        }
+                        catch (Exception e)
+                        {
+                            mod.Logger.Error("OnLateUpdate: " + e.GetType().Name + " - " + e.Message);
+                            Debug.LogException(e);
+                        }
+                    }
+                }
+
+                Logger.Watcher(deltaTime);
             }
 
             private void PrepareGUI()
@@ -225,10 +280,7 @@ namespace UnityModManagerNet
                 new Column {name = "Status", width = 50}
             };
 
-            private long mFilelogLength = 0;
-            private string[] mLogStrings = new string[0];
             private Vector2[] mScrollPosition = new Vector2[0];
-            private float mLogTimer = 0;
 
             private int mShowModSettings = -1;
 
@@ -408,7 +460,7 @@ namespace UnityModManagerNet
                                     catch (Exception e)
                                     {
                                         mShowModSettings = -1;
-                                        mods[i].Logger.Error("OnGUI error.");
+                                        mods[i].Logger.Error("OnGUI: " + e.GetType().Name + " - " + e.Message);
                                         Debug.LogException(e);
                                     }
                                 }
@@ -468,27 +520,13 @@ namespace UnityModManagerNet
 
                     case "Logs":
                         {
-                            if (mLogTimer > 1)
-                            {
-                                mLogTimer = 0;
-                                var filepath = Logger.filepath;
-                                if (File.Exists(filepath))
-                                {
-                                    var fileinfo = new FileInfo(filepath);
-                                    if (mFilelogLength != fileinfo.Length)
-                                    {
-                                        mFilelogLength = fileinfo.Length;
-                                        mLogStrings = File.ReadAllLines(filepath);
-                                    }
-                                }
-                            }
-
                             mScrollPosition[tabId] = GUILayout.BeginScrollView(mScrollPosition[tabId], minWidth);
 
                             GUILayout.BeginVertical("box");
-                            for (int i = Mathf.Max(0, mLogStrings.Length - 200); i < mLogStrings.Length; i++)
+
+                            for (int c = Logger.history.Count, i = Mathf.Max(0, c - Logger.historyCapacity); i < c; i++)
                             {
-                                GUILayout.Label(mLogStrings[i]);
+                                GUILayout.Label(Logger.history[i]);
                             }
 
                             GUILayout.EndVertical();
@@ -502,11 +540,7 @@ namespace UnityModManagerNet
                                 }
                                 if (GUILayout.Button("Open detailed log", GUILayout.Width(150)))
                                 {
-                                    var filepath = Path.Combine((unityVersion.Major >= 2017) ? Application.persistentDataPath : Application.dataPath, "output_log.txt");
-                                    if (File.Exists(filepath))
-                                    {
-                                        Application.OpenURL(filepath);
-                                    }
+                                    OpenUnityFileLog();
                                 }
                             };
 
@@ -563,6 +597,23 @@ namespace UnityModManagerNet
 
             internal bool GameCursorLocked { get; set; }
 
+            public void FirstLaunch()
+            {
+                if (mFirstLaunch)
+                    return;
+
+                mFirstLaunch = true;
+                try
+                {
+                    ToggleWindow(true);
+                }
+                catch(Exception e)
+                {
+                    Logger.Error("FirstLaunch: " + e.GetType().Name + " - " + e.Message);
+                    Debug.LogException(e);
+                }
+            }
+
             public void ToggleWindow()
             {
                 ToggleWindow(!mOpened);
@@ -570,9 +621,12 @@ namespace UnityModManagerNet
 
             public void ToggleWindow(bool open)
             {
+                if (open == mOpened)
+                    return;
+
                 mOpened = open;
                 BlockGameUI(open);
-                if (!mOpened)
+                if (!open)
                 {
                     SaveSettingsAndParams();
                 }

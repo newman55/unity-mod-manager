@@ -29,11 +29,11 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UnityModManagerForm));
             this.panelMain = new System.Windows.Forms.Panel();
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.installTypeGroup = new System.Windows.Forms.GroupBox();
             this.btnRestore = new System.Windows.Forms.Button();
             this.btnDownloadUpdate = new System.Windows.Forms.Button();
             this.btnRemove = new System.Windows.Forms.Button();
@@ -133,6 +133,7 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.Controls.Add(this.installTypeGroup);
             this.tabPage1.Controls.Add(this.btnRestore);
             this.tabPage1.Controls.Add(this.btnDownloadUpdate);
             this.tabPage1.Controls.Add(this.btnRemove);
@@ -150,6 +151,16 @@
             this.tabPage1.Size = new System.Drawing.Size(318, 342);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Install";
+            // 
+            // installTypeGroup
+            // 
+            this.installTypeGroup.Location = new System.Drawing.Point(6, 213);
+            this.installTypeGroup.Name = "installTypeGroup";
+            this.installTypeGroup.Padding = new System.Windows.Forms.Padding(10, 3, 10, 5);
+            this.installTypeGroup.Size = new System.Drawing.Size(306, 46);
+            this.installTypeGroup.TabIndex = 18;
+            this.installTypeGroup.TabStop = false;
+            this.installTypeGroup.Text = "Installation method";
             // 
             // btnRestore
             // 
@@ -175,10 +186,9 @@
             this.btnDownloadUpdate.Name = "btnDownloadUpdate";
             this.btnDownloadUpdate.Size = new System.Drawing.Size(122, 26);
             this.btnDownloadUpdate.TabIndex = 12;
-            this.btnDownloadUpdate.Text = "Download update";
+            this.btnDownloadUpdate.Text = "Home Page";
             this.btnDownloadUpdate.UseMnemonic = false;
             this.btnDownloadUpdate.UseVisualStyleBackColor = false;
-            this.btnDownloadUpdate.Visible = false;
             this.btnDownloadUpdate.Click += new System.EventHandler(this.btnDownloadUpdate_Click);
             // 
             // btnRemove
@@ -402,7 +412,7 @@
             // 
             // splitContainerModsInstall.Panel2
             // 
-            this.splitContainerModsInstall.Panel2.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("splitContainerModsInstall.Panel2.BackgroundImage")));
+            this.splitContainerModsInstall.Panel2.BackgroundImage = global::UnityModManagerNet.Installer.Properties.Resources.dragdropfiles;
             this.splitContainerModsInstall.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.splitContainerModsInstall.Size = new System.Drawing.Size(312, 142);
             this.splitContainerModsInstall.SplitterDistance = 45;
@@ -547,6 +557,7 @@
         private System.Windows.Forms.OpenFileDialog modInstallFileDialog;
         private System.Windows.Forms.Button btnDownloadUpdate;
         private System.Windows.Forms.Button btnRestore;
+        private System.Windows.Forms.GroupBox installTypeGroup;
     }
 }
 

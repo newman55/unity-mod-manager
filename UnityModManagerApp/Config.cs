@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 namespace UnityModManagerNet.Installer
 {
     public enum ModStatus { NotInstalled, Installed }
+    public enum InstallType { Assembly, Config, Count }
 
     public class ModInfo : UnityModManager.ModInfo
     {
@@ -49,7 +50,7 @@ namespace UnityModManagerNet.Installer
         }
     }
 
-    [Serializable]
+    [XmlRoot("Config")]
     public class GameInfo
     {
         [XmlAttribute]
@@ -57,20 +58,59 @@ namespace UnityModManagerNet.Installer
         public string Folder;
         public string ModsDirectory;
         public string ModInfo;
-        public string AssemblyName;
-        public string PatchTarget;
+        public string EntryPoint;
+        public string StartingPoint;
+        public string UIStartingPoint;
+        public string OldPatchTarget;
+        public string MachineConfig;
 
         public override string ToString()
         {
             return Name;
         }
+
+        public static string filepathInGame;
+
+        public void ExportToGame()
+        {
+            try
+            {
+                using (var writer = new StreamWriter(filepathInGame))
+                {
+                    new XmlSerializer(typeof(GameInfo)).Serialize(writer, this);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Print($"Error file creating '{filepathInGame}'.");
+                throw e;
+            }
+        }
+
+        public static GameInfo ImportFromGame()
+        {
+            try
+            {
+                using (var stream = File.OpenRead(filepathInGame))
+                {
+                    return new XmlSerializer(typeof(GameInfo)).Deserialize(stream) as GameInfo;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Print(e.ToString());
+                Log.Print($"Can't read file '{filepathInGame}'.");
+                return null;
+            }
+        }
     }
 
-    public class Config
+    public sealed class Config
     {
         public const string filename = "UnityModManagerConfig.xml";
 
         public string Repository;
+        public string HomePage;
 
         [XmlElement]
         public GameInfo[] GameInfo;
@@ -91,8 +131,8 @@ namespace UnityModManagerNet.Installer
                                 Folder = "Folder",
                                 ModsDirectory = "Mods",
                                 ModInfo = "Info.json",
-                                AssemblyName = "Assembly-CSharp.dll",
-                                PatchTarget = "App.Awake"
+                                EntryPoint = "[Assembly-CSharp.dll]App.Awake",
+                                MachineConfig = @"MonoBleedingEdge\etc\mono\4.5\"
                             }
                         }
                     };
@@ -104,7 +144,7 @@ namespace UnityModManagerNet.Installer
             }
             catch (Exception e)
             {
-                Log.Print(e.Message);
+                Log.Print(e.ToString());
             }
         }
 
@@ -117,61 +157,71 @@ namespace UnityModManagerNet.Installer
                     using (var stream = File.OpenRead(filename))
                     {
                         var serializer = new XmlSerializer(typeof(Config));
-                        return serializer.Deserialize(stream) as Config;
+                        var result = serializer.Deserialize(stream) as Config;
+                        OnDeserialize(result);
+                        return result;
                     }
                 }
                 catch (Exception e)
                 {
-                    Log.Print(e.Message);
+                    Log.Print(e.ToString());
                 }
             }
             return null;
         }
+
+        private static void OnDeserialize(Config value)
+        {
+
+        }
     }
 
-    public class Param
+    public sealed class Param
     {
         [Serializable]
-        public class GamePath
+        public class GameParam
         {
             [XmlAttribute]
             public string Name;
-            [XmlAttribute]
             public string Path;
+            public InstallType InstallType = InstallType.Config;
         }
 
         public string LastSelectedGame;
-        public List<GamePath> GamePaths = new List<GamePath>();
+        public List<GameParam> GameParams = new List<GameParam>();
 
         public const string filename = "Params.xml";
 
-        public void SaveGamePath(string name, string path)
+        static GameParam CreateGameParam(GameInfo gameInfo)
         {
-            var item = GamePaths.FirstOrDefault(x => x.Name == name);
-            if (item != null)
-            {
-                item.Path = path;
-            }
-            else
-            {
-                GamePaths.Add(new GamePath { Name = name, Path = path });
-            }
+            return new GameParam { Name = gameInfo.Name };
         }
 
-        public bool ExtractGamePath(string name, out string result)
+        public GameParam GetGameParam(GameInfo gameInfo)
         {
-            if (GamePaths != null && GamePaths.Count > 0)
+            var result = GameParams.FirstOrDefault(x => x.Name == gameInfo.Name);
+            if (result == null)
             {
-                var item = GamePaths.FirstOrDefault(x => x.Name == name);
-                if (item != null && !string.IsNullOrEmpty(item.Path))
+                result = CreateGameParam(gameInfo);
+                GameParams.Add(result);
+            }
+            return result;
+        }
+    
+        public void Sync(GameInfo[] gameInfos)
+        {
+            int i = 0;
+            while(i < GameParams.Count)
+            {
+                if (gameInfos.Any(x => x.Name == GameParams[i].Name))
                 {
-                    result = item.Path;
-                    return true;
+                    i++;
+                }
+                else
+                {
+                    GameParams.RemoveAt(i);
                 }
             }
-
-            result = null;
-            return false;
         }
 
         public void Save()
@@ -187,7 +237,7 @@ namespace UnityModManagerNet.Installer
             }
             catch (Exception e)
             {
-                Log.Print(e.Message);
+                Log.Print(e.ToString());
             }
         }
 
@@ -206,7 +256,7 @@ namespace UnityModManagerNet.Installer
                 }
                 catch (Exception e)
                 {
-                    Log.Print(e.Message);
+                    Log.Print(e.ToString());
                 }
             }
             return new Param();

@@ -1,25 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using UnityEngine;
+using dnlib.DotNet;
+//using UnityEngine.SceneManagement;
 
 namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        public const string version = "0.12.7";
-        public const string modsDirname = "Mods";
-        public const string infoFilename = "Info.json";
-        public const string patchTarget = "";
+        //public const string version = "0.13.1";
+        //public const string modsDirname = "Mods";
+        //public const string infoFilename = "Info.json";
+        //public const string assemblyName = "Assembly-CSharp.dll";
+        //public const string patchTarget = "";
 
-        public static Version unityVersion;
+        private static readonly Version VER_0_13 = new Version(0, 13);
 
-        private static Version mVersion = new Version();
+        public static Version unityVersion { get; private set; }
+
+        public static Version version { get; private set; } = typeof(UnityModManager).Assembly.GetName().Version;
+
+        private static ModuleDefMD thisModuleDef = ModuleDefMD.Load(typeof(UnityModManager).Module);
 
         public class Repository
         {
@@ -79,7 +85,7 @@ namespace UnityModManagerNet
                 catch (Exception e)
                 {
                     modEntry.Logger.Error($"Can't save {filepath}.");
-                    modEntry.Logger.Error(e.ToString());
+                    Debug.LogException(e);
                 }
             }
 
@@ -101,7 +107,7 @@ namespace UnityModManagerNet
                     catch (Exception e)
                     {
                         modEntry.Logger.Error($"Can't read {filepath}.");
-                        modEntry.Logger.Error(e.ToString());
+                        Debug.LogException(e);
                     }
                 }
 
@@ -185,6 +191,21 @@ namespace UnityModManagerNet
 
             public Action<ModEntry> OnSaveGUI = null;
 
+            /// <summary>
+            /// Added in 0.13.0
+            /// </summary>
+            public Action<ModEntry, float> OnUpdate = null;
+
+            /// <summary>
+            /// Added in 0.13.0
+            /// </summary>
+            public Action<ModEntry, float> OnLateUpdate = null;
+
+            /// <summary>
+            /// Added in 0.13.0
+            /// </summary>
+            public Action<ModEntry, float> OnFixedUpdate = null;
+
             Dictionary<long, MethodInfo> mCache = new Dictionary<long, MethodInfo>();
 
             bool mStarted = false;
@@ -219,6 +240,10 @@ namespace UnityModManagerNet
                                 mActive = true;
                                 this.Logger.Log($"Active.");
                             }
+                            else
+                            {
+                                this.Logger.Log($"Unsuccessfully.");
+                            }
                         }
                         else
                         {
@@ -234,8 +259,8 @@ namespace UnityModManagerNet
                     }
                     catch (Exception e)
                     {
-                        this.Logger.Error($"Error trying to call 'OnToggle' function.");
-                        this.Logger.Error(e.ToString());
+                        this.Logger.Error("OnToggle: " + e.GetType().Name + " - " + e.Message);
+                        Debug.LogException(e);
                     }
                 }
             }
@@ -334,33 +359,81 @@ namespace UnityModManagerNet
                     return false;
 
                 string assemblyPath = System.IO.Path.Combine(Path, Info.AssemblyName);
+                
                 if (File.Exists(assemblyPath))
                 {
                     try
                     {
-                        if (mAssembly == null)
+                        if (ManagerVersion >= VER_0_13)
+                        {
                             mAssembly = Assembly.LoadFile(assemblyPath);
+                        }
+                        else
+                        {
+                            var fi = new FileInfo(assemblyPath);
+                            var hash = (uint)((long)fi.LastWriteTimeUtc.GetHashCode() + version.GetHashCode()).GetHashCode();
+                            var assemblyCachePath = System.IO.Path.Combine(Path, Info.AssemblyName + $".{hash}.cache");
+
+                            if (File.Exists(assemblyCachePath))
+                            {
+                                mAssembly = Assembly.LoadFile(assemblyCachePath);
+                            }
+                            else
+                            {
+                                foreach (var filepath in Directory.GetFiles(Path, "*.cache"))
+                                {
+                                    try
+                                    {
+                                        File.Delete(filepath);
+                                    }
+                                    catch (Exception)
+                                    {
+                                    }
+                                }
+                                var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
+
+                                foreach (var item in modDef.GetTypeRefs())
+                                {
+                                    if (item.FullName == "UnityModManagerNet.UnityModManager")
+                                    {
+                                        item.ResolutionScope = new AssemblyRefUser(thisModuleDef.Assembly);
+                                    }
+                                }
+
+                                modDef.Write(assemblyCachePath);
+                                mAssembly = Assembly.LoadFile(assemblyCachePath);
+                            }
+                        }
                     }
                     catch (Exception exception)
                     {
                         mErrorOnLoading = true;
                         this.Logger.Error($"Error loading file '{assemblyPath}'.");
-                        this.Logger.Error(exception.ToString());
+                        Debug.LogException(exception);
                         return false;
                     }
 
-                    object[] param = new object[] { this };
-                    Type[] types = new Type[] { typeof(ModEntry) };
-                    if (FindMethod(Info.EntryMethod, types, false) == null)
+                    try
                     {
-                        param = null;
-                        types = null;
-                    }
+                        object[] param = new object[] { this };
+                        Type[] types = new Type[] { typeof(ModEntry) };
+                        if (FindMethod(Info.EntryMethod, types, false) == null)
+                        {
+                            param = null;
+                            types = null;
+                        }
 
-                    if (!Invoke(Info.EntryMethod, out var result, param, types) || result != null && (bool)result == false)
+                        if (!Invoke(Info.EntryMethod, out var result, param, types) || result != null && (bool)result == false)
+                        {
+                            mErrorOnLoading = true;
+                            this.Logger.Log($"Not loaded.");
+                        }
+                    }
+                    catch (Exception e)
                     {
                         mErrorOnLoading = true;
-                        this.Logger.Log($"Not loaded.");
+                        this.Logger.Log(e.ToString());
+                        return false;
                     }
 
                     mStarted = true;
@@ -374,7 +447,7 @@ namespace UnityModManagerNet
                 else
                 {
                     mErrorOnLoading = true;
-                    this.Logger.Error($"'{assemblyPath}' not found.");
+                    this.Logger.Error($"File '{assemblyPath}' not found.");
                 }
 
                 return false;
@@ -508,49 +581,134 @@ namespace UnityModManagerNet
                 {
                     UnityModManager.Logger.Log(str, PrefixWarning);
                 }
+
+                public void NativeLog(string str)
+                {
+                    UnityModManager.Logger.NativeLog(str, Prefix);
+                }
             }
         }
 
         public static readonly List<ModEntry> modEntries = new List<ModEntry>();
-        public static readonly string modsPath = Path.Combine(Environment.CurrentDirectory, modsDirname);
+        public static string modsPath { get; private set; }
 
-        private static Param mParams = new Param();
-        public static Param Params => mParams;
+        internal static Param Params { get; set; } = new Param();
+        internal static GameInfo Config { get; set; } = new GameInfo();
 
-        public static bool isStarted = false;
+        internal static bool started;
+        internal static bool initialized;
+
+        public static bool Initialize()
+        {
+            if (initialized)
+                return true;
+
+            initialized = true;
+
+            Logger.Clear();
+
+            Logger.Log($"Initialize. Version '{version}'.");
+
+            Config = GameInfo.Load();
+            if (Config == null)
+            {
+                return false;
+            }
+
+            modsPath = Path.Combine(Environment.CurrentDirectory, Config.ModsDirectory);
+
+            if (!Directory.Exists(modsPath))
+                Directory.CreateDirectory(modsPath);
+
+            unityVersion = ParseVersion(Application.unityVersion);
+
+            //SceneManager.sceneLoaded += SceneManager_sceneLoaded; // Incompatible with Unity5
+
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+
+            return true;
+        }
+
+        //private static void SceneManager_sceneLoaded(Scene scene, LoadSceneMode mode)
+        //{
+        //    Logger.NativeLog($"Scene loaded: {scene.name} ({mode.ToString()})");
+        //}
+
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == args.Name);
+            if (assembly != null)
+                return assembly;
+
+            if (args.Name.StartsWith("0Harmony,"))
+            {
+                var regex = new Regex(@"Version=(\d+\.\d+)");
+                var match = regex.Match(args.Name);
+                if (match.Success)
+                {
+                    var ver = match.Groups[1].Value;
+                    string filepath = Path.Combine(Path.GetDirectoryName(typeof(UnityModManager).Assembly.Location), $"0Harmony-{ver}.dll");
+                    if (File.Exists(filepath))
+                    {
+                        try
+                        {
+                            return Assembly.LoadFile(filepath);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Error(e.ToString());
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
 
         public static void Start()
         {
-            if (isStarted)
+            try
+            {
+                _Start();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                OpenUnityFileLog();
+            }
+        }
+
+        private static void _Start()
+        {
+            if (!Initialize())
+            {
+                Logger.Log($"Cancel start due to an error.");
+                OpenUnityFileLog();
+                return;
+            }
+            if (started)
             {
                 Logger.Log($"Cancel start. Already started.");
                 return;
             }
 
-            mVersion = ParseVersion(version);
-            unityVersion = ParseVersion(Application.unityVersion);
-
-            Logger.Clear();
-
-            Console.WriteLine();
-            Console.WriteLine();
-            Logger.Log($"Version '{version}'. Initialize.");
-
-            if (!Directory.Exists(modsPath))
-                Directory.CreateDirectory(modsPath);
-
-            Dictionary<string, ModEntry> mods = new Dictionary<string, ModEntry>();
+            started = true;
 
             if (Directory.Exists(modsPath))
             {
                 Logger.Log($"Parsing mods.");
 
+                Dictionary<string, ModEntry> mods = new Dictionary<string, ModEntry>();
+
                 int countMods = 0;
 
                 foreach (string dir in Directory.GetDirectories(modsPath))
                 {
-                    string jsonPath = Path.Combine(dir, infoFilename);
-                    if (!File.Exists(Path.Combine(dir, infoFilename))) jsonPath = Path.Combine(dir, infoFilename.ToLower());
+                    string jsonPath = Path.Combine(dir, Config.ModInfo);
+                    if (!File.Exists(Path.Combine(dir, Config.ModInfo)))
+                    {
+                        jsonPath = Path.Combine(dir, Config.ModInfo.ToLower());
+                    }
                     if (File.Exists(jsonPath))
                     {
                         countMods++;
@@ -577,7 +735,7 @@ namespace UnityModManagerNet
                         catch (Exception exception)
                         {
                             Logger.Error($"Error parsing file '{jsonPath}'.");
-                            Logger.Log(exception.Message);
+                            Debug.LogException(exception);
                         }
                     }
                     else
@@ -586,21 +744,23 @@ namespace UnityModManagerNet
                     }
                 }
 
-                mParams = Param.Load();
+                Params = Param.Load();
 
                 if (mods.Count > 0)
                 {
                     Logger.Log($"Sorting mods.");
                     TopoSort(mods);
-
+                    
                     Logger.Log($"Loading mods.");
                     foreach (var mod in modEntries)
                     {
+                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
                         mod.Load();
+                        mod.Logger.NativeLog($"Loading time {(stopwatch.ElapsedMilliseconds / 1000f):f2} s.");
                     }
                 }
 
-                Logger.Log($"Finish. Found {countMods} mods. Successful loaded {modEntries.Count(x => x.Active)} mods.".ToUpper());
+                Logger.Log($"Finish. Found {countMods} mods. Successful loaded {modEntries.Count(x => !x.ErrorOnLoading)} mods.".ToUpper());
                 Console.WriteLine();
                 Console.WriteLine();
             }
@@ -609,8 +769,6 @@ namespace UnityModManagerNet
             {
                 Logger.Error($"Can't load UI.");
             }
-
-            isStarted = true;
         }
 
         private static void DFS(string id, Dictionary<string, ModEntry> mods)
@@ -639,35 +797,32 @@ namespace UnityModManagerNet
             return modEntries.FirstOrDefault(x => x.Info.Id == id);
         }
 
-        public static Version ParseVersion(string str)
-        {
-            var array = str.Split('.', ',');
-            if (array.Length >= 3)
-            {
-                var regex = new Regex(@"\D");
-                return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")), int.Parse(regex.Replace(array[2], "")));
-            }
-
-            Logger.Error($"Error parsing version {str}");
-            return new Version();
-        }
-
         public static Version GetVersion()
         {
-            return mVersion;
+            return version;
         }
 
         public static void SaveSettingsAndParams()
         {
-            mParams.Save();
+            Params.Save();
             foreach (var mod in modEntries)
             {
-                if (mod.OnSaveGUI != null)
-                    mod.OnSaveGUI(mod);
+                if (mod.Active && mod.OnSaveGUI != null)
+                {
+                    try
+                    {
+                        mod.OnSaveGUI(mod);
+                    }
+                    catch (Exception e)
+                    {
+                        mod.Logger.Error("OnSaveGUI: " + e.GetType().Name + " - " + e.Message);
+                        Debug.LogException(e);
+                    }
+                }
             }
         }
 
-        public class Param
+        public sealed class Param
         {
             [Serializable]
             public class Mod
@@ -684,7 +839,7 @@ namespace UnityModManagerNet
 
             public List<Mod> ModParams = new List<Mod>();
 
-            public static readonly string filepath = Path.Combine(modsPath, "UnityModManager.xml");
+            static readonly string filepath = Path.Combine(Path.GetDirectoryName(typeof(Param).Assembly.Location), "Params.xml");
 
             public void Save()
             {
@@ -703,7 +858,8 @@ namespace UnityModManagerNet
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e.ToString());
+                    Logger.Error($"Can't write file '{filepath}'.");
+                    Debug.LogException(e);
                 }
             }
 
@@ -730,10 +886,44 @@ namespace UnityModManagerNet
                     }
                     catch (Exception e)
                     {
-                        Logger.Error(e.ToString());
+                        Logger.Error($"Can't read file '{filepath}'.");
+                        Debug.LogException(e);
                     }
                 }
                 return new Param();
+            }
+        }
+
+        [XmlRoot("Config")]
+        public class GameInfo 
+        {
+            [XmlAttribute]
+            public string Name;
+            public string Folder;
+            public string ModsDirectory;
+            public string ModInfo;
+            public string EntryPoint;
+            public string StartingPoint;
+            public string UIStartingPoint;
+            public string MachineConfig;
+
+            static readonly string filepath = Path.Combine(Path.GetDirectoryName(typeof(GameInfo).Assembly.Location), "Config.xml");
+
+            public static GameInfo Load()
+            {
+                try
+                {
+                    using (var stream = File.OpenRead(filepath))
+                    {
+                        return new XmlSerializer(typeof(GameInfo)).Deserialize(stream) as GameInfo;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"Can't read file '{filepath}'.");
+                    Debug.LogException(e);
+                    return null;
+                }
             }
         }
 
@@ -741,7 +931,18 @@ namespace UnityModManagerNet
         {
             const string Prefix = "[Manager] ";
             const string PrefixError = "[Manager] [Error] ";
-            public static readonly string filepath = Path.Combine(modsPath, "UnityModManager.log");
+
+            public static readonly string filepath = Path.Combine(Path.Combine(Application.dataPath, Path.Combine("Managed", nameof(UnityModManager))), "Log.txt");
+
+            public static void NativeLog(string str)
+            {
+                NativeLog(str, Prefix);
+            }
+
+            public static void NativeLog(string str, string prefix)
+            {
+                Write(prefix + str, true);
+            }
 
             public static void Log(string str)
             {
@@ -763,33 +964,81 @@ namespace UnityModManagerNet
                 Write(prefix + str);
             }
 
-            public static void Write(string str)
+            private static int bufferCapacity = 100;
+            private static List<string> buffer = new List<string>(bufferCapacity);
+            internal static int historyCapacity = 200;
+            internal static List<string> history = new List<string>(historyCapacity * 2);
+
+            private static void Write(string str, bool onlyNative = false)
             {
+                if (str == null)
+                    return;
+
                 Console.WriteLine(str);
 
+                if (onlyNative)
+                    return;
+
+                buffer.Add(str);
+                history.Add(str);
+
+                if (history.Count >= historyCapacity * 2)
+                {
+                    var result = history.Skip(historyCapacity);
+                    history.Clear();
+                    history.AddRange(result);
+                }
+            }
+
+            private static float timer;
+
+            internal static void Watcher(float dt)
+            {
+                if (buffer.Count >= bufferCapacity || timer > 1f)
+                {
+                    WriteBuffers();
+                }
+                else
+                {
+                    timer += dt;
+                }
+            }
+
+            internal static void WriteBuffers()
+            {
                 try
                 {
-                    using (StreamWriter writer = File.AppendText(filepath))
+                    if (buffer.Count > 0)
                     {
-                        writer.WriteLine(str);
+                        using (StreamWriter writer = File.AppendText(filepath))
+                        {
+                            foreach (var str in buffer)
+                            {
+                                writer.WriteLine(str);
+                            }
+                        }
                     }
                 }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
                 }
+
+                buffer.Clear();
+                timer = 0;
             }
 
             public static void Clear()
             {
+                buffer.Clear();
+                history.Clear();
                 if (File.Exists(filepath))
                 {
                     try
                     {
                         File.Delete(filepath);
                         using (File.Create(filepath))
-                        {
-                        }
+                        {; }
                     }
                     catch (Exception e)
                     {

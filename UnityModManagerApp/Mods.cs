@@ -137,7 +137,7 @@ namespace UnityModManagerNet.Installer
                 return;
             }
 
-            var modsPath = Path.Combine(currentGamePath, selectedGame.ModsDirectory);
+            var modsPath = Path.Combine(gamePath, selectedGame.ModsDirectory);
             if (!Directory.Exists(modsPath))
             {
                 Log.Print("Install the UnityModManager.");
@@ -196,7 +196,7 @@ namespace UnityModManagerNet.Installer
                 return;
             }
 
-            var modsPath = Path.Combine(currentGamePath, selectedGame.ModsDirectory);
+            var modsPath = Path.Combine(gamePath, selectedGame.ModsDirectory);
             if (!Directory.Exists(modsPath))
             {
                 Log.Print("Install the UnityModManager.");
@@ -253,7 +253,7 @@ namespace UnityModManagerNet.Installer
             if (selectedGame == null)
                 return;
 
-            var modsPath = Path.Combine(currentGamePath, selectedGame.ModsDirectory);
+            var modsPath = Path.Combine(gamePath, selectedGame.ModsDirectory);
             if (Directory.Exists(modsPath))
             {
                 foreach (var dir in Directory.GetDirectories(modsPath))

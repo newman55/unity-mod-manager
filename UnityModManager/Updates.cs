@@ -1,36 +1,36 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Windows.Forms;
-using Newtonsoft.Json;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Reflection;
+using System.Text;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Networking;
 
-namespace UnityModManagerNet.Installer
+namespace UnityModManagerNet
 {
-    public partial class UnityModManagerForm : Form
+    public partial class UnityModManager
     {
-        readonly Dictionary<GameInfo, HashSet<UnityModManager.Repository.Release>> repositories = new Dictionary<GameInfo, HashSet<UnityModManager.Repository.Release>>();
-
-        private void CheckModUpdates()
+        private static void CheckModUpdates()
         {
-            if (selectedGame == null)
-                return;
+            Logger.Log("Checking for updates.");
 
-            if (!UnityModManager.HasNetworkConnection())
+            if (!HasNetworkConnection())
             {
+                Logger.Log("No network connection or firewall blocked.");
                 return;
             }
 
-            if (!repositories.ContainsKey(selectedGame))
-                repositories.Add(selectedGame, new HashSet<UnityModManager.Repository.Release>());
-
             var urls = new HashSet<string>();
-            foreach (var mod in mods)
+
+            foreach (var modEntry in modEntries)
             {
-                if (!string.IsNullOrEmpty(mod.Repository))
+                if (!string.IsNullOrEmpty(modEntry.Info.Repository))
                 {
-                    urls.Add(mod.Repository);
+                    urls.Add(modEntry.Info.Repository);
                 }
             }
 
@@ -38,125 +38,90 @@ namespace UnityModManagerNet.Installer
             {
                 foreach (var url in urls)
                 {
-                    try
-                    {
-                        using (var wc = new WebClient())
-                        {
-                            wc.Encoding = System.Text.Encoding.UTF8;
-                            wc.DownloadStringCompleted += (sender, e) => { ModUpdates_DownloadStringCompleted(sender, e, selectedGame, url); };
-                            wc.DownloadStringAsync(new Uri(url));
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Print(e.Message);
-                        Log.Print($"Error checking updates on '{url}'.");
-                    }
+                    UI.Instance.StartCoroutine(DownloadString(url, ParseRepository));
                 }
             }
         }
 
-        private void ModUpdates_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e, GameInfo game, string url)
+        private static void ParseRepository(string json, string url)
         {
-            if (e.Error != null)
+            if (string.IsNullOrEmpty(json))
             {
-                Log.Print(e.Error.Message);
-                return;
-            }
-
-            if (!e.Cancelled && !string.IsNullOrEmpty(e.Result) && repositories.ContainsKey(game))
-            {
-                try
-                {
-                    var repository = JsonConvert.DeserializeObject<UnityModManager.Repository>(e.Result);
-                    if (repository == null || repository.Releases == null || repository.Releases.Length == 0)
-                        return;
-
-                    listMods.Invoke((MethodInvoker)delegate
-                    {
-                        foreach(var v in repository.Releases)
-                        {
-                            repositories[game].Add(v);
-                        }
-                        if (selectedGame == game)
-                            RefreshModList();
-                    });
-                }
-                catch (Exception ex)
-                {
-                    Log.Print(ex.Message);
-                    Log.Print($"Error checking updates on '{url}'.");
-                }
-            }
-        }
-
-        private void CheckLastVersion()
-        {
-            if (string.IsNullOrEmpty(config.Repository))
-                return;
-
-            Log.Print("Checking for updates.");
-
-            if (!UnityModManager.HasNetworkConnection())
-            {
-                Log.Print("No network connection or firewall blocked.");
                 return;
             }
 
             try
             {
-                using (var wc = new WebClient())
+                var repository = JsonUtility.FromJson<Repository>(json);
+                if (repository != null && repository.Releases != null && repository.Releases.Length > 0)
                 {
-                    wc.Encoding = System.Text.Encoding.UTF8;
-                    wc.DownloadStringCompleted += LastVersion_DownloadStringCompleted;
-                    wc.DownloadStringAsync(new Uri(config.Repository));
+                    foreach (var release in repository.Releases)
+                    {
+                        if (!string.IsNullOrEmpty(release.Id) && !string.IsNullOrEmpty(release.Version))
+                        {
+                            var modEntry = FindMod(release.Id);
+                            if (modEntry != null)
+                            {
+                                var ver = ParseVersion(release.Version);
+                                if (modEntry.Version < ver && (modEntry.NewestVersion == null || modEntry.NewestVersion < ver))
+                                {
+                                    modEntry.NewestVersion = ver;
+                                }
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception e)
             {
-                Log.Print(e.Message);
-                Log.Print($"Error checking update.");
+                Logger.Log(string.Format("Error checking mod updates on '{0}'.", url));
+                Logger.Log(e.Message);
             }
         }
 
-        private void LastVersion_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        public static bool HasNetworkConnection()
         {
-            if (e.Error != null)
+            try
             {
-                Log.Print(e.Error.Message);
-                return;
-            }
-
-            if (!e.Cancelled && !string.IsNullOrEmpty(e.Result))
-            {
-                try
+                using (var ping = new System.Net.NetworkInformation.Ping())
                 {
-                    var repository = JsonConvert.DeserializeObject<UnityModManager.Repository>(e.Result);
-                    if (repository == null || repository.Releases == null || repository.Releases.Length == 0)
-                        return;
-
-                    var release = repository.Releases.FirstOrDefault(x => x.Id == nameof(UnityModManager));
-                    if (release != null && !string.IsNullOrEmpty(release.Version))
-                    {
-                        var ver = Utils.ParseVersion(release.Version);
-                        if (version < ver)
-                        {
-                            btnDownloadUpdate.Visible = true;
-                            btnDownloadUpdate.Text = $"Download {release.Version}";
-                            Log.Print($"Update is available.");
-                        }
-                        else
-                        {
-                            Log.Print($"No updates.");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Print(ex.Message);
-                    Log.Print($"Error checking update.");
+                    return ping.Send("www.google.com.mx", 2000).Status == IPStatus.Success;
                 }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            return false;
+        }
+
+        private static IEnumerator DownloadString(string url, UnityAction<string, string> handler)
+        {
+            var www = UnityWebRequest.Get(url);
+
+            yield return www.Send();
+
+            MethodInfo isError;
+
+            var ver = ParseVersion(Application.unityVersion);
+            if (ver.Major >= 2017)
+            {
+                isError = typeof(UnityWebRequest).GetMethod("get_isNetworkError");
+            }
+            else
+            {
+                isError = typeof(UnityWebRequest).GetMethod("get_isError");
+            }
+
+            if (isError == null || (bool)isError.Invoke(www, null))
+            {
+                Logger.Log(www.error);
+                Logger.Log(string.Format("Error downloading '{0}'.", url));
+                yield break;
+            }
+
+            handler(www.downloadHandler.text, url);
         }
     }
 }

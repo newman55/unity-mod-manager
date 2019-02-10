@@ -8,11 +8,13 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace UnityModManagerNet.Properties {
+namespace UnityModManagerNet.Installer.Properties {
     using System;
     
     
-
+    /// <summary>
+    ///   Класс ресурса со строгой типизацией для поиска локализованных строк и т.д.
+    /// </summary>
     // Этот класс создан автоматически классом StronglyTypedResourceBuilder
     // с помощью такого средства, как ResGen или Visual Studio.
     // Чтобы добавить или удалить член, измените файл .ResX и снова запустите ResGen
@@ -30,19 +32,24 @@ namespace UnityModManagerNet.Properties {
         internal Resources() {
         }
         
-
+        /// <summary>
+        ///   Возвращает кэшированный экземпляр ResourceManager, использованный этим классом.
+        /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("UnityModManagerNet.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("UnityModManagerNet.Installer.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
         
-
+        /// <summary>
+        ///   Перезаписывает свойство CurrentUICulture текущего потока для всех
+        ///   обращений к ресурсу с помощью этого класса ресурса со строгой типизацией.
+        /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Globalization.CultureInfo Culture {
             get {
@@ -50,6 +57,16 @@ namespace UnityModManagerNet.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap dragdropfiles {
+            get {
+                object obj = ResourceManager.GetObject("dragdropfiles", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }
