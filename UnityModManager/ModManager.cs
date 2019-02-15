@@ -13,12 +13,6 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
-        //public const string version = "0.13.1";
-        //public const string modsDirname = "Mods";
-        //public const string infoFilename = "Info.json";
-        //public const string assemblyName = "Assembly-CSharp.dll";
-        //public const string patchTarget = "";
-
         private static readonly Version VER_0_13 = new Version(0, 13);
 
         public static Version unityVersion { get; private set; }
@@ -162,7 +156,7 @@ namespace UnityModManagerNet
             }
         }
 
-        public class ModEntry
+        public partial class ModEntry
         {
             public readonly ModInfo Info;
 
@@ -185,23 +179,35 @@ namespace UnityModManagerNet
 
             //public ModSettings Settings = null;
 
+            /// <summary>
+            /// Called to activate / deactivate the mod.
+            /// </summary>
             public Func<ModEntry, bool, bool> OnToggle = null;
 
+            /// <summary>
+            /// Called by MonoBehaviour.OnGUI
+            /// </summary>
             public Action<ModEntry> OnGUI = null;
 
+            /// <summary>
+            /// Called when the UMM UI closes.
+            /// </summary>
             public Action<ModEntry> OnSaveGUI = null;
 
             /// <summary>
+            /// Called by MonoBehaviour.Update
             /// Added in 0.13.0
             /// </summary>
             public Action<ModEntry, float> OnUpdate = null;
 
             /// <summary>
+            /// Called by MonoBehaviour.LateUpdate
             /// Added in 0.13.0
             /// </summary>
             public Action<ModEntry, float> OnLateUpdate = null;
 
             /// <summary>
+            /// Called by MonoBehaviour.FixedUpdate
             /// Added in 0.13.0
             /// </summary>
             public Action<ModEntry, float> OnFixedUpdate = null;
@@ -390,8 +396,19 @@ namespace UnityModManagerNet
                                     {
                                     }
                                 }
+                                //var asmDef = AssemblyDefinition.ReadAssembly(assemblyPath);
+                                //var modDef = asmDef.MainModule;
+                                //if (modDef.TryGetTypeReference("UnityModManagerNet.UnityModManager", out var typeRef))
+                                //{
+                                //    var managerAsmRef = new AssemblyNameReference("UnityModManager", version);
+                                //    if (typeRef.Scope is AssemblyNameReference asmNameRef)
+                                //    {
+                                //        typeRef.Scope = managerAsmRef;
+                                //        modDef.AssemblyReferences.Add(managerAsmRef);
+                                //        asmDef.Write(assemblyCachePath);
+                                //    }
+                                //}
                                 var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
-
                                 foreach (var item in modDef.GetTypeRefs())
                                 {
                                     if (item.FullName == "UnityModManagerNet.UnityModManager")
@@ -399,7 +416,6 @@ namespace UnityModManagerNet
                                         item.ResolutionScope = new AssemblyRefUser(thisModuleDef.Assembly);
                                     }
                                 }
-
                                 modDef.Write(assemblyCachePath);
                                 mAssembly = Assembly.LoadFile(assemblyCachePath);
                             }
@@ -546,47 +562,6 @@ namespace UnityModManagerNet
 
                 return methodInfo;
             }
-
-            public class ModLogger
-            {
-                protected readonly string Prefix;
-                protected readonly string PrefixError;
-                protected readonly string PrefixCritical;
-                protected readonly string PrefixWarning;
-
-                public ModLogger(string Id)
-                {
-                    Prefix = $"[{Id}] ";
-                    PrefixError = $"[{Id}] [Error] ";
-                    PrefixCritical = $"[{Id}] [Critical] ";
-                    PrefixWarning = $"[{Id}] [Warning] ";
-                }
-
-                public void Log(string str)
-                {
-                    UnityModManager.Logger.Log(str, Prefix);
-                }
-
-                public void Error(string str)
-                {
-                    UnityModManager.Logger.Log(str, PrefixError);
-                }
-
-                public void Critical(string str)
-                {
-                    UnityModManager.Logger.Log(str, PrefixCritical);
-                }
-
-                public void Warning(string str)
-                {
-                    UnityModManager.Logger.Log(str, PrefixWarning);
-                }
-
-                public void NativeLog(string str)
-                {
-                    UnityModManager.Logger.NativeLog(str, Prefix);
-                }
-            }
         }
 
         public static readonly List<ModEntry> modEntries = new List<ModEntry>();
@@ -597,6 +572,20 @@ namespace UnityModManagerNet
 
         internal static bool started;
         internal static bool initialized;
+
+        public static void Main()
+        {
+            AppDomain.CurrentDomain.AssemblyLoad += OnLoad;
+        }
+
+        static void OnLoad(object sender, AssemblyLoadEventArgs args)
+        {
+            if (args.LoadedAssembly.FullName == "Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null")
+            {
+                AppDomain.CurrentDomain.AssemblyLoad -= OnLoad;
+                Injector.Run();
+            }
+        }
 
         public static bool Initialize()
         {
@@ -816,232 +805,6 @@ namespace UnityModManagerNet
                     catch (Exception e)
                     {
                         mod.Logger.Error("OnSaveGUI: " + e.GetType().Name + " - " + e.Message);
-                        Debug.LogException(e);
-                    }
-                }
-            }
-        }
-
-        public sealed class Param
-        {
-            [Serializable]
-            public class Mod
-            {
-                [XmlAttribute]
-                public string Id;
-                [XmlAttribute]
-                public bool Enabled = true;
-            }
-
-            public int ShortcutKeyId = 0;
-            public int CheckUpdates = 1;
-            public int ShowOnStart = 1;
-
-            public List<Mod> ModParams = new List<Mod>();
-
-            static readonly string filepath = Path.Combine(Path.GetDirectoryName(typeof(Param).Assembly.Location), "Params.xml");
-
-            public void Save()
-            {
-                try
-                {
-                    ModParams.Clear();
-                    foreach (var mod in modEntries)
-                    {
-                        ModParams.Add(new Mod { Id = mod.Info.Id, Enabled = mod.Enabled });
-                    }
-                    using (var writer = new StreamWriter(filepath))
-                    {
-                        var serializer = new XmlSerializer(typeof(Param));
-                        serializer.Serialize(writer, this);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.Error($"Can't write file '{filepath}'.");
-                    Debug.LogException(e);
-                }
-            }
-
-            public static Param Load()
-            {
-                if (File.Exists(filepath))
-                {
-                    try
-                    {
-                        using (var stream = File.OpenRead(filepath))
-                        {
-                            var serializer = new XmlSerializer(typeof(Param));
-                            var result = serializer.Deserialize(stream) as Param;
-                            foreach (var item in result.ModParams)
-                            {
-                                var mod = FindMod(item.Id);
-                                if (mod != null)
-                                {
-                                    mod.Enabled = item.Enabled;
-                                }
-                            }
-                            return result;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error($"Can't read file '{filepath}'.");
-                        Debug.LogException(e);
-                    }
-                }
-                return new Param();
-            }
-        }
-
-        [XmlRoot("Config")]
-        public class GameInfo 
-        {
-            [XmlAttribute]
-            public string Name;
-            public string Folder;
-            public string ModsDirectory;
-            public string ModInfo;
-            public string EntryPoint;
-            public string StartingPoint;
-            public string UIStartingPoint;
-            public string MachineConfig;
-
-            static readonly string filepath = Path.Combine(Path.GetDirectoryName(typeof(GameInfo).Assembly.Location), "Config.xml");
-
-            public static GameInfo Load()
-            {
-                try
-                {
-                    using (var stream = File.OpenRead(filepath))
-                    {
-                        return new XmlSerializer(typeof(GameInfo)).Deserialize(stream) as GameInfo;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.Error($"Can't read file '{filepath}'.");
-                    Debug.LogException(e);
-                    return null;
-                }
-            }
-        }
-
-        public static class Logger
-        {
-            const string Prefix = "[Manager] ";
-            const string PrefixError = "[Manager] [Error] ";
-
-            public static readonly string filepath = Path.Combine(Path.Combine(Application.dataPath, Path.Combine("Managed", nameof(UnityModManager))), "Log.txt");
-
-            public static void NativeLog(string str)
-            {
-                NativeLog(str, Prefix);
-            }
-
-            public static void NativeLog(string str, string prefix)
-            {
-                Write(prefix + str, true);
-            }
-
-            public static void Log(string str)
-            {
-                Log(str, Prefix);
-            }
-
-            public static void Log(string str, string prefix)
-            {
-                Write(prefix + str);
-            }
-
-            public static void Error(string str)
-            {
-                Error(str, PrefixError);
-            }
-
-            public static void Error(string str, string prefix)
-            {
-                Write(prefix + str);
-            }
-
-            private static int bufferCapacity = 100;
-            private static List<string> buffer = new List<string>(bufferCapacity);
-            internal static int historyCapacity = 200;
-            internal static List<string> history = new List<string>(historyCapacity * 2);
-
-            private static void Write(string str, bool onlyNative = false)
-            {
-                if (str == null)
-                    return;
-
-                Console.WriteLine(str);
-
-                if (onlyNative)
-                    return;
-
-                buffer.Add(str);
-                history.Add(str);
-
-                if (history.Count >= historyCapacity * 2)
-                {
-                    var result = history.Skip(historyCapacity);
-                    history.Clear();
-                    history.AddRange(result);
-                }
-            }
-
-            private static float timer;
-
-            internal static void Watcher(float dt)
-            {
-                if (buffer.Count >= bufferCapacity || timer > 1f)
-                {
-                    WriteBuffers();
-                }
-                else
-                {
-                    timer += dt;
-                }
-            }
-
-            internal static void WriteBuffers()
-            {
-                try
-                {
-                    if (buffer.Count > 0)
-                    {
-                        using (StreamWriter writer = File.AppendText(filepath))
-                        {
-                            foreach (var str in buffer)
-                            {
-                                writer.WriteLine(str);
-                            }
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
-
-                buffer.Clear();
-                timer = 0;
-            }
-
-            public static void Clear()
-            {
-                buffer.Clear();
-                history.Clear();
-                if (File.Exists(filepath))
-                {
-                    try
-                    {
-                        File.Delete(filepath);
-                        using (File.Create(filepath))
-                        {; }
-                    }
-                    catch (Exception e)
-                    {
                         Debug.LogException(e);
                     }
                 }

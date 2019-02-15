@@ -56,10 +56,6 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\lib\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
@@ -118,6 +114,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>start XCOPY /Y /R "$(TargetPath)" "$(TargetDir)UnityModManager.exe"</PostBuildEvent>
+    <PostBuildEvent>start XCOPY /Y /R "$(TargetPath)" "$(TargetDir)UnityModManager.exe*"
+start XCOPY /Y /R "$(SolutionDir)\lib\winhttp_x86.dll" "$(TargetDir)winhttp_x86.dll*"
+start XCOPY /Y /R "$(SolutionDir)\lib\winhttp_x64.dll" "$(TargetDir)winhttp_x64.dll*"
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

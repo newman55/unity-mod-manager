@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using System.Net;
+using System.Net.NetworkInformation;
 
 namespace UnityModManagerNet.Installer
 {
@@ -17,7 +18,7 @@ namespace UnityModManagerNet.Installer
             if (selectedGame == null)
                 return;
 
-            if (!UnityModManager.HasNetworkConnection())
+            if (!HasNetworkConnection())
             {
                 return;
             }
@@ -97,7 +98,7 @@ namespace UnityModManagerNet.Installer
 
             Log.Print("Checking for updates.");
 
-            if (!UnityModManager.HasNetworkConnection())
+            if (!HasNetworkConnection())
             {
                 Log.Print("No network connection or firewall blocked.");
                 return;
@@ -157,6 +158,23 @@ namespace UnityModManagerNet.Installer
                     Log.Print($"Error checking update.");
                 }
             }
+        }
+
+        public static bool HasNetworkConnection()
+        {
+            try
+            {
+                using (var ping = new Ping())
+                {
+                    return ping.Send("www.google.com.mx", 2000).Status == IPStatus.Success;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Print(e.Message);
+            }
+
+            return false;
         }
     }
 }

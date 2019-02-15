@@ -51,13 +51,16 @@ namespace UnityModManagerNet
             private bool mOpened = false;
             public bool Opened { get { return mOpened; } }
 
-            private float mWindowWidth = 960f;
             private Rect mWindowRect = new Rect(0, 0, 0, 0);
+            private Vector2 mWindowSize = Vector2.zero;
+            private Vector2 mExpectedWindowSize = Vector2.zero;
 
             private void Awake()
             {
                 mInstance = this;
                 DontDestroyOnLoad(this);
+                mWindowSize = ClampWindowSize(new Vector2(Params.WindowWidth, Params.WindowHeight));
+                mExpectedWindowSize = mWindowSize;
                 Textures.Init();
                 var harmony = HarmonyInstance.Create("UnityModManager.UI");
                 var original = typeof(Screen).GetMethod("set_lockCursor");
@@ -254,7 +257,7 @@ namespace UnityModManagerNet
                     var color = GUI.color;
                     GUI.backgroundColor = Color.white;
                     GUI.color = Color.white;
-                    mWindowRect = GUILayout.Window(0, mWindowRect, WindowFunction, "", window, GUILayout.Height(Screen.height - 200));
+                    mWindowRect = GUILayout.Window(0, mWindowRect, WindowFunction, "", window, GUILayout.Height(mWindowSize.y));
                     GUI.backgroundColor = backgroundColor;
                     GUI.color = color;
                 }
@@ -286,7 +289,13 @@ namespace UnityModManagerNet
 
             private void CalculateWindowPos()
             {
-                mWindowRect = new Rect((Screen.width - mWindowWidth) / 2f, 100f, 0, 0);
+                mWindowSize = ClampWindowSize(mWindowSize);
+                mWindowRect = new Rect((Screen.width - mWindowSize.x) / 2f, (Screen.height - mWindowSize.y) / 2f, 0, 0);
+            }
+
+            private Vector2 ClampWindowSize(Vector2 orig)
+            {
+                return new Vector2(Mathf.Clamp(orig.x, Mathf.Min(960, Screen.width), Screen.width), Mathf.Clamp(orig.y, Mathf.Min(720, Screen.height), Screen.height));
             }
 
             private void WindowFunction(int windowId)
@@ -333,7 +342,7 @@ namespace UnityModManagerNet
 
             private void DrawTab(int tabId, ref UnityAction buttons)
             {
-                var minWidth = GUILayout.MinWidth(mWindowWidth);
+                var minWidth = GUILayout.MinWidth(mWindowSize.x);
 
                 switch (tabs[tabId])
                 {
@@ -347,7 +356,7 @@ namespace UnityModManagerNet
                             var mods = modEntries;
                             var colWidth = mColumns.Select(x =>
                                 x.expand
-                                    ? GUILayout.Width(x.width / expandWidth * (mWindowWidth - 60 + expandWidth - amountWidth))
+                                    ? GUILayout.Width(x.width / expandWidth * (mWindowSize.x - 60 + expandWidth - amountWidth))
                                     : GUILayout.Width(x.width)).ToArray();
 
                             GUILayout.BeginVertical("box");
@@ -544,10 +553,6 @@ namespace UnityModManagerNet
                                 }
                             };
 
-                            if (GUI.changed)
-                            {
-                            }
-
                             break;
                         }
 
@@ -577,12 +582,30 @@ namespace UnityModManagerNet
                                 GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
 
+                            GUILayout.BeginVertical("box");
+                            GUILayout.Label("Window size", bold, GUILayout.ExpandWidth(false));
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Label("Width ", GUILayout.ExpandWidth(false));
+                            mExpectedWindowSize.x = GUILayout.HorizontalSlider(mExpectedWindowSize.x, Mathf.Min(Screen.width, 960), Screen.width, GUILayout.Width(200));
+                            GUILayout.Label(" " + mExpectedWindowSize.x.ToString("f0") + " px ", GUILayout.ExpandWidth(false));
+                            GUILayout.EndHorizontal();
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Label("Height", GUILayout.ExpandWidth(false));
+                            mExpectedWindowSize.y = GUILayout.HorizontalSlider(mExpectedWindowSize.y, Mathf.Min(Screen.height, 720), Screen.height, GUILayout.Width(200));
+                            GUILayout.Label(" " + mExpectedWindowSize.y.ToString("f0") + " px ", GUILayout.ExpandWidth(false));
+                            GUILayout.EndHorizontal();
+                            if (GUILayout.Button("Apply", GUILayout.ExpandWidth(false)))
+                            {
+                                mWindowSize.x = Mathf.Floor(mExpectedWindowSize.x) % 2 > 0 ? Mathf.Ceil(mExpectedWindowSize.x) : Mathf.Floor(mExpectedWindowSize.x);
+                                mWindowSize.y = Mathf.Floor(mExpectedWindowSize.y) % 2 > 0 ? Mathf.Ceil(mExpectedWindowSize.y) : Mathf.Floor(mExpectedWindowSize.y);
+                                CalculateWindowPos();
+                                Params.WindowWidth = mWindowSize.x;
+                                Params.WindowHeight = mWindowSize.y;
+                            }
+                            GUILayout.EndVertical();
+
                             GUILayout.EndVertical();
                             GUILayout.EndScrollView();
-
-                            if (GUI.changed)
-                            {
-                            }
 
                             break;
                         }

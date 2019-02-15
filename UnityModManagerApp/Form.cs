@@ -7,14 +7,13 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-using System.Xml;
-using System.Xml.Linq;
-using System.Reflection;
 
 namespace UnityModManagerNet.Installer
 {
     public partial class UnityModManagerForm : Form
     {
+        const string REG_PATH = @"HKEY_CURRENT_USER\Software\UnityModManager";
+
         public UnityModManagerForm()
         {
             InitializeComponent();
@@ -47,12 +46,19 @@ namespace UnityModManagerNet.Installer
         static string entryPoint = null;
         static string injectedEntryPoint = null;
 
+        static string gameExePath = null;
+
+        static string doorstopFilename = "winhttp.dll";
+        static string doorstopConfigFilename = "doorstop_config.ini";
+        static string doorstopPath = null;
+        static string doorstopConfigPath = null;
+
         static ModuleDefMD assemblyDef = null;
         static ModuleDefMD injectedAssemblyDef = null;
         static ModuleDefMD managerDef = null;
 
-        static string machineConfigPath = null;
-        static XDocument machineDoc = null;
+        //static string machineConfigPath = null;
+        //static XDocument machineDoc = null;
 
         GameInfo selectedGame => (GameInfo)gameList.SelectedItem;
         Param.GameParam selectedGameParams = null;
@@ -64,6 +70,32 @@ namespace UnityModManagerNet.Installer
             instance = this;
 
             Log.Init();
+
+            if (!Utils.IsUnixPlatform())
+            {
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    var registry = asm.GetType("Microsoft.Win32.Registry");
+                    if (registry != null)
+                    {
+                        var getValue = registry.GetMethod("GetValue", new Type[] { typeof(string), typeof(string), typeof(object) });
+                        if (getValue != null)
+                        {
+                            var exePath = getValue.Invoke(null, new object[] { REG_PATH, "ExePath", string.Empty }) as string;
+                            if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
+                            {
+                                var setValue = registry.GetMethod("SetValue", new Type[] { typeof(string), typeof(string), typeof(object) });
+                                if (setValue != null)
+                                {
+                                    setValue.Invoke(null, new object[] { REG_PATH, "ExePath", Path.Combine(Application.StartupPath, "UnityModManager.exe") });
+                                    setValue.Invoke(null, new object[] { REG_PATH, "Path", Application.StartupPath });
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
 
             for (var i = (InstallType)0; i < InstallType.Count; i++)
             {
@@ -151,7 +183,7 @@ namespace UnityModManagerNet.Installer
 
             var ignoreFields = new List<string>
             {
-                nameof(GameInfo.MachineConfig),
+                nameof(GameInfo.GameExe),
                 nameof(GameInfo.StartingPoint),
                 nameof(GameInfo.UIStartingPoint),
                 nameof(GameInfo.OldPatchTarget)
@@ -213,6 +245,7 @@ namespace UnityModManagerNet.Installer
             }
 
             btnInstall.Text = "Install";
+            btnRestore.Enabled = false;
 
             gamePath = "";
             if (string.IsNullOrEmpty(selectedGameParams.Path) || !Directory.Exists(selectedGameParams.Path))
@@ -248,29 +281,34 @@ namespace UnityModManagerNet.Installer
             injectedAssemblyDef = null;
             managerDef = null;
 
+            gameExePath = !string.IsNullOrEmpty(selectedGame.GameExe) ? Path.Combine(gamePath, selectedGame.GameExe) : string.Empty;
+
+            doorstopPath = Path.Combine(gamePath, doorstopFilename);
+            doorstopConfigPath = Path.Combine(gamePath, doorstopConfigFilename);
+
             libraryPaths = new string[libraryFiles.Length];
             for (int i = 0; i < libraryFiles.Length; i++)
             {
                 libraryPaths[i] = Path.Combine(managerPath, libraryFiles[i]);
             }
 
-            machineConfigPath = string.Empty;
-            machineDoc = null;
+            //machineConfigPath = string.Empty;
+            //machineDoc = null;
 
-            if (!string.IsNullOrEmpty(selectedGame.MachineConfig))
-            {
-                machineConfigPath = Path.Combine(gamePath, selectedGame.MachineConfig);
-                try
-                {
-                    machineDoc = XDocument.Load(machineConfigPath);
-                }
-                catch (Exception e)
-                {
-                    InactiveForm();
-                    Log.Print(e.ToString());
-                    return;
-                }
-            }
+            //if (!string.IsNullOrEmpty(selectedGame.MachineConfig))
+            //{
+            //    machineConfigPath = Path.Combine(gamePath, selectedGame.MachineConfig);
+            //    try
+            //    {
+            //        machineDoc = XDocument.Load(machineConfigPath);
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        InactiveForm();
+            //        Log.Print(e.ToString());
+            //        return;
+            //    }
+            //}
 
             try
             {
@@ -348,20 +386,37 @@ namespace UnityModManagerNet.Installer
                 goto Rescan;
             }
 
-            if (machineDoc == null)
+            //if (machineDoc == null)
+            //{
+            //    unavailableMethods.Add(InstallType.Config);
+            //    selectedGameParams.InstallType = InstallType.Assembly;
+            //}
+            //else if (hasInjectedAssembly)
+            //{
+            //    disabledMethods.Add(InstallType.Config);
+            //    selectedGameParams.InstallType = InstallType.Assembly;
+            //}
+            //else if (machineDoc.Descendants("cryptoClass").Any(x => x.HasAttributes && x.FirstAttribute.Name.LocalName == "ummRngWrapper"))
+            //{
+            //    disabledMethods.Add(InstallType.Assembly);
+            //    selectedGameParams.InstallType = InstallType.Config;
+            //}
+
+            if (Utils.IsUnixPlatform() || !File.Exists(gameExePath))
             {
-                unavailableMethods.Add(InstallType.Config);
+                unavailableMethods.Add(InstallType.DoorstopProxy);
                 selectedGameParams.InstallType = InstallType.Assembly;
             }
-            else if (hasInjectedAssembly)
-            {
-                disabledMethods.Add(InstallType.Config);
-                selectedGameParams.InstallType = InstallType.Assembly;
-            }
-            else if (machineDoc.Descendants("cryptoClass").Any(x => x.HasAttributes && x.FirstAttribute.Name.LocalName == "ummRngWrapper"))
+            else if (File.Exists(doorstopPath))
             {
                 disabledMethods.Add(InstallType.Assembly);
-                selectedGameParams.InstallType = InstallType.Config;
+                selectedGameParams.InstallType = InstallType.DoorstopProxy;
+            }
+            
+            if (hasInjectedAssembly)
+            {
+                disabledMethods.Add(InstallType.DoorstopProxy);
+                selectedGameParams.InstallType = InstallType.Assembly;
             }
 
             foreach (var ctrl in installTypeGroup.Controls)
@@ -389,10 +444,10 @@ namespace UnityModManagerNet.Installer
 
             installTypeGroup.PerformLayout();
 
-            if (selectedGameParams.InstallType == InstallType.Config)
-            {
-                btnRestore.Enabled = IsDirty(machineDoc) && File.Exists($"{machineConfigPath}.original_");
-            }
+            //if (selectedGameParams.InstallType == InstallType.Config)
+            //{
+            //    btnRestore.Enabled = IsDirty(machineDoc) && File.Exists($"{machineConfigPath}.original_");
+            //}
 
             if (selectedGameParams.InstallType == InstallType.Assembly)
             {
@@ -404,7 +459,7 @@ namespace UnityModManagerNet.Installer
             managerDef = managerDef ?? injectedAssemblyDef;
 
             var managerInstalled = managerDef.Types.FirstOrDefault(x => x.Name == managerType.Name);
-            if (managerInstalled != null && (hasInjectedAssembly || selectedGameParams.InstallType == InstallType.Config))
+            if (managerInstalled != null && (hasInjectedAssembly || selectedGameParams.InstallType == InstallType.DoorstopProxy))
             {
                 btnInstall.Text = "Update";
                 btnInstall.Enabled = false;
@@ -503,9 +558,13 @@ namespace UnityModManagerNet.Installer
             {
                 return;
             }
-            if (selectedGameParams.InstallType == InstallType.Config)
+            //if (selectedGameParams.InstallType == InstallType.Config)
+            //{
+            //    InjectConfig(Actions.Remove, machineDoc);
+            //}
+            if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
             {
-                InjectConfig(Actions.Remove, machineDoc);
+                InstallDoorstop(Actions.Remove);
             }
             else
             {
@@ -527,9 +586,13 @@ namespace UnityModManagerNet.Installer
                 Directory.CreateDirectory(modsPath);
             }
 
-            if (selectedGameParams.InstallType == InstallType.Config)
+            //if (selectedGameParams.InstallType == InstallType.Config)
+            //{
+            //    InjectConfig(Actions.Install, machineDoc);
+            //}
+            if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
             {
-                InjectConfig(Actions.Install, machineDoc);
+                InstallDoorstop(Actions.Install);
             }
             else
             {
@@ -541,12 +604,17 @@ namespace UnityModManagerNet.Installer
 
         private void btnRestore_Click(object sender, EventArgs e)
         {
-            if (selectedGameParams.InstallType == InstallType.Config)
-            {
-                var originalConfigPath = $"{machineConfigPath}.original_";
-                RestoreOriginal(machineConfigPath, originalConfigPath);
-            }
-            else
+            //if (selectedGameParams.InstallType == InstallType.Config)
+            //{
+            //    var originalConfigPath = $"{machineConfigPath}.original_";
+            //    RestoreOriginal(machineConfigPath, originalConfigPath);
+            //}
+            //else
+            //{
+                
+            //}
+
+            if (selectedGameParams.InstallType == InstallType.Assembly)
             {
                 var injectedEntryAssemblyPath = Path.Combine(managedPath, injectedAssemblyDef.Name);
                 var originalAssemblyPath = $"{injectedEntryAssemblyPath}.original_";
@@ -605,56 +673,39 @@ namespace UnityModManagerNet.Installer
             Remove
         };
 
-        private bool InjectConfig(Actions action, XDocument doc = null, bool write = true)
+        private bool InstallDoorstop(Actions action, bool write = true)
         {
-            var originalMachineConfigPath = $"{machineConfigPath}.original_";
             var gameConfigPath = GameInfo.filepathInGame;
 
             var success = false;
-
             switch (action)
             {
                 case Actions.Install:
                     try
                     {
+                        Log.Print("=======================================");
+
                         if (!Directory.Exists(managerPath))
                             Directory.CreateDirectory(managerPath);
 
-                        Utils.MakeBackup(machineConfigPath);
+                        Utils.MakeBackup(doorstopPath);
+                        Utils.MakeBackup(doorstopConfigPath);
                         Utils.MakeBackup(libraryPaths);
 
-                        if (!IsDirty(doc))
-                        {
-                            File.Copy(machineConfigPath, originalMachineConfigPath, true);
-                        }
-                        MakeDirty(doc);
-
-                        if (!InjectConfig(Actions.Remove, doc, false))
+                        if (!InstallDoorstop(Actions.Remove, false))
                         {
                             Log.Print("Installation failed. Can't uninstall the previous version.");
                             goto EXIT;
                         }
 
-                        Log.Print($"Applying patch to '{Path.GetFileName(machineConfigPath)}'...");
+                        Log.Print($"Copying files to game...");
+                        var arch = Utils.UnmanagedDllIs64Bit(gameExePath);
+                        var filename = arch == true ? "winhttp_x64.dll" : "winhttp_x86.dll";
+                        Log.Print($"  '{filename}'");
+                        File.Copy(filename, doorstopPath, true);
+                        Log.Print($"  '{doorstopConfigFilename}'");
+                        File.WriteAllText(doorstopConfigPath, "[UnityDoorstop]" + Environment.NewLine + "enabled = true" + Environment.NewLine + "targetAssembly = " + managerAssemblyPath);
 
-                        foreach (var mapping in doc.Descendants("cryptoNameMapping"))
-                        {
-                            foreach(var cryptoClasses in mapping.Elements("cryptoClasses"))
-                            {
-                                if (!cryptoClasses.Elements("cryptoClass").Any(x => x.FirstAttribute.Name.LocalName == "ummRngWrapper"))
-                                {
-                                    cryptoClasses.Add(new XElement("cryptoClass", new XAttribute("ummRngWrapper", "UnityModManagerNet.RngWrapper, UnityModManager, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")));
-                                }
-                            }
-                            if (!mapping.Elements("nameEntry").Any(x => x.LastAttribute.Value == "ummRngWrapper"))
-                            {
-                                //mapping.Add(new XElement("nameEntry", new XAttribute("name", "RandomNumberGenerator"), new XAttribute("class", "ummRngWrapper")));
-                                mapping.Add(new XElement("nameEntry", new XAttribute("name", "System.Security.Cryptography.RandomNumberGenerator"), new XAttribute("class", "ummRngWrapper")));
-                            }
-                            break;
-                        }
-
-                        doc.Save(machineConfigPath);
                         DoactionLibraries(Actions.Install);
                         DoactionGameConfig(Actions.Install);
                         Log.Print("Installation was successful.");
@@ -664,53 +715,39 @@ namespace UnityModManagerNet.Installer
                     catch (Exception e)
                     {
                         Log.Print(e.ToString());
-                        Utils.RestoreBackup(machineConfigPath);
+                        Utils.RestoreBackup(doorstopPath);
+                        Utils.RestoreBackup(doorstopConfigPath);
                         Utils.RestoreBackup(libraryPaths);
                         Utils.RestoreBackup(gameConfigPath);
                         Log.Print("Installation failed.");
                     }
-
                     break;
 
                 case Actions.Remove:
                     try
                     {
+                        if (write)
+                        {
+                            Log.Print("=======================================");
+                        }
+
                         Utils.MakeBackup(gameConfigPath);
                         if (write)
                         {
-                            Utils.MakeBackup(machineConfigPath);
+                            
+                            Utils.MakeBackup(doorstopPath);
+                            Utils.MakeBackup(doorstopConfigPath);
                             Utils.MakeBackup(libraryPaths);
                         }
 
-                        Log.Print("Removing patch...");
-
-                        MakeDirty(doc);
-
-                        foreach (var mapping in doc.Descendants("cryptoNameMapping"))
-                        {
-                            foreach (var cryptoClasses in mapping.Elements("cryptoClasses"))
-                            {
-                                foreach (var cryptoClass in cryptoClasses.Elements("cryptoClass"))
-                                {
-                                    if (cryptoClass.FirstAttribute.Name.LocalName == "ummRngWrapper")
-                                    {
-                                        cryptoClass.Remove();
-                                    }
-                                }
-                            }
-                            foreach (var nameEntry in mapping.Elements("nameEntry"))
-                            {
-                                if (nameEntry.LastAttribute.Value == "ummRngWrapper")
-                                {
-                                    nameEntry.Remove();
-                                }
-                            }
-                            break;
-                        }
+                        Log.Print($"Deleting files from game...");
+                        Log.Print($"  '{doorstopFilename}'");
+                        File.Delete(doorstopPath);
+                        Log.Print($"  '{doorstopConfigFilename}'");
+                        File.Delete(doorstopConfigPath);
 
                         if (write)
                         {
-                            doc.Save(machineConfigPath);
                             DoactionLibraries(Actions.Remove);
                             DoactionGameConfig(Actions.Remove);
                             Log.Print("Removal was successful.");
@@ -723,13 +760,13 @@ namespace UnityModManagerNet.Installer
                         Log.Print(e.ToString());
                         if (write)
                         {
-                            Utils.RestoreBackup(machineConfigPath);
+                            Utils.RestoreBackup(doorstopPath);
+                            Utils.RestoreBackup(doorstopConfigPath);
                             Utils.RestoreBackup(libraryPaths);
                             Utils.RestoreBackup(gameConfigPath);
                             Log.Print("Removal failed.");
                         }
                     }
-
                     break;
             }
 
@@ -739,7 +776,8 @@ namespace UnityModManagerNet.Installer
             {
                 try
                 {
-                    Utils.DeleteBackup(machineConfigPath);
+                    Utils.DeleteBackup(doorstopPath);
+                    Utils.DeleteBackup(doorstopConfigPath);
                     Utils.DeleteBackup(libraryPaths);
                     Utils.DeleteBackup(gameConfigPath);
                 }
@@ -750,6 +788,152 @@ namespace UnityModManagerNet.Installer
 
             return success;
         }
+
+        //private bool InjectConfig(Actions action, XDocument doc = null, bool write = true)
+        //{
+        //    var originalMachineConfigPath = $"{machineConfigPath}.original_";
+        //    var gameConfigPath = GameInfo.filepathInGame;
+
+        //    var success = false;
+
+        //    switch (action)
+        //    {
+        //        case Actions.Install:
+        //            try
+        //            {
+        //                if (!Directory.Exists(managerPath))
+        //                    Directory.CreateDirectory(managerPath);
+
+        //                Utils.MakeBackup(machineConfigPath);
+        //                Utils.MakeBackup(libraryPaths);
+
+        //                if (!IsDirty(doc))
+        //                {
+        //                    File.Copy(machineConfigPath, originalMachineConfigPath, true);
+        //                }
+        //                MakeDirty(doc);
+
+        //                if (!InjectConfig(Actions.Remove, doc, false))
+        //                {
+        //                    Log.Print("Installation failed. Can't uninstall the previous version.");
+        //                    goto EXIT;
+        //                }
+
+        //                Log.Print($"Applying patch to '{Path.GetFileName(machineConfigPath)}'...");
+
+        //                foreach (var mapping in doc.Descendants("cryptoNameMapping"))
+        //                {
+        //                    foreach(var cryptoClasses in mapping.Elements("cryptoClasses"))
+        //                    {
+        //                        if (!cryptoClasses.Elements("cryptoClass").Any(x => x.FirstAttribute.Name.LocalName == "ummRngWrapper"))
+        //                        {
+        //                            cryptoClasses.Add(new XElement("cryptoClass", new XAttribute("ummRngWrapper", "UnityModManagerNet.RngWrapper, UnityModManager, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")));
+        //                        }
+        //                    }
+        //                    if (!mapping.Elements("nameEntry").Any(x => x.LastAttribute.Value == "ummRngWrapper"))
+        //                    {
+        //                        //mapping.Add(new XElement("nameEntry", new XAttribute("name", "RandomNumberGenerator"), new XAttribute("class", "ummRngWrapper")));
+        //                        mapping.Add(new XElement("nameEntry", new XAttribute("name", "System.Security.Cryptography.RandomNumberGenerator"), new XAttribute("class", "ummRngWrapper")));
+        //                    }
+        //                    break;
+        //                }
+
+        //                doc.Save(machineConfigPath);
+        //                DoactionLibraries(Actions.Install);
+        //                DoactionGameConfig(Actions.Install);
+        //                Log.Print("Installation was successful.");
+
+        //                success = true;
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                Log.Print(e.ToString());
+        //                Utils.RestoreBackup(machineConfigPath);
+        //                Utils.RestoreBackup(libraryPaths);
+        //                Utils.RestoreBackup(gameConfigPath);
+        //                Log.Print("Installation failed.");
+        //            }
+
+        //            break;
+
+        //        case Actions.Remove:
+        //            try
+        //            {
+        //                Utils.MakeBackup(gameConfigPath);
+        //                if (write)
+        //                {
+        //                    Utils.MakeBackup(machineConfigPath);
+        //                    Utils.MakeBackup(libraryPaths);
+        //                }
+
+        //                Log.Print("Removing patch...");
+
+        //                MakeDirty(doc);
+
+        //                foreach (var mapping in doc.Descendants("cryptoNameMapping"))
+        //                {
+        //                    foreach (var cryptoClasses in mapping.Elements("cryptoClasses"))
+        //                    {
+        //                        foreach (var cryptoClass in cryptoClasses.Elements("cryptoClass"))
+        //                        {
+        //                            if (cryptoClass.FirstAttribute.Name.LocalName == "ummRngWrapper")
+        //                            {
+        //                                cryptoClass.Remove();
+        //                            }
+        //                        }
+        //                    }
+        //                    foreach (var nameEntry in mapping.Elements("nameEntry"))
+        //                    {
+        //                        if (nameEntry.LastAttribute.Value == "ummRngWrapper")
+        //                        {
+        //                            nameEntry.Remove();
+        //                        }
+        //                    }
+        //                    break;
+        //                }
+
+        //                if (write)
+        //                {
+        //                    doc.Save(machineConfigPath);
+        //                    DoactionLibraries(Actions.Remove);
+        //                    DoactionGameConfig(Actions.Remove);
+        //                    Log.Print("Removal was successful.");
+        //                }
+
+        //                success = true;
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                Log.Print(e.ToString());
+        //                if (write)
+        //                {
+        //                    Utils.RestoreBackup(machineConfigPath);
+        //                    Utils.RestoreBackup(libraryPaths);
+        //                    Utils.RestoreBackup(gameConfigPath);
+        //                    Log.Print("Removal failed.");
+        //                }
+        //            }
+
+        //            break;
+        //    }
+
+        //    EXIT:
+
+        //    if (write)
+        //    {
+        //        try
+        //        {
+        //            Utils.DeleteBackup(machineConfigPath);
+        //            Utils.DeleteBackup(libraryPaths);
+        //            Utils.DeleteBackup(gameConfigPath);
+        //        }
+        //        catch (Exception)
+        //        {
+        //        }
+        //    }
+
+        //    return success;
+        //}
 
         private bool InjectAssembly(Actions action, ModuleDefMD assemblyDef, bool write = true)
         {
@@ -768,6 +952,8 @@ namespace UnityModManagerNet.Installer
                     {
                         try
                         {
+                            Log.Print("=======================================");
+
                             if (!Directory.Exists(managerPath))
                                 Directory.CreateDirectory(managerPath);
 
@@ -831,6 +1017,11 @@ namespace UnityModManagerNet.Installer
                     {
                         try
                         {
+                            if (write)
+                            {
+                                Log.Print("=======================================");
+                            }
+
                             Utils.MakeBackup(gameConfigPath);
 
                             var v0_12_Installed = assemblyDef.Types.FirstOrDefault(x => x.Name == managerType.Name);
@@ -928,15 +1119,15 @@ namespace UnityModManagerNet.Installer
             return success;
         }
 
-        private static bool IsDirty(XDocument doc)
-        {
-            return doc.Root.Element("mscorlib").Attribute(nameof(UnityModManager)) != null;
-        }
+        //private static bool IsDirty(XDocument doc)
+        //{
+        //    return doc.Root.Element("mscorlib").Attribute(nameof(UnityModManager)) != null;
+        //}
 
-        private static void MakeDirty(XDocument doc)
-        {
-            doc.Root.Element("mscorlib").SetAttributeValue(nameof(UnityModManager), UnityModManager.version);
-        }
+        //private static void MakeDirty(XDocument doc)
+        //{
+        //    doc.Root.Element("mscorlib").SetAttributeValue(nameof(UnityModManager), UnityModManager.version);
+        //}
 
         private static bool IsDirty(ModuleDefMD assembly)
         {
@@ -964,9 +1155,13 @@ namespace UnityModManagerNet.Installer
                 success = Utils.IsFileWritable(file) && success;
             }
 
-            if (machineDoc != null)
+            //if (machineDoc != null)
+            //{
+            //    success = Utils.IsFileWritable(machineConfigPath) && success;
+            //}
+            if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
             {
-                success = Utils.IsFileWritable(machineConfigPath) && success;
+                success = Utils.IsFileWritable(doorstopPath) && success;
             }
             else
             {
@@ -999,11 +1194,11 @@ namespace UnityModManagerNet.Installer
         {
             if (action == Actions.Install)
             {
-                Log.Print($"Copying files to game folder...");
+                Log.Print($"Copying files to game...");
             }
             else
             {
-                Log.Print($"Deleting files from game folder...");
+                Log.Print($"Deleting files from game...");
             }
 
             for (int i = 0; i < libraryPaths.Length; i++)

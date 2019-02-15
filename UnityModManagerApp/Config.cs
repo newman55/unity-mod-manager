@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 namespace UnityModManagerNet.Installer
 {
     public enum ModStatus { NotInstalled, Installed }
-    public enum InstallType { Assembly, Config, Count }
+    public enum InstallType { Assembly, DoorstopProxy, /*Config,*/ Count }
 
     public class ModInfo : UnityModManager.ModInfo
     {
@@ -58,11 +58,12 @@ namespace UnityModManagerNet.Installer
         public string Folder;
         public string ModsDirectory;
         public string ModInfo;
+        public string GameExe;
         public string EntryPoint;
         public string StartingPoint;
         public string UIStartingPoint;
         public string OldPatchTarget;
-        public string MachineConfig;
+        //public string MachineConfig;
 
         public override string ToString()
         {
@@ -132,7 +133,7 @@ namespace UnityModManagerNet.Installer
                                 ModsDirectory = "Mods",
                                 ModInfo = "Info.json",
                                 EntryPoint = "[Assembly-CSharp.dll]App.Awake",
-                                MachineConfig = @"MonoBleedingEdge\etc\mono\4.5\"
+                                GameExe = "Game.exe"
                             }
                         }
                     };
@@ -184,7 +185,7 @@ namespace UnityModManagerNet.Installer
             [XmlAttribute]
             public string Name;
             public string Path;
-            public InstallType InstallType = InstallType.Config;
+            public InstallType InstallType = InstallType.DoorstopProxy;
         }
 
         public string LastSelectedGame;
