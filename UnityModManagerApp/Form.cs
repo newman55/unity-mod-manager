@@ -490,6 +490,17 @@ namespace UnityModManagerNet.Installer
             }
         }
 
+        //private void btnRunGame_SizeChanged(object sender, EventArgs e)
+        //{
+        //    var btn = sender as Button;
+        //    btn.Location = new System.Drawing.Point((int)(btn.Parent.Size.Width / 2f - btn.Size.Width / 2f), btn.Location.Y);
+        //}
+
+        //private void btnRunGame_Click(object sender, EventArgs e)
+        //{
+            //Process.Start(gameExePath);
+        //}
+
         private string FindGameFolder(string str)
         {
             string[] disks = new string[] { @"C:\", @"D:\", @"E:\", @"F:\" };

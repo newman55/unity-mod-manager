@@ -583,7 +583,7 @@ namespace UnityModManagerNet
             if (args.LoadedAssembly.FullName == "Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null")
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnLoad;
-                Injector.Run();
+                Injector.Run(true);
             }
         }
 

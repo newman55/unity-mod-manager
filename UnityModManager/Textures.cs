@@ -59,6 +59,12 @@ namespace UnityModManagerNet
                         }
                     }
                 }
+
+                int resize = 128;
+                SettingsNormal.ResizeToIfLess(resize);
+                SettingsActive.ResizeToIfLess(resize);
+                WWW.ResizeToIfLess(resize);
+                Updates.ResizeToIfLess(resize);
             }
         }
     }

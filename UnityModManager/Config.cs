@@ -24,6 +24,7 @@ namespace UnityModManagerNet
             public int ShowOnStart = 1;
             public float WindowWidth;
             public float WindowHeight;
+            public float UIScale = 1f;
 
             public List<Mod> ModParams = new List<Mod>();
 
