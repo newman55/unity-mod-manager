@@ -160,6 +160,9 @@ namespace UnityModManagerNet
         {
             public readonly ModInfo Info;
 
+            /// <summary>
+            /// Path to mod folder
+            /// </summary>
             public readonly string Path;
 
             Assembly mAssembly = null;
@@ -169,8 +172,14 @@ namespace UnityModManagerNet
 
             public readonly Version ManagerVersion = null;
 
+            /// <summary>
+            /// Not used
+            /// </summary>
             public Version NewestVersion;
 
+            /// <summary>
+            /// Required mods
+            /// </summary>
             public readonly Dictionary<string, Version> Requirements = new Dictionary<string, Version>();
 
             public readonly ModLogger Logger = null;
@@ -195,20 +204,17 @@ namespace UnityModManagerNet
             public Action<ModEntry> OnSaveGUI = null;
 
             /// <summary>
-            /// Called by MonoBehaviour.Update
-            /// Added in 0.13.0
+            /// Called by MonoBehaviour.Update [0.13.0]
             /// </summary>
             public Action<ModEntry, float> OnUpdate = null;
 
             /// <summary>
-            /// Called by MonoBehaviour.LateUpdate
-            /// Added in 0.13.0
+            /// Called by MonoBehaviour.LateUpdate [0.13.0]
             /// </summary>
             public Action<ModEntry, float> OnLateUpdate = null;
 
             /// <summary>
-            /// Called by MonoBehaviour.FixedUpdate
-            /// Added in 0.13.0
+            /// Called by MonoBehaviour.FixedUpdate [0.13.0]
             /// </summary>
             public Action<ModEntry, float> OnFixedUpdate = null;
 
@@ -220,10 +226,21 @@ namespace UnityModManagerNet
             bool mErrorOnLoading = false;
             public bool ErrorOnLoading => mErrorOnLoading;
 
+            /// <summary>
+            /// UI checkbox
+            /// </summary>
             public bool Enabled = true;
             //public bool Enabled => Enabled;
 
+            /// <summary>
+            /// If OnToggle exists
+            /// </summary>
             public bool Toggleable => OnToggle != null;
+
+            /// <summary>
+            /// If Assembly is loaded [0.13.1]
+            /// </summary>
+            public bool Loaded => Assembly != null;
 
             bool mActive = false;
             public bool Active
@@ -231,6 +248,14 @@ namespace UnityModManagerNet
                 get => mActive;
                 set
                 {
+                    if (value && !Loaded)
+                    {
+                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                        Load();
+                        Logger.NativeLog($"Loading time {(stopwatch.ElapsedMilliseconds / 1000f):f2} s.");
+                        return;
+                    }
+
                     if (!mStarted || mErrorOnLoading)
                         return;
 
@@ -299,12 +324,7 @@ namespace UnityModManagerNet
             public bool Load()
             {
                 if (mStarted)
-                {
-                    if (mErrorOnLoading)
-                        return false;
-
-                    return true;
-                }
+                    return !mErrorOnLoading;
 
                 mErrorOnLoading = false;
 
@@ -336,27 +356,25 @@ namespace UnityModManagerNet
                     {
                         var id = item.Key;
                         var mod = FindMod(id);
-                        if (mod == null || mod.Assembly == null)
+                        if (mod == null)
                         {
                             mErrorOnLoading = true;
-                            this.Logger.Error($"Required mod '{id}' not loaded.");
+                            this.Logger.Error($"Required mod '{id}' missing.");
+                            continue;
                         }
-                        //else if (!mod.Enabled)
-                        //{
-                        //    mErrorOnLoading = true;
-                        //    this.Logger.Error($"Required mod '{id}' disabled.");
-                        //}
-                        else if (!mod.Active)
+                        else if (item.Value != null && item.Value > mod.Version)
                         {
-                            this.Logger.Log($"Required mod '{id}' inactive.");
+                            mErrorOnLoading = true;
+                            this.Logger.Error($"Required mod '{id}' must be version '{item.Value}' or higher.");
+                            continue;
                         }
-                        else if (item.Value != null)
+
+                        if (!mod.Active)
                         {
-                            if (item.Value > mod.Version)
-                            {
-                                mErrorOnLoading = true;
-                                this.Logger.Error($"Required mod '{id}' must be version '{item.Value}' or higher.");
-                            }
+                            mod.Enabled = true;
+                            mod.Active = true;
+                            if (!mod.Active)
+                                this.Logger.Log($"Required mod '{id}' inactive.");
                         }
                     }
                 }
@@ -454,7 +472,7 @@ namespace UnityModManagerNet
 
                     mStarted = true;
 
-                    if (!mErrorOnLoading && Enabled)
+                    if (!mErrorOnLoading)
                     {
                         Active = true;
                         return true;
@@ -598,18 +616,20 @@ namespace UnityModManagerNet
 
             Logger.Log($"Initialize. Version '{version}'.");
 
+            unityVersion = ParseVersion(Application.unityVersion);
+
             Config = GameInfo.Load();
             if (Config == null)
             {
                 return false;
             }
 
+            Params = Param.Load();
+
             modsPath = Path.Combine(Environment.CurrentDirectory, Config.ModsDirectory);
 
             if (!Directory.Exists(modsPath))
                 Directory.CreateDirectory(modsPath);
-
-            unityVersion = ParseVersion(Application.unityVersion);
 
             //SceneManager.sceneLoaded += SceneManager_sceneLoaded; // Incompatible with Unity5
 
@@ -733,19 +753,24 @@ namespace UnityModManagerNet
                     }
                 }
 
-                Params = Param.Load();
-
                 if (mods.Count > 0)
                 {
                     Logger.Log($"Sorting mods.");
                     TopoSort(mods);
-                    
+
+                    Params.ReadModParams();
+
                     Logger.Log($"Loading mods.");
                     foreach (var mod in modEntries)
                     {
-                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                        mod.Load();
-                        mod.Logger.NativeLog($"Loading time {(stopwatch.ElapsedMilliseconds / 1000f):f2} s.");
+                        if (!mod.Enabled)
+                        {
+                            mod.Logger.Log("To skip (disabled).");
+                        }
+                        else
+                        {
+                            mod.Active = true;
+                        }
                     }
                 }
 

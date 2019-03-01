@@ -250,6 +250,17 @@ namespace UnityModManagerNet
             {
                 GUI.skin.font = Font.CreateDynamicFontFromOSFont(new[] { "Arial" }, Scale(globalFontSize));
                 GUI.skin.button.padding = RectOffset(Scale(10), Scale(5));
+
+                GUI.skin.horizontalSlider.fixedHeight = Scale(12);
+                GUI.skin.horizontalSlider.border = RectOffset(3, 0);
+                GUI.skin.horizontalSlider.padding = RectOffset(Scale(-1), 0);
+                GUI.skin.horizontalSlider.margin = RectOffset(Scale(4), Scale(8));
+
+                GUI.skin.horizontalSliderThumb.fixedHeight = Scale(12);
+                GUI.skin.horizontalSliderThumb.border = RectOffset(4, 0);
+                GUI.skin.horizontalSliderThumb.padding = RectOffset(Scale(7), 0);
+                GUI.skin.horizontalSliderThumb.margin = RectOffset(0);
+
                 window.padding = RectOffset(Scale(5));
                 h1.fontSize = Scale(16);
                 h1.margin = RectOffset(Scale(0), Scale(5));
@@ -349,9 +360,6 @@ namespace UnityModManagerNet
             {
                 mWindowSize = ClampWindowSize(mWindowSize);
                 mWindowRect = new Rect((Screen.width - mWindowSize.x) / 2f, (Screen.height - mWindowSize.y) / 2f, 0, 0);
-                Debug.Log(mWindowSize);
-                Debug.Log(mWindowRect);
-                Debug.Log($"{Screen.width}; {Screen.height}");
             }
 
             private Vector2 ClampWindowSize(Vector2 orig)
@@ -428,7 +436,7 @@ namespace UnityModManagerNet
                                     continue;
                                 GUILayout.Label(mColumns[i].name, colWidth[i]);
                             }
-
+                            
                             GUILayout.EndHorizontal();
 
                             for (int i = 0, c = mods.Count; i < c; i++)
@@ -492,7 +500,12 @@ namespace UnityModManagerNet
                                 }
                                 else if (mods[i].Requirements.Count > 0)
                                 {
-                                    GUILayout.Label(string.Join("\r\n", mods[i].Info.Requirements), colWidth[++col]);
+                                    foreach (var item in mods[i].Requirements)
+                                    {
+                                        var id = item.Key;
+                                        var mod = FindMod(id);
+                                        GUILayout.Label(((mod == null || item.Value != null && item.Value > mod.Version || !mod.Active) && mods[i].Active) ? "<color=\"#FF0000\">" + id + "</color>" : id, colWidth[++col]);
+                                    }
                                 }
                                 else
                                 {
@@ -505,6 +518,8 @@ namespace UnityModManagerNet
                                 {
                                     mods[i].Enabled = action;
                                     if (mods[i].Toggleable)
+                                        mods[i].Active = action;
+                                    else if (action && !mods[i].Loaded)
                                         mods[i].Active = action;
                                 }
 

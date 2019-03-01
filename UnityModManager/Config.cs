@@ -62,14 +62,7 @@ namespace UnityModManagerNet
                         {
                             var serializer = new XmlSerializer(typeof(Param));
                             var result = serializer.Deserialize(stream) as Param;
-                            foreach (var item in result.ModParams)
-                            {
-                                var mod = FindMod(item.Id);
-                                if (mod != null)
-                                {
-                                    mod.Enabled = item.Enabled;
-                                }
-                            }
+                            
                             return result;
                         }
                     }
@@ -80,6 +73,18 @@ namespace UnityModManagerNet
                     }
                 }
                 return new Param();
+            }
+
+            internal void ReadModParams()
+            {
+                foreach (var item in ModParams)
+                {
+                    var mod = FindMod(item.Id);
+                    if (mod != null)
+                    {
+                        mod.Enabled = item.Enabled;
+                    }
+                }
             }
         }
 
