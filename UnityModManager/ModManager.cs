@@ -189,7 +189,17 @@ namespace UnityModManagerNet
             //public ModSettings Settings = null;
 
             /// <summary>
-            /// Called to activate / deactivate the mod.
+            /// Show button to reload the mod [0.14.0]
+            /// </summary>
+            public bool CanReload = false;
+
+            /// <summary>
+            /// Called to unload old data for reloading mod [0.14.0]
+            /// </summary>
+            public Func<ModEntry, bool> OnUnload = null;
+
+            /// <summary>
+            /// Called to activate / deactivate the mod
             /// </summary>
             public Func<ModEntry, bool, bool> OnToggle = null;
 
@@ -199,7 +209,7 @@ namespace UnityModManagerNet
             public Action<ModEntry> OnGUI = null;
 
             /// <summary>
-            /// Called when the UMM UI closes.
+            /// Called when the game closes
             /// </summary>
             public Action<ModEntry> OnSaveGUI = null;
 
@@ -390,7 +400,8 @@ namespace UnityModManagerNet
                     {
                         if (ManagerVersion >= VER_0_13)
                         {
-                            mAssembly = Assembly.LoadFile(assemblyPath);
+                            //mAssembly = Assembly.LoadFile(assemblyPath);
+                            mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
                         }
                         else
                         {
@@ -400,7 +411,8 @@ namespace UnityModManagerNet
 
                             if (File.Exists(assemblyCachePath))
                             {
-                                mAssembly = Assembly.LoadFile(assemblyCachePath);
+                                //mAssembly = Assembly.LoadFile(assemblyCachePath);
+                                mAssembly = Assembly.Load(File.ReadAllBytes(assemblyCachePath));
                             }
                             else
                             {
@@ -435,7 +447,16 @@ namespace UnityModManagerNet
                                     }
                                 }
                                 modDef.Write(assemblyCachePath);
-                                mAssembly = Assembly.LoadFile(assemblyCachePath);
+                                //mAssembly = Assembly.LoadFile(assemblyCachePath);
+                                mAssembly = Assembly.Load(File.ReadAllBytes(assemblyCachePath));
+                            }
+                        }
+
+                        foreach (var filepath in Directory.GetFiles(Path, "*.dll"))
+                        {
+                            if (filepath != assemblyPath)
+                            {
+                                Assembly.Load(File.ReadAllBytes(filepath));
                             }
                         }
                     }
@@ -485,6 +506,125 @@ namespace UnityModManagerNet
                 }
 
                 return false;
+            }
+
+            internal void Reload()
+            {
+                if (!mStarted || !CanReload)
+                    return;
+
+                try
+                {
+                    string assemblyPath = System.IO.Path.Combine(Path, Info.AssemblyName);
+                    var reflAssembly = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(assemblyPath));
+                    if (reflAssembly.GetName().Version == Assembly.GetName().Version)
+                    {
+                        this.Logger.Log("Reload is not needed. The version is exactly the same as the previous one.");
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    this.Logger.Error(e.ToString());
+                    return;
+                }
+
+                if (OnSaveGUI != null)
+                    OnSaveGUI.Invoke(this);
+
+                this.Logger.Log("Reloading...");
+
+                if (Toggleable)
+                {
+                    Active = false;
+                }
+                else
+                {
+                    mActive = false;
+                }
+                
+                try
+                {
+                    if (!Active && (OnUnload == null || OnUnload.Invoke(this)))
+                    {
+                        mCache.Clear();
+                        typeof(Harmony12.Traverse).GetField("Cache", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, new Harmony12.AccessCache());
+                        typeof(Harmony.Traverse).GetField("Cache", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, new Harmony.AccessCache());
+
+                        var oldAssembly = Assembly;
+                        mAssembly = null;
+                        mStarted = false;
+                        mErrorOnLoading = false;
+
+                        OnToggle = null;
+                        OnGUI = null;
+                        OnSaveGUI = null;
+                        OnUnload = null;
+                        OnUpdate = null;
+                        OnFixedUpdate = null;
+                        OnLateUpdate = null;
+
+                        if (Load())
+                        {
+                            var allTypes = oldAssembly.GetTypes();
+                            foreach (var type in allTypes)
+                            {
+                                var t = Assembly.GetType(type.FullName);
+                                if (t != null)
+                                {
+                                    foreach (var field in type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                                    {
+                                        if (field.GetCustomAttributes(typeof(SaveOnReloadAttribute), true).Any())
+                                        {
+                                            var f = t.GetField(field.Name);
+                                            if (f != null)
+                                            {
+                                                this.Logger.Log($"Copying field '{field.DeclaringType.Name}.{field.Name}'");
+                                                try
+                                                {
+                                                    if (field.FieldType != f.FieldType)
+                                                    {
+                                                        if (field.FieldType.IsEnum && f.FieldType.IsEnum)
+                                                        {
+                                                            f.SetValue(null, Convert.ToInt32(field.GetValue(null)));
+                                                        }
+                                                        else if (field.FieldType.IsClass && f.FieldType.IsClass)
+                                                        {
+                                                            //f.SetValue(null, Convert.ChangeType(field.GetValue(null), f.FieldType));
+                                                        }
+                                                        else if (field.FieldType.IsValueType && f.FieldType.IsValueType)
+                                                        {
+                                                            //f.SetValue(null, Convert.ChangeType(field.GetValue(null), f.FieldType));
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        f.SetValue(null, field.GetValue(null));
+                                                    }
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    this.Logger.Error(ex.ToString());
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return;
+                    }
+                    else if (Active)
+                    {
+                        this.Logger.Log("Must be deactivated.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    this.Logger.Error(e.ToString());
+                }
+
+                this.Logger.Log("Reloading canceled.");
             }
 
             public bool Invoke(string namespaceClassnameMethodname, out object result, object[] param = null, Type[] types = null)
@@ -835,5 +975,10 @@ namespace UnityModManagerNet
                 }
             }
         }
+    }
+
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    public class SaveOnReloadAttribute : Attribute
+    {
     }
 }

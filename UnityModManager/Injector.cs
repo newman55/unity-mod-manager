@@ -98,7 +98,7 @@ namespace UnityModManagerNet
                     }
                     else
                     {
-                        UnityModManager.Logger.Log("Injection aborted.");
+                        UnityModManager.Logger.Log("Injection canceled.");
                         UnityModManager.OpenUnityFileLog();
                         return;
                     }
@@ -109,28 +109,25 @@ namespace UnityModManagerNet
                 UnityModManager.Start();
             }
 
-            if (UnityModManager.Params.ShowOnStart == 1)
+            if (!string.IsNullOrEmpty(UnityModManager.Config.UIStartingPoint))
             {
-                if (!string.IsNullOrEmpty(UnityModManager.Config.UIStartingPoint))
+                if (TryGetEntryPoint(UnityModManager.Config.UIStartingPoint, out var @class, out var method, out var place))
                 {
-                    if (TryGetEntryPoint(UnityModManager.Config.UIStartingPoint, out var @class, out var method, out var place))
-                    {
-                        usePrefix = (place == "before");
-                        var harmony = HarmonyInstance.Create(nameof(UnityModManager));
-                        var prefix = typeof(Injector).GetMethod(nameof(Prefix_Show), BindingFlags.Static | BindingFlags.NonPublic);
-                        var postfix = typeof(Injector).GetMethod(nameof(Postfix_Show), BindingFlags.Static | BindingFlags.NonPublic);
-                        harmony.Patch(method, new HarmonyMethod(prefix), new HarmonyMethod(postfix));
-                    }
-                    else
-                    {
-                        UnityModManager.OpenUnityFileLog();
-                        return;
-                    }
+                    usePrefix = (place == "before");
+                    var harmony = HarmonyInstance.Create(nameof(UnityModManager));
+                    var prefix = typeof(Injector).GetMethod(nameof(Prefix_Show), BindingFlags.Static | BindingFlags.NonPublic);
+                    var postfix = typeof(Injector).GetMethod(nameof(Postfix_Show), BindingFlags.Static | BindingFlags.NonPublic);
+                    harmony.Patch(method, new HarmonyMethod(prefix), new HarmonyMethod(postfix));
                 }
-                else if (UnityModManager.UI.Instance)
+                else
                 {
-                    UnityModManager.UI.Instance.FirstLaunch();
+                    UnityModManager.OpenUnityFileLog();
+                    return;
                 }
+            }
+            else if (UnityModManager.UI.Instance)
+            {
+                UnityModManager.UI.Instance.FirstLaunch();
             }
         }
 

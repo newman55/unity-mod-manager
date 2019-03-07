@@ -1225,7 +1225,7 @@ namespace UnityModManagerNet.Installer
                         if (dest.LastWriteTimeUtc == source.LastWriteTimeUtc)
                             continue;
 
-                        File.Copy(path, $"{path}.old_", true);
+                        //File.Copy(path, $"{path}.old_", true);
                     }
 
                     Log.Print($"  {filename}");

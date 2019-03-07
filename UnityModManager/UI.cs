@@ -46,7 +46,7 @@ namespace UnityModManagerNet
             private static GUIStyle www = null;
             private static GUIStyle updates = null;
 
-            private bool mFirstLaunch = false;
+            private bool mFirstLaunched = false;
             private bool mInit = false;
 
             private bool mOpened = false;
@@ -81,7 +81,7 @@ namespace UnityModManagerNet
             private void Start()
             {
                 CalculateWindowPos();
-                if (Params.ShowOnStart == 1 && string.IsNullOrEmpty(Config.UIStartingPoint))
+                if (string.IsNullOrEmpty(Config.UIStartingPoint))
                 {
                     FirstLaunch();
                 }
@@ -249,7 +249,8 @@ namespace UnityModManagerNet
             private void ScaleGUI()
             {
                 GUI.skin.font = Font.CreateDynamicFontFromOSFont(new[] { "Arial" }, Scale(globalFontSize));
-                GUI.skin.button.padding = RectOffset(Scale(10), Scale(5));
+                GUI.skin.button.padding = new RectOffset(Scale(10), Scale(10), Scale(3), Scale(3));
+                //GUI.skin.button.margin = RectOffset(Scale(4), Scale(2));
 
                 GUI.skin.horizontalSlider.fixedHeight = Scale(12);
                 GUI.skin.horizontalSlider.border = RectOffset(3, 0);
@@ -446,7 +447,7 @@ namespace UnityModManagerNet
                                 GUILayout.BeginHorizontal();
 
                                 GUILayout.BeginHorizontal(colWidth[++col]);
-                                if (mods[i].OnGUI != null)
+                                if (mods[i].OnGUI != null || mods[i].CanReload)
                                 {
                                     if (GUILayout.Button(mods[i].Info.DisplayName, GUI.skin.label, GUILayout.ExpandWidth(true)))
                                     {
@@ -534,18 +535,30 @@ namespace UnityModManagerNet
 
                                 GUILayout.EndHorizontal();
 
-                                if (mShowModSettings == i && mods[i].Active)
+                                if (mShowModSettings == i)
                                 {
-                                    GUILayout.Label("Options", h2);
-                                    try
+                                    if (mods[i].CanReload)
                                     {
-                                        mods[i].OnGUI(mods[i]);
+                                        GUILayout.Label("Debug", h2);
+                                        if (GUILayout.Button("Reload", button, GUILayout.ExpandWidth(false)))
+                                        {
+                                            mods[i].Reload();
+                                        }
+                                        GUILayout.Space(5);
                                     }
-                                    catch (Exception e)
+                                    if (mods[i].Active && mods[i].OnGUI != null)
                                     {
-                                        mShowModSettings = -1;
-                                        mods[i].Logger.Error("OnGUI: " + e.GetType().Name + " - " + e.Message);
-                                        Debug.LogException(e);
+                                        GUILayout.Label("Options", h2);
+                                        try
+                                        {
+                                            mods[i].OnGUI(mods[i]);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            mShowModSettings = -1;
+                                            mods[i].Logger.Error("OnGUI: " + e.GetType().Name + " - " + e.Message);
+                                            Debug.LogException(e);
+                                        }
                                     }
                                 }
 
@@ -721,19 +734,10 @@ namespace UnityModManagerNet
 
             public void FirstLaunch()
             {
-                if (mFirstLaunch)
+                if (mFirstLaunched || UnityModManager.Params.ShowOnStart == 0 && modEntries.All(x => !x.ErrorOnLoading))
                     return;
 
-                mFirstLaunch = true;
-                try
-                {
-                    ToggleWindow(true);
-                }
-                catch(Exception e)
-                {
-                    Logger.Error("FirstLaunch: " + e.GetType().Name + " - " + e.Message);
-                    Debug.LogException(e);
-                }
+                ToggleWindow(true);
             }
 
             public void ToggleWindow()
@@ -746,28 +750,37 @@ namespace UnityModManagerNet
                 if (open == mOpened)
                     return;
 
-                mOpened = open;
-                BlockGameUI(open);
-                if (!open)
-                {
-                    SaveSettingsAndParams();
-                }
                 if (open)
+                    mFirstLaunched = true;
+
+                try
                 {
-                    GameCursorLocked = Cursor.lockState == CursorLockMode.Locked || !Cursor.visible;
-                    if (GameCursorLocked)
+                    mOpened = open;
+                    BlockGameUI(open);
+                    //if (!open)
+                    //    SaveSettingsAndParams();
+                    if (open)
                     {
-                        Cursor.visible = true;
-                        Cursor.lockState = CursorLockMode.None;
+                        GameCursorLocked = Cursor.lockState == CursorLockMode.Locked || !Cursor.visible;
+                        if (GameCursorLocked)
+                        {
+                            Cursor.visible = true;
+                            Cursor.lockState = CursorLockMode.None;
+                        }
+                    }
+                    else
+                    {
+                        if (GameCursorLocked)
+                        {
+                            Cursor.visible = false;
+                            Cursor.lockState = CursorLockMode.Locked;
+                        }
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    if (GameCursorLocked)
-                    {
-                        Cursor.visible = false;
-                        Cursor.lockState = CursorLockMode.Locked;
-                    }
+                    Logger.Error("ToggleWindow: " + e.GetType().Name + " - " + e.Message);
+                    Debug.LogException(e);
                 }
             }
 
@@ -790,7 +803,8 @@ namespace UnityModManagerNet
                 }
                 else
                 {
-                    Destroy(mCanvas);
+                    if (mCanvas)
+                        Destroy(mCanvas);
                 }
             }
 
