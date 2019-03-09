@@ -8,46 +8,46 @@ using Harmony12;
 
 namespace UnityModManagerNet
 {
-    [ComVisible(true)]
-    public class RngWrapper : RandomNumberGenerator
-    {
-        readonly RNGCryptoServiceProvider _wrapped;
+    //[ComVisible(true)]
+    //public class RngWrapper : RandomNumberGenerator
+    //{
+    //    readonly RNGCryptoServiceProvider _wrapped;
 
-        static RngWrapper()
-        {
-            Injector.Run();
-        }
+    //    static RngWrapper()
+    //    {
+    //        Injector.Run();
+    //    }
 
-        public RngWrapper()
-        {
-            this._wrapped = new RNGCryptoServiceProvider();
-        }
+    //    public RngWrapper()
+    //    {
+    //        this._wrapped = new RNGCryptoServiceProvider();
+    //    }
 
-        public RngWrapper(string str)
-        {
-            this._wrapped = new RNGCryptoServiceProvider(str);
-        }
+    //    public RngWrapper(string str)
+    //    {
+    //        this._wrapped = new RNGCryptoServiceProvider(str);
+    //    }
 
-        public RngWrapper(byte[] rgb)
-        {
-            this._wrapped = new RNGCryptoServiceProvider(rgb);
-        }
+    //    public RngWrapper(byte[] rgb)
+    //    {
+    //        this._wrapped = new RNGCryptoServiceProvider(rgb);
+    //    }
 
-        public RngWrapper(CspParameters cspParams)
-        {
-            this._wrapped = new RNGCryptoServiceProvider(cspParams);
-        }
+    //    public RngWrapper(CspParameters cspParams)
+    //    {
+    //        this._wrapped = new RNGCryptoServiceProvider(cspParams);
+    //    }
 
-        public override void GetBytes(byte[] data)
-        {
-            this._wrapped.GetBytes(data);
-        }
+    //    public override void GetBytes(byte[] data)
+    //    {
+    //        this._wrapped.GetBytes(data);
+    //    }
 
-        public override void GetNonZeroBytes(byte[] data)
-        {
-            this._wrapped.GetNonZeroBytes(data);
-        }
-    }
+    //    public override void GetNonZeroBytes(byte[] data)
+    //    {
+    //        this._wrapped.GetNonZeroBytes(data);
+    //    }
+    //}
 
     public class Injector
     {
@@ -155,7 +155,7 @@ namespace UnityModManagerNet
                 UnityModManager.UI.Instance.FirstLaunch();
         }
 
-        static bool TryGetEntryPoint(string str, out Type foundClass, out MethodInfo foundMethod, out string insertionPlace)
+        internal static bool TryGetEntryPoint(string str, out Type foundClass, out MethodInfo foundMethod, out string insertionPlace)
         {
             foundClass = null;
             foundMethod = null;
@@ -178,7 +178,7 @@ namespace UnityModManagerNet
             return false;
         }
 
-        static bool TryGetEntryPoint(Assembly assembly, string str, out Type foundClass, out MethodInfo foundMethod, out string insertionPlace)
+        internal static bool TryGetEntryPoint(Assembly assembly, string str, out Type foundClass, out MethodInfo foundMethod, out string insertionPlace)
         {
             foundClass = null;
             foundMethod = null;
@@ -205,7 +205,7 @@ namespace UnityModManagerNet
             return true;
         }
 
-        public static bool TryParseEntryPoint(string str, out string assembly, out string @class, out string method, out string insertionPlace)
+        internal static bool TryParseEntryPoint(string str, out string assembly, out string @class, out string method, out string insertionPlace)
         {
             assembly = string.Empty;
             @class = string.Empty;

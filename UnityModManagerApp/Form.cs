@@ -10,6 +10,7 @@ using System.Diagnostics;
 
 namespace UnityModManagerNet.Installer
 {
+    [Serializable]
     public partial class UnityModManagerForm : Form
     {
         const string REG_PATH = @"HKEY_CURRENT_USER\Software\UnityModManager";
@@ -26,7 +27,8 @@ namespace UnityModManagerNet.Installer
             "0Harmony12.dll",
             "0Harmony-1.2.dll",
             "dnlib.dll",
-            nameof(UnityModManager) + ".dll"
+            nameof(UnityModManager) + ".dll",
+            nameof(UnityModManager) + ".xml"
         };
 
         static string[] libraryPaths;

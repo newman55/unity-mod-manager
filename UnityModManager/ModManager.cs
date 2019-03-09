@@ -184,6 +184,9 @@ namespace UnityModManagerNet
 
             public readonly ModLogger Logger = null;
 
+            /// <summary>
+            /// Not used
+            /// </summary>
             public bool HasUpdate = false;
 
             //public ModSettings Settings = null;
@@ -191,7 +194,7 @@ namespace UnityModManagerNet
             /// <summary>
             /// Show button to reload the mod [0.14.0]
             /// </summary>
-            public bool CanReload = false;
+            public bool CanReload { get; private set; }
 
             /// <summary>
             /// Called to unload old data for reloading mod [0.14.0]
@@ -251,6 +254,8 @@ namespace UnityModManagerNet
             /// If Assembly is loaded [0.13.1]
             /// </summary>
             public bool Loaded => Assembly != null;
+
+            bool mFirstLoading = true;
 
             bool mActive = false;
             public bool Active
@@ -333,7 +338,7 @@ namespace UnityModManagerNet
 
             public bool Load()
             {
-                if (mStarted)
+                if (Loaded)
                     return !mErrorOnLoading;
 
                 mErrorOnLoading = false;
@@ -398,23 +403,17 @@ namespace UnityModManagerNet
                 {
                     try
                     {
-                        if (ManagerVersion >= VER_0_13)
-                        {
-                            //mAssembly = Assembly.LoadFile(assemblyPath);
-                            mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
-                        }
-                        else
+                        var assemblyCachePath = assemblyPath;
+                        var cacheExists = false;
+
+                        if (mFirstLoading)
                         {
                             var fi = new FileInfo(assemblyPath);
-                            var hash = (uint)((long)fi.LastWriteTimeUtc.GetHashCode() + version.GetHashCode()).GetHashCode();
-                            var assemblyCachePath = System.IO.Path.Combine(Path, Info.AssemblyName + $".{hash}.cache");
+                            var hash = (ushort)((long)fi.LastWriteTimeUtc.GetHashCode() + version.GetHashCode() + ManagerVersion.GetHashCode()).GetHashCode();
+                            assemblyCachePath = assemblyPath + $".{hash}.cache";
+                            cacheExists = File.Exists(assemblyCachePath);
 
-                            if (File.Exists(assemblyCachePath))
-                            {
-                                //mAssembly = Assembly.LoadFile(assemblyCachePath);
-                                mAssembly = Assembly.Load(File.ReadAllBytes(assemblyCachePath));
-                            }
-                            else
+                            if (!cacheExists)
                             {
                                 foreach (var filepath in Directory.GetFiles(Path, "*.cache"))
                                 {
@@ -426,18 +425,49 @@ namespace UnityModManagerNet
                                     {
                                     }
                                 }
-                                //var asmDef = AssemblyDefinition.ReadAssembly(assemblyPath);
-                                //var modDef = asmDef.MainModule;
-                                //if (modDef.TryGetTypeReference("UnityModManagerNet.UnityModManager", out var typeRef))
-                                //{
-                                //    var managerAsmRef = new AssemblyNameReference("UnityModManager", version);
-                                //    if (typeRef.Scope is AssemblyNameReference asmNameRef)
-                                //    {
-                                //        typeRef.Scope = managerAsmRef;
-                                //        modDef.AssemblyReferences.Add(managerAsmRef);
-                                //        asmDef.Write(assemblyCachePath);
-                                //    }
-                                //}
+                            }
+                        }
+
+                        if (ManagerVersion >= VER_0_13)
+                        {
+                            if (mFirstLoading)
+                            {
+                                if (!cacheExists)
+                                {
+                                    File.Copy(assemblyPath, assemblyCachePath, true);
+                                }
+                                mAssembly = Assembly.LoadFile(assemblyCachePath);
+
+                                foreach (var type in mAssembly.GetTypes())
+                                {
+                                    if (type.GetCustomAttributes(typeof(EnableReloadingAttribute), true).Any())
+                                    {
+                                        CanReload = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+                            }
+                        }
+                        else
+                        {
+                            //var asmDef = AssemblyDefinition.ReadAssembly(assemblyPath);
+                            //var modDef = asmDef.MainModule;
+                            //if (modDef.TryGetTypeReference("UnityModManagerNet.UnityModManager", out var typeRef))
+                            //{
+                            //    var managerAsmRef = new AssemblyNameReference("UnityModManager", version);
+                            //    if (typeRef.Scope is AssemblyNameReference asmNameRef)
+                            //    {
+                            //        typeRef.Scope = managerAsmRef;
+                            //        modDef.AssemblyReferences.Add(managerAsmRef);
+                            //        asmDef.Write(assemblyCachePath);
+                            //    }
+                            //}
+                            if (!cacheExists)
+                            {
                                 var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
                                 foreach (var item in modDef.GetTypeRefs())
                                 {
@@ -447,18 +477,11 @@ namespace UnityModManagerNet
                                     }
                                 }
                                 modDef.Write(assemblyCachePath);
-                                //mAssembly = Assembly.LoadFile(assemblyCachePath);
-                                mAssembly = Assembly.Load(File.ReadAllBytes(assemblyCachePath));
                             }
+                            mAssembly = Assembly.LoadFile(assemblyCachePath);
                         }
 
-                        foreach (var filepath in Directory.GetFiles(Path, "*.dll"))
-                        {
-                            if (filepath != assemblyPath)
-                            {
-                                Assembly.Load(File.ReadAllBytes(filepath));
-                            }
-                        }
+                        mFirstLoading = false;
                     }
                     catch (Exception exception)
                     {
@@ -977,8 +1000,16 @@ namespace UnityModManagerNet
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    /// <summary>
+    /// Copies a value from an old assembly to a new one [0.14.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
     public class SaveOnReloadAttribute : Attribute
+    {
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class EnableReloadingAttribute : Attribute
     {
     }
 }
