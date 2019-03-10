@@ -40,6 +40,9 @@ namespace UnityModManagerNet
             public static GUIStyle h1 = null;
             public static GUIStyle h2 = null;
             public static GUIStyle bold = null;
+            /// <summary>
+            /// [0.13.1]
+            /// </summary>
             public static GUIStyle button = null;
             private static GUIStyle settings = null;
             private static GUIStyle status = null;

@@ -1008,6 +1008,9 @@ namespace UnityModManagerNet
     {
     }
 
+    /// <summary>
+    /// Allows reloading [0.14.1]
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class EnableReloadingAttribute : Attribute
     {

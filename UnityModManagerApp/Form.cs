@@ -294,6 +294,21 @@ namespace UnityModManagerNet.Installer
                 libraryPaths[i] = Path.Combine(managerPath, libraryFiles[i]);
             }
 
+            var parent = new DirectoryInfo(Application.StartupPath).Parent;
+            for(int i = 0; i < 3; i++)
+            {
+                if (parent == null)
+                    break;
+
+                if (parent.FullName == gamePath)
+                {
+                    InactiveForm();
+                    Log.Print("UMM Installer should not be located in the game folder.");
+                    return;
+                }
+                parent = parent.Parent;
+            }
+
             //machineConfigPath = string.Empty;
             //machineDoc = null;
 
