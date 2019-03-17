@@ -120,7 +120,7 @@ namespace UnityModManagerNet
                 }
 
                 bool toggle = false;
-
+                
                 switch (Params.ShortcutKeyId)
                 {
                     default:
@@ -128,28 +128,24 @@ namespace UnityModManagerNet
                         {
                             toggle = true;
                         }
-
                         break;
                     case 1:
                         if (Input.GetKeyUp(KeyCode.ScrollLock))
                         {
                             toggle = true;
                         }
-
                         break;
                     case 2:
                         if (Input.GetKeyUp(KeyCode.KeypadMultiply))
                         {
                             toggle = true;
                         }
-
                         break;
                     case 3:
                         if (Input.GetKeyUp(KeyCode.BackQuote))
                         {
                             toggle = true;
                         }
-
                         break;
                 }
 
@@ -498,9 +494,11 @@ namespace UnityModManagerNet
 
                                 if (mods[i].ManagerVersion > GetVersion())
                                 {
-                                    GUI.color = new Color32(255, 81, 83, 255);
-                                    GUILayout.Label("Manager-" + mods[i].Info.ManagerVersion, colWidth[++col]);
-                                    GUI.color = Color.white;
+                                    GUILayout.Label("<color=\"#CD5C5C\">Manager-" + mods[i].Info.ManagerVersion + "</color>", colWidth[++col]);
+                                }
+                                else if (gameVersion != VER_0 && mods[i].GameVersion > gameVersion)
+                                {
+                                    GUILayout.Label("<color=\"#CD5C5C\">Game-" + mods[i].Info.GameVersion + "</color>", colWidth[++col]);
                                 }
                                 else if (mods[i].Requirements.Count > 0)
                                 {
@@ -508,8 +506,12 @@ namespace UnityModManagerNet
                                     {
                                         var id = item.Key;
                                         var mod = FindMod(id);
-                                        GUILayout.Label(((mod == null || item.Value != null && item.Value > mod.Version || !mod.Active) && mods[i].Active) ? "<color=\"#FF0000\">" + id + "</color>" : id, colWidth[++col]);
+                                        GUILayout.Label(((mod == null || item.Value != null && item.Value > mod.Version || !mod.Active) && mods[i].Active) ? "<color=\"#CD5C5C\">" + id + "</color>" : id, colWidth[++col]);
                                     }
+                                }
+                                else if (!string.IsNullOrEmpty(mods[i].CustomRequirements))
+                                {
+                                    GUILayout.Label(mods[i].CustomRequirements, colWidth[++col]);
                                 }
                                 else
                                 {
@@ -655,8 +657,7 @@ namespace UnityModManagerNet
 
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Hotkey", GUILayout.ExpandWidth(false));
-                            Params.ShortcutKeyId =
-                                GUILayout.Toolbar(Params.ShortcutKeyId, mShortcutNames, GUILayout.ExpandWidth(false));
+                            Params.ShortcutKeyId = GUILayout.Toolbar(Params.ShortcutKeyId, mHotkeyNames, GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
 
                             GUILayout.Space(5);
@@ -731,7 +732,7 @@ namespace UnityModManagerNet
             
             private string[] mShowOnStartStrings = { "No", "Yes" };
 
-            private string[] mShortcutNames = { "CTRL+F10", "ScrollLock", "Num *", "~" };
+            private string[] mHotkeyNames = { "CTRL+F10", "ScrollLock", "Num *", "~" };
 
             internal bool GameCursorLocked { get; set; }
 

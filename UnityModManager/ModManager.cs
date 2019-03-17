@@ -13,10 +13,23 @@ namespace UnityModManagerNet
 {
     public partial class UnityModManager
     {
+        private static readonly Version VER_0 = new Version();
+
         private static readonly Version VER_0_13 = new Version(0, 13);
 
+        /// <summary>
+        /// Contains version of UnityEngine
+        /// </summary>
         public static Version unityVersion { get; private set; }
 
+        /// <summary>
+        /// Contains version of a game, if configured [0.15.0]
+        /// </summary>
+        public static Version gameVersion { get; private set; } = new Version();
+
+        /// <summary>
+        /// Contains version of UMM
+        /// </summary>
         public static Version version { get; private set; } = typeof(UnityModManager).Assembly.GetName().Version;
 
         private static ModuleDefMD thisModuleDef = ModuleDefMD.Load(typeof(UnityModManager).Module);
@@ -121,6 +134,8 @@ namespace UnityModManagerNet
 
             public string ManagerVersion;
 
+            public string GameVersion;
+
             public string[] Requirements;
 
             public string AssemblyName;
@@ -168,9 +183,20 @@ namespace UnityModManagerNet
             Assembly mAssembly = null;
             public Assembly Assembly => mAssembly;
 
+            /// <summary>
+            /// Version of a mod
+            /// </summary>
             public readonly Version Version = null;
 
+            /// <summary>
+            /// Required UMM version
+            /// </summary>
             public readonly Version ManagerVersion = null;
+
+            /// <summary>
+            /// Required game version [0.15.0]
+            /// </summary>
+            public readonly Version GameVersion = null;
 
             /// <summary>
             /// Not used
@@ -181,6 +207,11 @@ namespace UnityModManagerNet
             /// Required mods
             /// </summary>
             public readonly Dictionary<string, Version> Requirements = new Dictionary<string, Version>();
+
+            /// <summary>
+            /// Displayed in UMM UI. Add <color></color> tag to change colors. Can be used when custom verification game version [0.15.0]
+            /// </summary>
+            public string CustomRequirements = String.Empty;
 
             public readonly ModLogger Logger = null;
 
@@ -318,6 +349,7 @@ namespace UnityModManagerNet
                 Logger = new ModLogger(Info.Id);
                 Version = ParseVersion(info.Version);
                 ManagerVersion = !string.IsNullOrEmpty(info.ManagerVersion) ? ParseVersion(info.ManagerVersion) : new Version();
+                GameVersion = !string.IsNullOrEmpty(info.GameVersion) ? ParseVersion(info.GameVersion) : new Version();
 
                 if (info.Requirements != null && info.Requirements.Length > 0)
                 {
@@ -362,6 +394,15 @@ namespace UnityModManagerNet
                     {
                         mErrorOnLoading = true;
                         this.Logger.Error($"Mod Manager must be version '{Info.ManagerVersion}' or higher.");
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(Info.GameVersion))
+                {
+                    if (gameVersion != VER_0 && GameVersion > gameVersion)
+                    {
+                        mErrorOnLoading = true;
+                        this.Logger.Error($"Game must be version '{Info.GameVersion}' or higher.");
                     }
                 }
 
@@ -586,6 +627,7 @@ namespace UnityModManagerNet
                         OnUpdate = null;
                         OnFixedUpdate = null;
                         OnLateUpdate = null;
+                        CustomRequirements = null;
 
                         if (Load())
                         {
@@ -865,6 +907,53 @@ namespace UnityModManagerNet
             }
 
             started = true;
+
+            if (!string.IsNullOrEmpty(Config.GameVersionPoint))
+            {
+                try
+                {
+                    Logger.Log($"Start parsing game version.");
+                    if (Injector.TryParseEntryPoint(Config.GameVersionPoint, out var assembly, out var className, out var methodName, out _))
+                    {
+                        var asm = Assembly.Load(assembly);
+                        if (asm == null)
+                        {
+                            Logger.Error($"File '{assembly}' not found.");
+                            goto Next;
+                        }
+                        var foundClass = asm.GetType(className);
+                        if (foundClass == null)
+                        {
+                            Logger.Error($"Class '{className}' not found.");
+                            goto Next;
+                        }
+                        var foundMethod = foundClass.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                        if (foundMethod == null)
+                        {
+                            var foundField = foundClass.GetField(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                            if (foundField != null)
+                            {
+                                gameVersion = ParseVersion(foundField.GetValue(null).ToString());
+                                Logger.Log($"Game version detected as '{gameVersion}'.");
+                                goto Next;
+                            }
+
+                            UnityModManager.Logger.Error($"Method '{methodName}' not found.");
+                            goto Next;
+                        }
+
+                        gameVersion = ParseVersion(foundMethod.Invoke(null, null).ToString());
+                        Logger.Log($"Game version detected as '{gameVersion}'.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    OpenUnityFileLog();
+                }
+            }
+
+            Next:
 
             if (Directory.Exists(modsPath))
             {

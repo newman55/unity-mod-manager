@@ -27,6 +27,7 @@ namespace UnityModManagerNet.Installer
             "0Harmony12.dll",
             "0Harmony-1.2.dll",
             "dnlib.dll",
+            //"System.Xml.dll",
             nameof(UnityModManager) + ".dll",
             nameof(UnityModManager) + ".xml"
         };
@@ -188,7 +189,8 @@ namespace UnityModManagerNet.Installer
                 nameof(GameInfo.GameExe),
                 nameof(GameInfo.StartingPoint),
                 nameof(GameInfo.UIStartingPoint),
-                nameof(GameInfo.OldPatchTarget)
+                nameof(GameInfo.OldPatchTarget),
+                nameof(GameInfo.GameVersionPoint)
             };
 
             var prefix = (!string.IsNullOrEmpty(gameInfo.Name) ? $"[{gameInfo.Name}]" : "[?]");

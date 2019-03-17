@@ -100,6 +100,7 @@ namespace UnityModManagerNet
             public string StartingPoint;
             public string UIStartingPoint;
             public string GameExe;
+            public string GameVersionPoint;
 
             static readonly string filepath = Path.Combine(Path.GetDirectoryName(typeof(GameInfo).Assembly.Location), "Config.xml");
 

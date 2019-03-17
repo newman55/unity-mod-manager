@@ -24,11 +24,21 @@ namespace UnityModManagerNet
 
         public static Version ParseVersion(string str)
         {
-            var array = str.Split('.', ',');
+            var array = str.Split('.');
             if (array.Length >= 3)
             {
                 var regex = new Regex(@"\D");
                 return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")), int.Parse(regex.Replace(array[2], "")));
+            }
+            else if (array.Length >= 2)
+            {
+                var regex = new Regex(@"\D");
+                return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")));
+            }
+            else if (array.Length >= 1)
+            {
+                var regex = new Regex(@"\D");
+                return new Version(int.Parse(regex.Replace(array[0], "")), 0);
             }
 
             Logger.Error($"Error parsing version {str}");
