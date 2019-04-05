@@ -243,6 +243,16 @@ namespace UnityModManagerNet
             public Action<ModEntry> OnGUI = null;
 
             /// <summary>
+            /// Called when opening mod GUI [0.16.0]
+            /// </summary>
+            public Action<ModEntry> OnShowGUI = null;
+
+            /// <summary>
+            /// Called when closing mod GUI [0.16.0]
+            /// </summary>
+            public Action<ModEntry> OnHideGUI = null;
+
+            /// <summary>
             /// Called when the game closes
             /// </summary>
             public Action<ModEntry> OnSaveGUI = null;
@@ -478,6 +488,7 @@ namespace UnityModManagerNet
                                     File.Copy(assemblyPath, assemblyCachePath, true);
                                 }
                                 mAssembly = Assembly.LoadFile(assemblyCachePath);
+                                //mAssembly = Assembly.LoadFile(assemblyPath);
 
                                 foreach (var type in mAssembly.GetTypes())
                                 {

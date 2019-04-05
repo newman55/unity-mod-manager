@@ -264,7 +264,7 @@ namespace UnityModManagerNet.Installer
                     Log.Print($"Game folder '{selectedGame.Folder}' not found.");
                     return;
                 }
-                Log.Print($"Game folder detected as '{result}'.");
+                Log.Print($"Game path detected as '{result}'.");
                 selectedGameParams.Path = result;
             }
 
@@ -692,6 +692,8 @@ namespace UnityModManagerNet.Installer
                 Log.Print($"Game changed to '{selected.Name}'.");
                 param.LastSelectedGame = selected.Name;
                 selectedGameParams = param.GetGameParam(selected);
+                if (!string.IsNullOrEmpty(selectedGameParams.Path))
+                    Log.Print($"Game path '{selectedGameParams.Path}'.");
             }
 
             RefreshForm();
