@@ -166,7 +166,7 @@ namespace UnityModManagerNet.Installer
             {
                 using (var ping = new Ping())
                 {
-                    return ping.Send("www.google.com.mx", 2000).Status == IPStatus.Success;
+                    return ping.Send("www.google.com.mx", 3000).Status == IPStatus.Success;
                 }
             }
             catch (Exception e)

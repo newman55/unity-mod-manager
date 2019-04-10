@@ -633,6 +633,8 @@ namespace UnityModManagerNet
 
                         OnToggle = null;
                         OnGUI = null;
+                        OnShowGUI = null;
+                        OnHideGUI = null;
                         OnSaveGUI = null;
                         OnUnload = null;
                         OnUpdate = null;
@@ -840,6 +842,8 @@ namespace UnityModManagerNet
                 return false;
             }
 
+            Logger.Log($"Game: {Config.Name}");
+
             Params = Param.Load();
 
             modsPath = Path.Combine(Environment.CurrentDirectory, Config.ModsDirectory);
@@ -966,6 +970,8 @@ namespace UnityModManagerNet
 
             Next:
 
+            GameScripts.WhenStartManager();
+
             if (Directory.Exists(modsPath))
             {
                 Logger.Log($"Parsing mods.");
@@ -1037,7 +1043,7 @@ namespace UnityModManagerNet
                     }
                 }
 
-                Logger.Log($"Finish. Found {countMods} mods. Successful loaded {modEntries.Count(x => !x.ErrorOnLoading)} mods.".ToUpper());
+                Logger.Log($"Finish. Successful loaded {modEntries.Count(x => !x.ErrorOnLoading)}/{countMods} mods.".ToUpper());
                 Console.WriteLine();
                 Console.WriteLine();
             }

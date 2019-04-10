@@ -33,6 +33,7 @@
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.notesTextBox = new System.Windows.Forms.RichTextBox();
             this.installTypeGroup = new System.Windows.Forms.GroupBox();
             this.btnRestore = new System.Windows.Forms.Button();
             this.btnDownloadUpdate = new System.Windows.Forms.Button();
@@ -65,21 +66,26 @@
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.modInstallFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.additionallyGroupBox = new System.Windows.Forms.GroupBox();
             this.panelMain.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
             this.splitContainerMain.Panel1.SuspendLayout();
             this.splitContainerMain.Panel2.SuspendLayout();
             this.splitContainerMain.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerMods)).BeginInit();
             this.splitContainerMods.Panel1.SuspendLayout();
             this.splitContainerMods.Panel2.SuspendLayout();
             this.splitContainerMods.SuspendLayout();
             this.ModcontextMenuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerModsInstall)).BeginInit();
             this.splitContainerModsInstall.Panel1.SuspendLayout();
             this.splitContainerModsInstall.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            this.additionallyGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelMain
@@ -104,6 +110,7 @@
             // splitContainerMain.Panel1
             // 
             this.splitContainerMain.Panel1.Controls.Add(this.tabControl);
+            this.splitContainerMain.Panel1MinSize = 20;
             // 
             // splitContainerMain.Panel2
             // 
@@ -133,6 +140,7 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.Controls.Add(this.additionallyGroupBox);
             this.tabPage1.Controls.Add(this.installTypeGroup);
             this.tabPage1.Controls.Add(this.btnRestore);
             this.tabPage1.Controls.Add(this.btnDownloadUpdate);
@@ -151,6 +159,27 @@
             this.tabPage1.Size = new System.Drawing.Size(318, 342);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Install";
+            // 
+            // notesTextBox
+            // 
+            this.notesTextBox.AcceptsTab = true;
+            this.notesTextBox.AutoWordSelection = true;
+            this.notesTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.notesTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.notesTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.notesTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.notesTextBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.notesTextBox.Location = new System.Drawing.Point(6, 16);
+            this.notesTextBox.Margin = new System.Windows.Forms.Padding(0);
+            this.notesTextBox.Name = "notesTextBox";
+            this.notesTextBox.ReadOnly = true;
+            this.notesTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.notesTextBox.ShortcutsEnabled = false;
+            this.notesTextBox.Size = new System.Drawing.Size(294, 55);
+            this.notesTextBox.TabIndex = 19;
+            this.notesTextBox.TabStop = false;
+            this.notesTextBox.Text = "";
+            this.notesTextBox.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.notesTextBox_LinkClicked);
             // 
             // installTypeGroup
             // 
@@ -437,7 +466,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 28);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(318, 342);
+            this.tabPage3.Size = new System.Drawing.Size(318, 337);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Log";
             // 
@@ -450,25 +479,26 @@
             this.inputLog.Name = "inputLog";
             this.inputLog.ReadOnly = true;
             this.inputLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.inputLog.Size = new System.Drawing.Size(312, 336);
+            this.inputLog.Size = new System.Drawing.Size(312, 331);
             this.inputLog.TabIndex = 10;
             // 
             // statusStrip1
             // 
             this.statusStrip1.AutoSize = false;
+            this.statusStrip1.Dock = System.Windows.Forms.DockStyle.Top;
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel});
             this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            this.statusStrip1.Location = new System.Drawing.Point(0, -2);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 0);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.ShowItemToolTips = true;
-            this.statusStrip1.Size = new System.Drawing.Size(326, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(326, 20);
             this.statusStrip1.TabIndex = 0;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // statusLabel
             // 
-            this.statusLabel.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
+            this.statusLabel.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.statusLabel.MergeAction = System.Windows.Forms.MergeAction.Replace;
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
@@ -486,6 +516,17 @@
             this.modInstallFileDialog.Filter = "ZIP|*.zip";
             this.modInstallFileDialog.Multiselect = true;
             // 
+            // additionallyGroupBox
+            // 
+            this.additionallyGroupBox.Controls.Add(this.notesTextBox);
+            this.additionallyGroupBox.Location = new System.Drawing.Point(6, 265);
+            this.additionallyGroupBox.Name = "additionallyGroupBox";
+            this.additionallyGroupBox.Padding = new System.Windows.Forms.Padding(6, 3, 6, 3);
+            this.additionallyGroupBox.Size = new System.Drawing.Size(306, 74);
+            this.additionallyGroupBox.TabIndex = 20;
+            this.additionallyGroupBox.TabStop = false;
+            this.additionallyGroupBox.Text = "Additionally";
+            // 
             // UnityModManagerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -502,6 +543,7 @@
             this.panelMain.ResumeLayout(false);
             this.splitContainerMain.Panel1.ResumeLayout(false);
             this.splitContainerMain.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).EndInit();
             this.splitContainerMain.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
@@ -509,14 +551,17 @@
             this.tabPage2.ResumeLayout(false);
             this.splitContainerMods.Panel1.ResumeLayout(false);
             this.splitContainerMods.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerMods)).EndInit();
             this.splitContainerMods.ResumeLayout(false);
             this.ModcontextMenuStrip1.ResumeLayout(false);
             this.splitContainerModsInstall.Panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerModsInstall)).EndInit();
             this.splitContainerModsInstall.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.additionallyGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -558,6 +603,8 @@
         private System.Windows.Forms.Button btnDownloadUpdate;
         private System.Windows.Forms.Button btnRestore;
         private System.Windows.Forms.GroupBox installTypeGroup;
+        private System.Windows.Forms.RichTextBox notesTextBox;
+        private System.Windows.Forms.GroupBox additionallyGroupBox;
     }
 }
 

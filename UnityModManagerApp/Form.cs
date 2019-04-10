@@ -27,7 +27,7 @@ namespace UnityModManagerNet.Installer
             "0Harmony12.dll",
             "0Harmony-1.2.dll",
             "dnlib.dll",
-            //"System.Xml.dll",
+            "System.Xml.dll",
             nameof(UnityModManager) + ".dll",
             nameof(UnityModManager) + ".xml"
         };
@@ -166,6 +166,7 @@ namespace UnityModManagerNet.Installer
             btnRestore.Enabled = false;
             tabControl.TabPages[1].Enabled = false;
             installedVersion.Text = "-";
+            additionallyGroupBox.Visible = false;
 
             foreach (var ctrl in installTypeGroup.Controls)
             {
@@ -190,7 +191,8 @@ namespace UnityModManagerNet.Installer
                 nameof(GameInfo.StartingPoint),
                 nameof(GameInfo.UIStartingPoint),
                 nameof(GameInfo.OldPatchTarget),
-                nameof(GameInfo.GameVersionPoint)
+                nameof(GameInfo.GameVersionPoint),
+                nameof(GameInfo.Additionally)
             };
 
             var prefix = (!string.IsNullOrEmpty(gameInfo.Name) ? $"[{gameInfo.Name}]" : "[?]");
@@ -250,6 +252,7 @@ namespace UnityModManagerNet.Installer
 
             btnInstall.Text = "Install";
             btnRestore.Enabled = false;
+            additionallyGroupBox.Visible = false;
 
             gamePath = "";
             if (string.IsNullOrEmpty(selectedGameParams.Path) || !Directory.Exists(selectedGameParams.Path))
@@ -266,6 +269,13 @@ namespace UnityModManagerNet.Installer
                 }
                 Log.Print($"Game path detected as '{result}'.");
                 selectedGameParams.Path = result;
+            }
+
+            if (!Utils.IsUnixPlatform() && !Directory.GetFiles(selectedGameParams.Path, "*.exe", SearchOption.TopDirectoryOnly).Any())
+            {
+                InactiveForm();
+                Log.Print("Select the game folder where an exe file is located.");
+                return;
             }
 
             Utils.TryParseEntryPoint(selectedGame.EntryPoint, out var assemblyName);
@@ -506,6 +516,12 @@ namespace UnityModManagerNet.Installer
                 installedVersion.Text = "-";
                 btnInstall.Enabled = true;
                 btnRemove.Enabled = false;
+            }
+
+            if (!string.IsNullOrEmpty(selectedGame.Additionally))
+            {
+                notesTextBox.Text = selectedGame.Additionally;
+                additionallyGroupBox.Visible = true;
             }
         }
 
@@ -1298,6 +1314,11 @@ namespace UnityModManagerNet.Installer
                         CheckModUpdates();
                     break;
             }
+        }
+
+        private void notesTextBox_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            Process.Start(e.LinkText);
         }
     }
 }
