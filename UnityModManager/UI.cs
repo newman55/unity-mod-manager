@@ -119,8 +119,7 @@ namespace UnityModManagerNet
                         }
                         catch (Exception e)
                         {
-                            mod.Logger.Error("OnUpdate: " + e.GetType().Name + " - " + e.Message);
-                            Debug.LogException(e);
+                            mod.Logger.LogException("OnUpdate", e);
                         }
                     }
                 }
@@ -179,8 +178,7 @@ namespace UnityModManagerNet
                         }
                         catch (Exception e)
                         {
-                            mod.Logger.Error("OnFixedUpdate: " + e.GetType().Name + " - " + e.Message);
-                            Debug.LogException(e);
+                            mod.Logger.LogException("OnFixedUpdate", e);
                         }
                     }
                 }
@@ -199,8 +197,7 @@ namespace UnityModManagerNet
                         }
                         catch (Exception e)
                         {
-                            mod.Logger.Error("OnLateUpdate: " + e.GetType().Name + " - " + e.Message);
-                            Debug.LogException(e);
+                            mod.Logger.LogException("OnLateUpdate", e);
                         }
                     }
                 }
@@ -385,8 +382,7 @@ namespace UnityModManagerNet
                             }
                             catch (Exception ex)
                             {
-                                mod.Logger.Error("OnHideGUI: " + ex.GetType().Name + " - " + ex.Message);
-                                Debug.LogException(ex);
+                                mod.Logger.LogException("OnHideGUI", ex);
                             }
                         }
                     };
@@ -401,8 +397,7 @@ namespace UnityModManagerNet
                             }
                             catch (Exception ex)
                             {
-                                mod.Logger.Error("OnShowGUI: " + ex.GetType().Name + " - " + ex.Message);
-                                Debug.LogException(ex);
+                                mod.Logger.LogException("OnShowGUI", ex);
                             }
                         }
                     };
@@ -604,15 +599,22 @@ namespace UnityModManagerNet
                                     GUILayout.Label("-", colWidth[++col]);
                                 }
 
-                                var action = mods[i].Enabled;
-                                action = GUILayout.Toggle(action, "", colWidth[++col]);
-                                if (action != mods[i].Enabled)
+                                if (!forbidDisableMods)
                                 {
-                                    mods[i].Enabled = action;
-                                    if (mods[i].Toggleable)
-                                        mods[i].Active = action;
-                                    else if (action && !mods[i].Loaded)
-                                        mods[i].Active = action;
+                                    var action = mods[i].Enabled;
+                                    action = GUILayout.Toggle(action, "", colWidth[++col]);
+                                    if (action != mods[i].Enabled)
+                                    {
+                                        mods[i].Enabled = action;
+                                        if (mods[i].Toggleable)
+                                            mods[i].Active = action;
+                                        else if (action && !mods[i].Loaded)
+                                            mods[i].Active = action;
+                                    }
+                                }
+                                else
+                                {
+                                    GUILayout.Label("", colWidth[++col]);
                                 }
 
                                 if (mods[i].Active)
@@ -884,8 +886,7 @@ namespace UnityModManagerNet
                 }
                 catch (Exception e)
                 {
-                    Logger.Error("ToggleWindow: " + e.GetType().Name + " - " + e.Message);
-                    Debug.LogException(e);
+                    Logger.LogException("ToggleWindow", e);
                 }
             }
 

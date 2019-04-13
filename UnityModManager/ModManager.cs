@@ -14,7 +14,6 @@ namespace UnityModManagerNet
     public partial class UnityModManager
     {
         private static readonly Version VER_0 = new Version();
-
         private static readonly Version VER_0_13 = new Version(0, 13);
 
         /// <summary>
@@ -33,6 +32,8 @@ namespace UnityModManagerNet
         public static Version version { get; private set; } = typeof(UnityModManager).Assembly.GetName().Version;
 
         private static ModuleDefMD thisModuleDef = ModuleDefMD.Load(typeof(UnityModManager).Module);
+
+        private static bool forbidDisableMods;
 
         public class Repository
         {
@@ -92,7 +93,7 @@ namespace UnityModManagerNet
                 catch (Exception e)
                 {
                     modEntry.Logger.Error($"Can't save {filepath}.");
-                    Debug.LogException(e);
+                    modEntry.Logger.LogException(e);
                 }
             }
 
@@ -114,7 +115,7 @@ namespace UnityModManagerNet
                     catch (Exception e)
                     {
                         modEntry.Logger.Error($"Can't read {filepath}.");
-                        Debug.LogException(e);
+                        modEntry.Logger.LogException(e);
                     }
                 }
 
@@ -145,6 +146,11 @@ namespace UnityModManagerNet
             public string HomePage;
 
             public string Repository;
+
+            /// <summary>
+            /// Used for RoR2 game [0.17.0]
+            /// </summary>
+            public bool Cheating = true;
 
             public static implicit operator bool(ModInfo exists)
             {
@@ -326,13 +332,14 @@ namespace UnityModManagerNet
                             {
                                 mActive = true;
                                 this.Logger.Log($"Active.");
+                                GameScripts.OnModToggle(this, true);
                             }
                             else
                             {
                                 this.Logger.Log($"Unsuccessfully.");
                             }
                         }
-                        else
+                        else if (!forbidDisableMods)
                         {
                             if (!mActive)
                                 return;
@@ -341,13 +348,13 @@ namespace UnityModManagerNet
                             {
                                 mActive = false;
                                 this.Logger.Log($"Inactive.");
+                                GameScripts.OnModToggle(this, false);
                             }
                         }
                     }
                     catch (Exception e)
                     {
-                        this.Logger.Error("OnToggle: " + e.GetType().Name + " - " + e.Message);
-                        Debug.LogException(e);
+                        this.Logger.LogException("OnToggle", e);
                     }
                 }
             }
@@ -539,7 +546,7 @@ namespace UnityModManagerNet
                     {
                         mErrorOnLoading = true;
                         this.Logger.Error($"Error loading file '{assemblyPath}'.");
-                        Debug.LogException(exception);
+                        this.Logger.LogException(exception);
                         return false;
                     }
 
@@ -611,7 +618,10 @@ namespace UnityModManagerNet
 
                 if (Toggleable)
                 {
+                    var b = forbidDisableMods;
+                    forbidDisableMods = false;
                     Active = false;
+                    forbidDisableMods = b;
                 }
                 else
                 {
@@ -720,8 +730,7 @@ namespace UnityModManagerNet
                 catch (Exception exception)
                 {
                     this.Logger.Error($"Error trying to call '{namespaceClassnameMethodname}'.");
-                    this.Logger.Error($"{exception.GetType().Name} - {exception.Message}");
-                    Debug.LogException(exception);
+                    this.Logger.LogException(exception);
                 }
 
                 return false;
@@ -970,7 +979,9 @@ namespace UnityModManagerNet
 
             Next:
 
-            GameScripts.WhenStartManager();
+            GameScripts.Init();
+
+            GameScripts.OnBeforeLoadMods();
 
             if (Directory.Exists(modsPath))
             {
@@ -1048,6 +1059,8 @@ namespace UnityModManagerNet
                 Console.WriteLine();
             }
 
+            GameScripts.OnAfterLoadMods();
+
             if (!UI.Load())
             {
                 Logger.Error($"Can't load UI.");
@@ -1098,8 +1111,7 @@ namespace UnityModManagerNet
                     }
                     catch (Exception e)
                     {
-                        mod.Logger.Error("OnSaveGUI: " + e.GetType().Name + " - " + e.Message);
-                        Debug.LogException(e);
+                        mod.Logger.LogException("OnSaveGUI", e);
                     }
                 }
             }

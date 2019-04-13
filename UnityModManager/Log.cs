@@ -16,6 +16,7 @@ namespace UnityModManagerNet
                 protected readonly string PrefixError;
                 protected readonly string PrefixCritical;
                 protected readonly string PrefixWarning;
+                protected readonly string PrefixException;
 
                 public ModLogger(string Id)
                 {
@@ -23,6 +24,7 @@ namespace UnityModManagerNet
                     PrefixError = $"[{Id}] [Error] ";
                     PrefixCritical = $"[{Id}] [Critical] ";
                     PrefixWarning = $"[{Id}] [Warning] ";
+                    PrefixException = $"[{Id}] [Exception] ";
                 }
 
                 public void Log(string str)
@@ -49,6 +51,22 @@ namespace UnityModManagerNet
                 {
                     UnityModManager.Logger.NativeLog(str, Prefix);
                 }
+
+                /// <summary>
+                /// [0.17.0]
+                /// </summary>
+                public void LogException(string key, Exception e)
+                {
+                    UnityModManager.Logger.LogException(key, e, PrefixException);
+                }
+
+                /// <summary>
+                /// [0.17.0]
+                /// </summary>
+                public void LogException(Exception e)
+                {
+                    UnityModManager.Logger.LogException(null, e, PrefixException);
+                }
             }
         }
 
@@ -56,6 +74,7 @@ namespace UnityModManagerNet
         {
             const string Prefix = "[Manager] ";
             const string PrefixError = "[Manager] [Error] ";
+            const string PrefixException = "[Manager] [Exception] ";
 
             public static readonly string filepath = Path.Combine(Path.Combine(Application.dataPath, Path.Combine("Managed", nameof(UnityModManager))), "Log.txt");
 
@@ -87,6 +106,34 @@ namespace UnityModManagerNet
             public static void Error(string str, string prefix)
             {
                 Write(prefix + str);
+            }
+
+            /// <summary>
+            /// [0.17.0]
+            /// </summary>
+            public static void LogException(Exception e)
+            {
+                LogException(null, e, PrefixException);
+            }
+
+            /// <summary>
+            /// [0.17.0]
+            /// </summary>
+            public static void LogException(string key, Exception e)
+            {
+                LogException(key, e, PrefixException);
+            }
+
+            /// <summary>
+            /// [0.17.0]
+            /// </summary>
+            public static void LogException(string key, Exception e, string prefix)
+            {
+                if (string.IsNullOrEmpty(key))
+                    Write($"{prefix}{e.GetType().Name} - {e.Message}");
+                else
+                    Write($"{prefix}{key}: {e.GetType().Name} - {e.Message}");
+                Console.WriteLine(e.ToString());
             }
 
             private static int bufferCapacity = 100;

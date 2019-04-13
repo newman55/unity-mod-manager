@@ -33,6 +33,7 @@
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.additionallyGroupBox = new System.Windows.Forms.GroupBox();
             this.notesTextBox = new System.Windows.Forms.RichTextBox();
             this.installTypeGroup = new System.Windows.Forms.GroupBox();
             this.btnRestore = new System.Windows.Forms.Button();
@@ -66,7 +67,6 @@
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.modInstallFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.additionallyGroupBox = new System.Windows.Forms.GroupBox();
             this.panelMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
             this.splitContainerMain.Panel1.SuspendLayout();
@@ -74,6 +74,7 @@
             this.splitContainerMain.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.additionallyGroupBox.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMods)).BeginInit();
             this.splitContainerMods.Panel1.SuspendLayout();
@@ -85,7 +86,6 @@
             this.splitContainerModsInstall.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.statusStrip1.SuspendLayout();
-            this.additionallyGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelMain
@@ -117,7 +117,7 @@
             this.splitContainerMain.Panel2.Controls.Add(this.statusStrip1);
             this.splitContainerMain.Panel2MinSize = 20;
             this.splitContainerMain.Size = new System.Drawing.Size(326, 398);
-            this.splitContainerMain.SplitterDistance = 374;
+            this.splitContainerMain.SplitterDistance = 369;
             this.splitContainerMain.TabIndex = 11;
             // 
             // tabControl
@@ -132,7 +132,7 @@
             this.tabControl.Name = "tabControl";
             this.tabControl.Padding = new System.Drawing.Point(0, 4);
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(326, 374);
+            this.tabControl.Size = new System.Drawing.Size(326, 369);
             this.tabControl.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.tabControl.TabIndex = 10;
             this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabs_Changed);
@@ -156,9 +156,20 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 28);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(318, 342);
+            this.tabPage1.Size = new System.Drawing.Size(318, 337);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Install";
+            // 
+            // additionallyGroupBox
+            // 
+            this.additionallyGroupBox.Controls.Add(this.notesTextBox);
+            this.additionallyGroupBox.Location = new System.Drawing.Point(6, 265);
+            this.additionallyGroupBox.Name = "additionallyGroupBox";
+            this.additionallyGroupBox.Padding = new System.Windows.Forms.Padding(6, 3, 6, 3);
+            this.additionallyGroupBox.Size = new System.Drawing.Size(306, 74);
+            this.additionallyGroupBox.TabIndex = 20;
+            this.additionallyGroupBox.TabStop = false;
+            this.additionallyGroupBox.Text = "Additionally";
             // 
             // notesTextBox
             // 
@@ -316,7 +327,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 28);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(318, 342);
+            this.tabPage2.Size = new System.Drawing.Size(318, 337);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Mods";
             // 
@@ -338,8 +349,8 @@
             // 
             this.splitContainerMods.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.splitContainerMods.Panel2.Controls.Add(this.splitContainerModsInstall);
-            this.splitContainerMods.Size = new System.Drawing.Size(312, 336);
-            this.splitContainerMods.SplitterDistance = 190;
+            this.splitContainerMods.Size = new System.Drawing.Size(312, 331);
+            this.splitContainerMods.SplitterDistance = 185;
             this.splitContainerMods.TabIndex = 0;
             // 
             // listMods
@@ -356,7 +367,7 @@
             this.listMods.Location = new System.Drawing.Point(0, 0);
             this.listMods.MultiSelect = false;
             this.listMods.Name = "listMods";
-            this.listMods.Size = new System.Drawing.Size(312, 190);
+            this.listMods.Size = new System.Drawing.Size(312, 185);
             this.listMods.TabIndex = 0;
             this.listMods.UseCompatibleStateImageBehavior = false;
             this.listMods.View = System.Windows.Forms.View.Details;
@@ -364,7 +375,7 @@
             // columnHeader1
             // 
             this.columnHeader1.Text = "Name";
-            this.columnHeader1.Width = 116;
+            this.columnHeader1.Width = 107;
             // 
             // columnHeader2
             // 
@@ -516,17 +527,6 @@
             this.modInstallFileDialog.Filter = "ZIP|*.zip";
             this.modInstallFileDialog.Multiselect = true;
             // 
-            // additionallyGroupBox
-            // 
-            this.additionallyGroupBox.Controls.Add(this.notesTextBox);
-            this.additionallyGroupBox.Location = new System.Drawing.Point(6, 265);
-            this.additionallyGroupBox.Name = "additionallyGroupBox";
-            this.additionallyGroupBox.Padding = new System.Windows.Forms.Padding(6, 3, 6, 3);
-            this.additionallyGroupBox.Size = new System.Drawing.Size(306, 74);
-            this.additionallyGroupBox.TabIndex = 20;
-            this.additionallyGroupBox.TabStop = false;
-            this.additionallyGroupBox.Text = "Additionally";
-            // 
             // UnityModManagerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -548,6 +548,7 @@
             this.tabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            this.additionallyGroupBox.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.splitContainerMods.Panel1.ResumeLayout(false);
             this.splitContainerMods.Panel2.ResumeLayout(false);
@@ -561,7 +562,6 @@
             this.tabPage3.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
-            this.additionallyGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
