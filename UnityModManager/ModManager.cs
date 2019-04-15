@@ -150,7 +150,8 @@ namespace UnityModManagerNet
             /// <summary>
             /// Used for RoR2 game [0.17.0]
             /// </summary>
-            public bool Cheating = true;
+            [NonSerialized]
+            public bool IsCheat = true;
 
             public static implicit operator bool(ModInfo exists)
             {
@@ -841,7 +842,9 @@ namespace UnityModManagerNet
 
             Logger.Clear();
 
-            Logger.Log($"Initialize. Version '{version}'.");
+            Logger.Log($"Initialize.");
+            Logger.Log($"Version: '{version}'.");
+            Logger.Log($"OS: {Environment.OSVersion} {Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")}.");
 
             unityVersion = ParseVersion(Application.unityVersion);
 
@@ -851,7 +854,7 @@ namespace UnityModManagerNet
                 return false;
             }
 
-            Logger.Log($"Game: {Config.Name}");
+            Logger.Log($"Game: {Config.Name}.");
 
             Params = Param.Load();
 

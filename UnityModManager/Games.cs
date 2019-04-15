@@ -37,13 +37,13 @@ namespace UnityModManagerNet
             {
                 public override void OnModToggle(ModEntry modEntry, bool value)
                 {
-                    if (modEntry.Info.Cheating)
+                    if (modEntry.Info.IsCheat)
                     {
                         if (value)
                         {
                             SetModded(true);
                         }
-                        else if (modEntries.All(x => x == modEntry || !x.Info.Cheating))
+                        else if (modEntries.All(x => x == modEntry || !x.Info.IsCheat))
                         {
                             SetModded(false);
                         }
