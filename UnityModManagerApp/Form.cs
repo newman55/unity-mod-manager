@@ -7,6 +7,7 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Net;
 
 namespace UnityModManagerNet.Installer
 {
@@ -73,6 +74,8 @@ namespace UnityModManagerNet.Installer
             instance = this;
 
             Log.Init();
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
             if (!Utils.IsUnixPlatform())
             {
