@@ -844,7 +844,14 @@ namespace UnityModManagerNet
 
             Logger.Log($"Initialize.");
             Logger.Log($"Version: '{version}'.");
-            Logger.Log($"OS: {Environment.OSVersion} {Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")}.");
+            try
+            {
+                Logger.Log($"OS: {Environment.OSVersion} {Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")}.");
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
+            }
 
             unityVersion = ParseVersion(Application.unityVersion);
 

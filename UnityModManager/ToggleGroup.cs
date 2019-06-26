@@ -79,7 +79,7 @@ namespace UnityModManagerNet
                         mWindowRect = GUILayout.Window(mId, mWindowRect, WindowFunction, "", window);
                         if (mWindowRect.width > 0)
                         {
-                            mWidth = (int)(Math.Min(Math.Max(mWindowRect.width, 150), Screen.width - MARGIN));
+                            mWidth = (int)(Math.Min(Math.Max(mWindowRect.width, 250), Screen.width - MARGIN));
                             mHeight = (int)(Math.Min(mWindowRect.height, Screen.height - MARGIN));
                             mWindowRect.x = (int)(Math.Max(Screen.width - mWidth, 0) / 2);
                             mWindowRect.y = (int)(Math.Max(Screen.height - mHeight, 0) / 2);
@@ -87,7 +87,7 @@ namespace UnityModManagerNet
                     }
                     else
                     {
-                        mWindowRect = GUILayout.Window(mId, mWindowRect, WindowFunction, "", window, GUILayout.Width(mWidth), GUILayout.Height(mHeight + 10));
+                        mWindowRect = GUILayout.Window(mId, mWindowRect, WindowFunction, "", window, GUILayout.Width(mWidth), GUILayout.Height(mHeight + 20));
                         GUI.BringWindowToFront(mId);
                     }
                 }
@@ -125,17 +125,47 @@ namespace UnityModManagerNet
             }
 
             /// <summary>
-            /// [0.16.0]
+            /// [0.18.0]
             /// </summary>
-            public static void PopupToggleGroup(int selected, string[] values, Action<int> onChange, GUIStyle style = null, params GUILayoutOption[] option)
+            /// <returns>
+            /// Returns true if the value has changed.
+            /// </returns>
+            public static bool PopupToggleGroup(ref int selected, string[] values, GUIStyle style = null, params GUILayoutOption[] buttonOption)
             {
-                PopupToggleGroup(selected, values, onChange, null, style, option);
+                var changed = false;
+                var newSelected = selected;
+                PopupToggleGroup(selected, values, (i) => { changed = true; newSelected = i; }, style, buttonOption);
+                selected = newSelected;
+                return changed;
+            }
+
+            /// <summary>
+            /// [0.18.0]
+            /// </summary>
+            /// <returns>
+            /// Returns true if the value has changed.
+            /// </returns>
+            public static bool PopupToggleGroup(ref int selected, string[] values, string title, GUIStyle style = null, params GUILayoutOption[] buttonOption)
+            {
+                var changed = false;
+                var newSelected = selected;
+                PopupToggleGroup(selected, values, (i) => { changed = true; newSelected = i; }, title, style, buttonOption);
+                selected = newSelected;
+                return changed;
             }
 
             /// <summary>
             /// [0.16.0]
             /// </summary>
-            public static void PopupToggleGroup(int selected, string[] values, Action<int> onChange, string title, GUIStyle style = null, params GUILayoutOption[] option)
+            public static void PopupToggleGroup(int selected, string[] values, Action<int> onChange, GUIStyle style = null, params GUILayoutOption[] buttonOption)
+            {
+                PopupToggleGroup(selected, values, onChange, null, style, buttonOption);
+            }
+
+            /// <summary>
+            /// [0.16.0]
+            /// </summary>
+            public static void PopupToggleGroup(int selected, string[] values, Action<int> onChange, string title, GUIStyle style = null, params GUILayoutOption[] buttonOption)
             {
                 if (values == null)
                 {
@@ -181,7 +211,7 @@ namespace UnityModManagerNet
                 obj.selected = selected;
                 obj.newSelected = null;
                 obj.title = title;
-                obj.Button(null, style, option);
+                obj.Button(null, style, buttonOption);
                 if (needInvoke)
                 {
                     try
@@ -194,6 +224,21 @@ namespace UnityModManagerNet
                         Console.WriteLine(e.ToString());
                     }
                 }
+            }
+
+            /// <summary>
+            /// [0.18.0]
+            /// </summary>
+            /// <returns>
+            /// Returns true if the value has changed.
+            /// </returns>
+            public static bool ToggleGroup(ref int selected, string[] values, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                var changed = false;
+                var newSelected = selected;
+                ToggleGroup(selected, values, (i) => { changed = true; newSelected = i; }, style, option);
+                selected = newSelected;
+                return changed;
             }
 
             /// <summary>

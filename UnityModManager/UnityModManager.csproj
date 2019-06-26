@@ -69,6 +69,7 @@
     </Compile>
     <Compile Include="Textures.cs" />
     <Compile Include="UI.cs" />
+    <Compile Include="UIDraw.cs" />
     <Compile Include="Updates.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

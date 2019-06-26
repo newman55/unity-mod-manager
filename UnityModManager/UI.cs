@@ -650,9 +650,9 @@ namespace UnityModManagerNet
                                         }
                                         catch (Exception e)
                                         {
-                                            mods[i].Logger.Error("OnGUI: " + e.GetType().Name + " - " + e.Message);
-                                            Debug.LogException(e);
+                                            mods[i].Logger.LogException("OnGUI", e);
                                             ShowModSettings = -1;
+                                            GUIUtility.ExitGUI();
                                         }
                                     }
                                 }
