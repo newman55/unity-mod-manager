@@ -79,6 +79,8 @@ namespace UnityModManagerNet
                 return;
             }
 
+            Fixes.Apply();
+
             if (!string.IsNullOrEmpty(UnityModManager.Config.StartingPoint))
             {
                 if (!doorstop && UnityModManager.Config.StartingPoint == UnityModManager.Config.EntryPoint)

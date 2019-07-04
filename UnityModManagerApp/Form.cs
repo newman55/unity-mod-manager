@@ -298,7 +298,21 @@ namespace UnityModManagerNet.Installer
             injectedAssemblyDef = null;
             managerDef = null;
 
-            gameExePath = !string.IsNullOrEmpty(selectedGame.GameExe) ? Path.Combine(gamePath, selectedGame.GameExe) : string.Empty;
+            if (!string.IsNullOrEmpty(selectedGame.GameExe))
+            {
+                if (selectedGame.GameExe.Contains('*'))
+                {
+                    foreach (var file in new DirectoryInfo(gamePath).GetFiles(selectedGame.GameExe, SearchOption.TopDirectoryOnly))
+                    {
+                        selectedGame.GameExe = file.Name;
+                    }
+                }
+                gameExePath = Path.Combine(gamePath, selectedGame.GameExe);
+            }
+            else
+            {
+                gameExePath = string.Empty;
+            }
 
             doorstopPath = Path.Combine(gamePath, doorstopFilename);
             doorstopConfigPath = Path.Combine(gamePath, doorstopConfigFilename);

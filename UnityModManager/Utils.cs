@@ -172,7 +172,7 @@ namespace UnityModManagerNet
                 if (string.IsNullOrEmpty(a.Alias))
                     a.Alias = f.Name;
 
-                var f2 = typeof(T2).GetField(a.Alias);
+                var f2 = typeof(T2).GetField(a.Alias, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 if (f2 == null)
                 {
                     if ((mask & CopyFieldMask.Matching) == 0)

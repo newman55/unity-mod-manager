@@ -847,6 +847,7 @@ namespace UnityModManagerNet
             try
             {
                 Logger.Log($"OS: {Environment.OSVersion} {Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")}.");
+                Logger.Log($"Net Framework: {Environment.Version}.");
             }
             catch(Exception e)
             {
