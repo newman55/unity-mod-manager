@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Networking;
@@ -35,7 +37,14 @@ namespace UnityModManagerNet
             {
                 foreach (var url in urls)
                 {
-                    UI.Instance.StartCoroutine(DownloadString(url, ParseRepository));
+                    if (unityVersion < new Version(5, 4))
+                    {
+                        UI.Instance.StartCoroutine(DownloadString_5_3(url, ParseRepository));
+                    }
+                    else
+                    {
+                        UI.Instance.StartCoroutine(DownloadString(url, ParseRepository));
+                    }
                 }
             }
         }
@@ -49,7 +58,8 @@ namespace UnityModManagerNet
 
             try
             {
-                var repository = JsonUtility.FromJson<Repository>(json);
+                //var repository = JsonUtility.FromJson<Repository>(json);
+                var repository = TinyJson.JSONParser.FromJson<Repository>(json);
                 if (repository != null && repository.Releases != null && repository.Releases.Length > 0)
                 {
                     foreach (var release in repository.Releases)
@@ -96,11 +106,9 @@ namespace UnityModManagerNet
         private static IEnumerator DownloadString(string url, UnityAction<string, string> handler)
         {
             var www = UnityWebRequest.Get(url);
-
             yield return www.Send();
 
             MethodInfo isError;
-
             var ver = ParseVersion(Application.unityVersion);
             if (ver.Major >= 2017)
             {
@@ -110,15 +118,28 @@ namespace UnityModManagerNet
             {
                 isError = typeof(UnityWebRequest).GetMethod("get_isError");
             }
-
             if (isError == null || (bool)isError.Invoke(www, null))
             {
                 Logger.Log(www.error);
                 Logger.Log(string.Format("Error downloading '{0}'.", url));
                 yield break;
             }
-
             handler(www.downloadHandler.text, url);
+        }
+
+        private static IEnumerator DownloadString_5_3(string url, UnityAction<string, string> handler)
+        {
+            var www = new WWW(url);
+            yield return www;
+
+            if (!string.IsNullOrEmpty(www.error))
+            {
+                Logger.Log(www.error);
+                Logger.Log(string.Format("Error downloading '{0}'.", url));
+                yield break;
+            }
+
+            handler(www.text, url);
         }
     }
 }

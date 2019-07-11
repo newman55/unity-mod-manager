@@ -124,37 +124,7 @@ namespace UnityModManagerNet
                     }
                 }
 
-                bool toggle = false;
-                
-                switch (Params.ShortcutKeyId)
-                {
-                    default:
-                        if (Input.GetKeyUp(KeyCode.F10) && (Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)))
-                        {
-                            toggle = true;
-                        }
-                        break;
-                    case 1:
-                        if (Input.GetKeyUp(KeyCode.ScrollLock))
-                        {
-                            toggle = true;
-                        }
-                        break;
-                    case 2:
-                        if (Input.GetKeyUp(KeyCode.KeypadMultiply))
-                        {
-                            toggle = true;
-                        }
-                        break;
-                    case 3:
-                        if (Input.GetKeyUp(KeyCode.BackQuote))
-                        {
-                            toggle = true;
-                        }
-                        break;
-                }
-
-                if (toggle)
+                if (Params.Hotkey.Up() || Input.GetKeyUp(KeyCode.F10) && KeyBinding.Ctrl())
                 {
                     ToggleWindow();
                 }
@@ -760,8 +730,8 @@ namespace UnityModManagerNet
                             GUILayout.BeginVertical("box");
 
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Hotkey", GUILayout.ExpandWidth(false));
-                            ToggleGroup(Params.ShortcutKeyId, mHotkeyNames, i => { Params.ShortcutKeyId = i; }, null, GUILayout.ExpandWidth(false));
+                            GUILayout.Label("Hotkey (default Ctrl+F10)", GUILayout.ExpandWidth(false));
+                            DrawKeybinding(ref Params.Hotkey, null, GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
 
                             GUILayout.Space(5);

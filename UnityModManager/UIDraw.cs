@@ -12,7 +12,7 @@ namespace UnityModManagerNet
     /// <summary>
     /// [0.18.0]
     /// </summary>
-    public enum DrawType { Auto, Ignore, Field, Slider, Toggle, ToggleGroup, /*MultiToggle, */PopupList };
+    public enum DrawType { Auto, Ignore, Field, Slider, Toggle, ToggleGroup, /*MultiToggle, */PopupList, KeyBinding };
 
     /// <summary>
     /// [0.18.0]
@@ -110,6 +110,72 @@ namespace UnityModManagerNet
     {
     }
 
+    /// <summary>
+    /// [0.20.0]
+    /// </summary>
+    [Serializable]
+    public class KeyBinding
+    {
+        public KeyCode keyCode = KeyCode.None;
+        public byte modifiers;
+        private int m_Index = -1;
+        public int Index
+        {
+            get
+            {
+                if (m_Index == -1)
+                {
+                    m_Index = Array.FindIndex(KeyCodeNames, x => x == keyCode.ToString());
+                }
+                return m_Index;
+            }
+        }
+
+        public readonly static string[] KeyCodeNames = Enum.GetNames(typeof(KeyCode));
+
+        public static bool Ctrl()
+        {
+            return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        }
+
+        public static bool Shift()
+        {
+            return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        }
+
+        public static bool Alt()
+        {
+            return Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+        }
+
+        public void Change(KeyCode key, bool ctrl, bool shift, bool alt)
+        {
+            Change(key, (byte)((ctrl ? 1 : 0) + (shift ? 2 : 0) + (alt ? 4 : 0)));
+        }
+
+        public void Change(KeyCode key, byte modifier = 0)
+        {
+            keyCode = key;
+            modifiers = modifier;
+            m_Index = -1;
+        }
+
+        public bool Pressed()
+        {
+            return keyCode != KeyCode.None && Input.GetKey(keyCode) && ((modifiers & 1) == 0 || Ctrl()) && ((modifiers & 2) == 0 || Shift()) && ((modifiers & 4) == 0 || Alt());
+        }
+
+        public bool Down()
+        {
+            return keyCode != KeyCode.None && Input.GetKeyDown(keyCode) && ((modifiers & 1) == 0 || Ctrl()) && ((modifiers & 2) == 0 || Shift()) && ((modifiers & 4) == 0 || Alt());
+        }
+
+        public bool Up()
+        {
+            return keyCode != KeyCode.None && Input.GetKeyUp(keyCode) && ((modifiers & 1) == 0 || Ctrl()) && ((modifiers & 2) == 0 || Shift()) && ((modifiers & 4) == 0 || Alt());
+        }
+    }
+
     public partial class UnityModManager
     {
         public partial class UI : MonoBehaviour
@@ -118,8 +184,54 @@ namespace UnityModManagerNet
                 typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(string)};
             static Type[] sliderTypes = new[] { typeof(int), typeof(long), typeof(float), typeof(double) };
             static Type[] toggleTypes = new[] { typeof(bool) };
-            static Type[] specialTypes = new[] { typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color) };
+            static Type[] specialTypes = new[] { typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(KeyBinding) };
             static float drawHeight = 22;
+
+            /// <summary>
+            /// [0.20.0]
+            /// </summary>
+            /// <returns>
+            /// Returns true if the value has changed.
+            /// </returns>
+            public static bool DrawKeybinding(ref KeyBinding key, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                var changed = false;
+                if (key == null)
+                    key = new KeyBinding();
+                GUILayout.BeginHorizontal();
+                var modifiersValue = new byte[] { 1, 2, 4 };
+                var modifiersStr = new string[] { "Ctrl", "Shift", "Alt" };
+                var modifiers = key.modifiers;
+                for (int i = 0; i < modifiersValue.Length; i++)
+                {
+                    if (GUILayout.Toggle((modifiers & modifiersValue[i]) != 0, modifiersStr[i], GUILayout.ExpandWidth(false)))
+                    {
+                        modifiers |= modifiersValue[i];
+                    }
+                    else if ((modifiers & modifiersValue[i]) != 0)
+                    {
+                        modifiers ^= modifiersValue[i];
+                    }
+                    //GUILayout.Space(Scale(2));
+                }
+                //GUILayout.Space(Scale(5));
+                GUILayout.Label(" + ", GUILayout.ExpandWidth(false));
+                var val = key.Index;
+                if (PopupToggleGroup(ref val, KeyBinding.KeyCodeNames, style, option))
+                {
+                    key.Change((KeyCode)Enum.Parse(typeof(KeyCode), KeyBinding.KeyCodeNames[val]), modifiers);
+                    changed = true;
+                }
+
+                if (key.modifiers != modifiers)
+                {
+                    key.modifiers = modifiers;
+                    changed = true;
+                }
+                GUILayout.EndHorizontal();
+
+                return changed;
+            }
 
             /// <summary>
             /// [0.18.0]
@@ -505,11 +617,6 @@ namespace UnityModManagerNet
                                 a.Max = a_.max;
                                 break;
                             }
-                            foreach (HeaderAttribute a_ in f.GetCustomAttributes(typeof(HeaderAttribute), false))
-                            {
-                                a.Label = a_.header;
-                                break;
-                            }
                         }
                         else
                         {
@@ -522,9 +629,14 @@ namespace UnityModManagerNet
                         GUILayout.Space(Scale((int)a_.height));
                     }
 
-                    var fieldName = string.IsNullOrEmpty(a.Label) ? f.Name : a.Label;
+                    foreach (HeaderAttribute a_ in f.GetCustomAttributes(typeof(HeaderAttribute), false))
+                    {
+                        GUILayout.Label(a_.header, bold, GUILayout.ExpandWidth(false));
+                    }
 
-                    if (f.FieldType.IsClass && !f.FieldType.IsArray || f.FieldType.IsValueType && !f.FieldType.IsPrimitive && !f.FieldType.IsEnum && !Array.Exists(specialTypes, x => x == f.FieldType))
+                    var fieldName = a.Label == null ? f.Name : a.Label;
+
+                    if ((f.FieldType.IsClass && !f.FieldType.IsArray || f.FieldType.IsValueType && !f.FieldType.IsPrimitive && !f.FieldType.IsEnum) && !Array.Exists(specialTypes, x => x == f.FieldType))
                     {
                         defaultMask = mask;
                         foreach (DrawFieldsAttribute attr in f.GetCustomAttributes(typeof(DrawFieldsAttribute), false))
@@ -543,12 +655,14 @@ namespace UnityModManagerNet
                         if (a.Collapsible)
                             GUILayout.BeginHorizontal();
 
-                        GUILayout.Label($"{fieldName}", GUILayout.ExpandWidth(false));
+                        if (!string.IsNullOrEmpty(fieldName))
+                            GUILayout.Label($"{fieldName}", GUILayout.ExpandWidth(false));
 
                         var visible = true;
                         if (a.Collapsible)
                         {
-                            GUILayout.Space(5);
+                            if (!string.IsNullOrEmpty(fieldName))
+                                GUILayout.Space(5);
                             visible = collapsibleStates.Exists(x => x == f.MetadataToken);
                             if (GUILayout.Button(visible ? "Hide" : "Show", GUILayout.ExpandWidth(false)))
                             {
@@ -569,10 +683,17 @@ namespace UnityModManagerNet
                             if (box)
                                 GUILayout.BeginVertical("box");
                             var val = f.GetValue(container);
-                            if (Draw(val, f.FieldType, mod, defaultMask))
+                            if (typeof(UnityEngine.Object).IsAssignableFrom(f.FieldType) && val is UnityEngine.Object obj)
                             {
-                                changed = true;
-                                f.SetValue(container, val);
+                                GUILayout.Label(obj.name, GUILayout.ExpandWidth(false));
+                            }
+                            else
+                            {
+                                if (Draw(val, f.FieldType, mod, defaultMask))
+                                {
+                                    changed = true;
+                                    f.SetValue(container, val);
+                                }
                             }
                             if (box)
                                 GUILayout.EndVertical();
@@ -598,6 +719,10 @@ namespace UnityModManagerNet
                         {
                             if (f.GetCustomAttributes(typeof(FlagsAttribute), false).Length == 0)
                                 a.Type = DrawType.PopupList;
+                        }
+                        else if (f.FieldType == typeof(KeyBinding))
+                        {
+                            a.Type = DrawType.KeyBinding;
                         }
                     }
 
@@ -968,6 +1093,36 @@ namespace UnityModManagerNet
                             GUILayout.EndVertical();
                         else
                             GUILayout.EndHorizontal();
+                    }
+                    else if (a.Type == DrawType.KeyBinding)
+                    {
+                        if (f.FieldType != typeof(KeyBinding))
+                        {
+                            throw new Exception($"Type {f.FieldType} can't be drawed as {DrawType.KeyBinding}");
+                        }
+
+                        if (a.Vertical)
+                            GUILayout.BeginVertical();
+                        else
+                            GUILayout.BeginHorizontal();
+                        GUILayout.Label(fieldName, GUILayout.ExpandWidth(false));
+                        if (!a.Vertical)
+                            GUILayout.Space(Scale(5));
+                        var key = (KeyBinding)f.GetValue(container);
+                        if (DrawKeybinding(ref key, null, options.ToArray()))
+                        {
+                            f.SetValue(container, key);
+                            changed = true;
+                        }
+                        if (a.Vertical)
+                        {
+                            GUILayout.EndVertical();
+                        }
+                        else
+                        {
+                            GUILayout.FlexibleSpace();
+                            GUILayout.EndHorizontal();
+                        }
                     }
                 }
                 return changed;

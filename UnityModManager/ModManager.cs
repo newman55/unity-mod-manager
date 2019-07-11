@@ -81,12 +81,20 @@ namespace UnityModManagerNet
 
             public static void Save<T>(T data, ModEntry modEntry) where T : ModSettings, new()
             {
+                Save<T>(data, modEntry, null);
+            }
+
+            /// <summary>
+            /// [0.20.0]
+            /// </summary>
+            public static void Save<T>(T data, ModEntry modEntry, XmlAttributeOverrides attributes) where T : ModSettings, new()
+            {
                 var filepath = data.GetPath(modEntry);
                 try
                 {
                     using (var writer = new StreamWriter(filepath))
                     {
-                        var serializer = new XmlSerializer(typeof(T));
+                        var serializer = new XmlSerializer(typeof(T), attributes);
                         serializer.Serialize(writer, data);
                     }
                 }
@@ -108,6 +116,31 @@ namespace UnityModManagerNet
                         using (var stream = File.OpenRead(filepath))
                         {
                             var serializer = new XmlSerializer(typeof(T));
+                            var result = (T)serializer.Deserialize(stream);
+                            return result;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        modEntry.Logger.Error($"Can't read {filepath}.");
+                        modEntry.Logger.LogException(e);
+                    }
+                }
+
+                return t;
+            }
+
+            public static T Load<T>(ModEntry modEntry, XmlAttributeOverrides attributes) where T : ModSettings, new()
+            {
+                var t = new T();
+                var filepath = t.GetPath(modEntry);
+                if (File.Exists(filepath))
+                {
+                    try
+                    {
+                        using (var stream = File.OpenRead(filepath))
+                        {
+                            var serializer = new XmlSerializer(typeof(T), attributes);
                             var result = (T)serializer.Deserialize(stream);
                             return result;
                         }
@@ -855,6 +888,7 @@ namespace UnityModManagerNet
             }
 
             unityVersion = ParseVersion(Application.unityVersion);
+            Logger.Log($"Unity Engine: {unityVersion}.");
 
             Config = GameInfo.Load();
             if (Config == null)
@@ -1015,7 +1049,8 @@ namespace UnityModManagerNet
                         Logger.Log($"Reading file '{jsonPath}'.");
                         try
                         {
-                            ModInfo modInfo = JsonUtility.FromJson<ModInfo>(File.ReadAllText(jsonPath));
+                            //ModInfo modInfo = JsonUtility.FromJson<ModInfo>(File.ReadAllText(jsonPath));
+                            ModInfo modInfo = TinyJson.JSONParser.FromJson<ModInfo>(File.ReadAllText(jsonPath));
                             if (string.IsNullOrEmpty(modInfo.Id))
                             {
                                 Logger.Error($"Id is null.");

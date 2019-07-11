@@ -19,7 +19,7 @@ namespace UnityModManagerNet
                 public bool Enabled = true;
             }
 
-            public int ShortcutKeyId = 0;
+            public KeyBinding Hotkey = new KeyBinding();
             public int CheckUpdates = 1;
             public int ShowOnStart = 1;
             public float WindowWidth;
