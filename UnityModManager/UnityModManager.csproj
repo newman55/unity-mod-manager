@@ -37,7 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony-1.2">
-      <HintPath>F:\Steam Games\SteamApps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityModManager\0Harmony-1.2.dll</HintPath>
+      <HintPath>..\lib\0Harmony-1.2.dll</HintPath>
     </Reference>
     <Reference Include="0Harmony12">
       <HintPath>..\lib\0Harmony12.dll</HintPath>
