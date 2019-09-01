@@ -265,7 +265,7 @@ namespace UnityModManagerNet.Installer
                 {
                     InactiveForm();
                     btnOpenFolder.ForeColor = System.Drawing.Color.FromArgb(192, 0, 0);
-                    btnOpenFolder.Text = "Select Game Folder";
+                    btnOpenFolder.Text = "Select";
                     folderBrowserDialog.SelectedPath = null;
                     Log.Print($"Game folder '{selectedGame.Folder}' not found.");
                     return;
@@ -278,6 +278,13 @@ namespace UnityModManagerNet.Installer
             {
                 InactiveForm();
                 Log.Print("Select the game folder where an exe file is located.");
+                return;
+            }
+
+            if (Utils.IsMacPlatform() && !selectedGameParams.Path.EndsWith(".app"))
+            {
+                InactiveForm();
+                Log.Print("Select the game folder where name ending with '.app'.");
                 return;
             }
 
@@ -585,19 +592,30 @@ namespace UnityModManagerNet.Installer
 
         private string FindManagedFolder(string str)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            if (Utils.IsMacPlatform())
             {
-                var appName = $"{Path.GetFileName(str)}.app";
-                if (!Directory.Exists(Path.Combine(str, appName)))
-                {
-                    appName = Directory.GetDirectories(str).FirstOrDefault(dir => dir.EndsWith(".app"));
-                }
-                var path = Path.Combine(str, $"{appName}/Contents/Resources/Data/Managed");
+                //var appName = $"{Path.GetFileName(str)}.app";
+                //if (!Directory.Exists(Path.Combine(str, appName)))
+                //{
+                //    appName = Directory.GetDirectories(str).FirstOrDefault(dir => dir.EndsWith(".app"));
+                //}
+                //var path = Path.Combine(str, $"{appName}/Contents/Resources/Data/Managed");
+                //if (Directory.Exists(path))
+                //{
+                //    return path;
+                //}
+
+                var path = $"{str}/Contents/Resources/Data/Managed";
                 if (Directory.Exists(path))
                 {
                     return path;
                 }
+
+                InactiveForm();
+                Log.Print("Select the game folder that contains the 'Contents' folder.");
+                return null;
             }
+
             var regex = new Regex(".*_Data$");
             var directory = new DirectoryInfo(str);
             foreach (var dir in directory.GetDirectories())
@@ -612,7 +630,10 @@ namespace UnityModManagerNet.Installer
                     }
                 }
             }
-            return str;
+
+            InactiveForm();
+            Log.Print("Select the game folder that contains the 'Data' folder.");
+            return null;
         }
 
         private void btnRemove_Click(object sender, EventArgs e)

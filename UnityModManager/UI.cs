@@ -311,6 +311,21 @@ namespace UnityModManagerNet
                     GUI.backgroundColor = backgroundColor;
                     GUI.color = color;
                 }
+
+                foreach (var mod in modEntries)
+                {
+                    if (mod.Active && mod.OnFixedGUI != null)
+                    {
+                        try
+                        {
+                            mod.OnFixedGUI.Invoke(mod);
+                        }
+                        catch (Exception e)
+                        {
+                            mod.Logger.LogException("OnFixedGUI", e);
+                        }
+                    }
+                }
             }
 
             public int tabId = 0;

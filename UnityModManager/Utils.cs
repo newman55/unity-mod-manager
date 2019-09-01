@@ -51,6 +51,18 @@ namespace UnityModManagerNet
             int p = (int)Environment.OSVersion.Platform;
             return (p == 4) || (p == 6) || (p == 128);
         }
+
+        public static bool IsMacPlatform()
+        {
+            int p = (int)Environment.OSVersion.Platform;
+            return (p == 6);
+        }
+
+        public static bool IsLinuxPlatform()
+        {
+            int p = (int)Environment.OSVersion.Platform;
+            return (p == 4) || (p == 128);
+        }
     }
 
     /// <summary>

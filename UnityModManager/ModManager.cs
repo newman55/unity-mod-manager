@@ -278,9 +278,14 @@ namespace UnityModManagerNet
             public Func<ModEntry, bool, bool> OnToggle = null;
 
             /// <summary>
-            /// Called by MonoBehaviour.OnGUI
+            /// Called by MonoBehaviour.OnGUI when mod options are visible.
             /// </summary>
             public Action<ModEntry> OnGUI = null;
+
+            /// <summary>
+            /// Called by MonoBehaviour.OnGUI, always [0.21.0]
+            /// </summary>
+            public Action<ModEntry> OnFixedGUI = null;
 
             /// <summary>
             /// Called when opening mod GUI [0.16.0]
