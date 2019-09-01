@@ -495,12 +495,14 @@ namespace UnityModManagerNet
                     return false;
 
                 string assemblyPath = System.IO.Path.Combine(Path, Info.AssemblyName);
-                
+                string pdbPath = assemblyPath.Replace(".dll", ".pdb");
+
                 if (File.Exists(assemblyPath))
                 {
                     try
                     {
                         var assemblyCachePath = assemblyPath;
+                        var pdbCachePath = pdbPath;
                         var cacheExists = false;
 
                         if (mFirstLoading)
@@ -508,6 +510,7 @@ namespace UnityModManagerNet
                             var fi = new FileInfo(assemblyPath);
                             var hash = (ushort)((long)fi.LastWriteTimeUtc.GetHashCode() + version.GetHashCode() + ManagerVersion.GetHashCode()).GetHashCode();
                             assemblyCachePath = assemblyPath + $".{hash}.cache";
+                            pdbCachePath = assemblyCachePath + ".pdb";
                             cacheExists = File.Exists(assemblyCachePath);
 
                             if (!cacheExists)
@@ -533,6 +536,10 @@ namespace UnityModManagerNet
                                 {
                                     File.Copy(assemblyPath, assemblyCachePath, true);
                                 }
+                                if (File.Exists(pdbPath))
+                                {
+                                    File.Copy(pdbPath, pdbCachePath, true);
+                                }
                                 mAssembly = Assembly.LoadFile(assemblyCachePath);
                                 //mAssembly = Assembly.LoadFile(assemblyPath);
 
@@ -547,7 +554,13 @@ namespace UnityModManagerNet
                             }
                             else
                             {
-                                mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+                                if (File.Exists(pdbPath))
+                                {
+                                    mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath), File.ReadAllBytes(pdbPath));
+                                } else
+                                {
+                                    mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+                                }
                             }
                         }
                         else
