@@ -295,6 +295,12 @@ namespace UnityModManagerNet.Installer
             btnOpenFolder.Text = new DirectoryInfo(gamePath).Name;
             folderBrowserDialog.SelectedPath = gamePath;
             managedPath = FindManagedFolder(gamePath);
+            if (managedPath == null)
+            {
+                InactiveForm();
+                Log.Print("Select the game folder that contains the 'Data' folder.");
+                return;
+            }
             managerPath = Path.Combine(managedPath, nameof(UnityModManager));
             entryAssemblyPath = Path.Combine(managedPath, assemblyName);
             injectedEntryAssemblyPath = entryAssemblyPath;
@@ -590,49 +596,31 @@ namespace UnityModManagerNet.Installer
             return null;
         }
 
-        private string FindManagedFolder(string str)
+        private string FindManagedFolder(string path)
         {
             if (Utils.IsMacPlatform())
             {
-                //var appName = $"{Path.GetFileName(str)}.app";
-                //if (!Directory.Exists(Path.Combine(str, appName)))
-                //{
-                //    appName = Directory.GetDirectories(str).FirstOrDefault(dir => dir.EndsWith(".app"));
-                //}
-                //var path = Path.Combine(str, $"{appName}/Contents/Resources/Data/Managed");
-                //if (Directory.Exists(path))
-                //{
-                //    return path;
-                //}
-
-                var path = $"{str}/Contents/Resources/Data/Managed";
-                if (Directory.Exists(path))
+                var dir = $"{path}/Contents/Resources/Data/Managed";
+                if (Directory.Exists(dir))
                 {
-                    return path;
+                    return dir;
                 }
-
-                InactiveForm();
-                Log.Print("Select the game folder that contains the 'Contents' folder.");
-                return null;
             }
 
-            var regex = new Regex(".*_Data$");
-            var directory = new DirectoryInfo(str);
-            foreach (var dir in directory.GetDirectories())
+            foreach (var dir in Directory.GetDirectories(path))
             {
-                var match = regex.Match(dir.Name);
-                if (match.Success)
+                if (dir.EndsWith("Managed"))
                 {
-                    var path = Path.Combine(str, $"{dir.Name}{Path.DirectorySeparatorChar}Managed");
-                    if (Directory.Exists(path))
+                    if (File.Exists(Path.Combine(dir, "Assembly-CSharp.dll")) || File.Exists(Path.Combine(dir, "UnityEngine.dll")))
                     {
-                        return path;
+                        return dir;
                     }
                 }
+                var result = FindManagedFolder(dir);
+                if (!string.IsNullOrEmpty(result))
+                    return result;
             }
 
-            InactiveForm();
-            Log.Print("Select the game folder that contains the 'Data' folder.");
             return null;
         }
 
