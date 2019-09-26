@@ -480,6 +480,8 @@ namespace UnityModManagerNet
                 GUILayout.EndHorizontal();
             }
 
+            static List<string> mJoinList = new List<string>();
+
             private void DrawTab(int tabId, ref UnityAction buttons)
             {
                 var minWidth = GUILayout.MinWidth(mWindowSize.x);
@@ -574,12 +576,16 @@ namespace UnityModManagerNet
                                 }
                                 else if (mods[i].Requirements.Count > 0)
                                 {
+                                    GUILayout.BeginHorizontal(colWidth[++col]);
+                                    mJoinList.Clear();
                                     foreach (var item in mods[i].Requirements)
                                     {
                                         var id = item.Key;
                                         var mod = FindMod(id);
-                                        GUILayout.Label(((mod == null || item.Value != null && item.Value > mod.Version || !mod.Active) && mods[i].Active) ? "<color=\"#CD5C5C\">" + id + "</color>" : id, colWidth[++col]);
+                                        mJoinList.Add(((mod == null || item.Value != null && item.Value > mod.Version || !mod.Active) && mods[i].Active) ? "<color=\"#CD5C5C\">" + id + "</color> " : id);
                                     }
+                                    GUILayout.Label(string.Join(", ", mJoinList.ToArray()));
+                                    GUILayout.EndHorizontal();
                                 }
                                 else if (!string.IsNullOrEmpty(mods[i].CustomRequirements))
                                 {

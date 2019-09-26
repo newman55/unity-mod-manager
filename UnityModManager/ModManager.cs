@@ -894,7 +894,7 @@ namespace UnityModManagerNet
             Logger.Clear();
 
             Logger.Log($"Initialize.");
-            Logger.Log($"Version: '{version}'.");
+            Logger.Log($"Version: {version}.");
             try
             {
                 Logger.Log($"OS: {Environment.OSVersion} {Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")}.");
@@ -919,9 +919,21 @@ namespace UnityModManagerNet
             Params = Param.Load();
 
             modsPath = Path.Combine(Environment.CurrentDirectory, Config.ModsDirectory);
-
             if (!Directory.Exists(modsPath))
-                Directory.CreateDirectory(modsPath);
+            {
+                var modsPath2 = Path.Combine(Path.GetDirectoryName(Environment.CurrentDirectory), Config.ModsDirectory);
+
+                if (Directory.Exists(modsPath2))
+                {
+                    modsPath = modsPath2;
+                }
+                else
+                {
+                    Directory.CreateDirectory(modsPath);
+                }
+            }
+
+            Logger.Log($"Mods path: {modsPath}.");
 
             //SceneManager.sceneLoaded += SceneManager_sceneLoaded; // Incompatible with Unity5
 
