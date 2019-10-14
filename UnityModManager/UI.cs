@@ -75,6 +75,7 @@ namespace UnityModManagerNet
                 mUIScale = Mathf.Clamp(Params.UIScale, 0.5f, 2f);
                 mExpectedUIScale = mUIScale;
                 Textures.Init();
+
                 var harmony = HarmonyInstance.Create("UnityModManager.UI");
                 var original = typeof(Screen).GetMethod("set_lockCursor");
                 var prefix = typeof(Screen_lockCursor_Patch).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic);
@@ -179,7 +180,7 @@ namespace UnityModManagerNet
             {
                 window = new GUIStyle();
                 window.name = "umm window";
-                window.normal.background = Textures.Window;
+                window.normal.background = !string.IsNullOrEmpty(Config.FixBlackUI) ? Textures.WindowLighter : Textures.Window;
                 window.normal.background.wrapMode = TextureWrapMode.Repeat;
 
                 h1 = new GUIStyle();
@@ -897,16 +898,19 @@ namespace UnityModManagerNet
             {
                 if (value)
                 {
-                    mCanvas = new GameObject("", typeof(Canvas), typeof(GraphicRaycaster));
-                    mCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
-                    mCanvas.GetComponent<Canvas>().sortingOrder = Int16.MaxValue;
+                    mCanvas = new GameObject("UMM blocking UI", typeof(Canvas), typeof(GraphicRaycaster));
+                    var canvas = mCanvas.GetComponent<Canvas>();
+                    canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    canvas.sortingOrder = Int16.MaxValue;
                     DontDestroyOnLoad(mCanvas);
-                    var panel = new GameObject("", typeof(Image));
+                    var panel = new GameObject("Image", typeof(Image));
                     panel.transform.SetParent(mCanvas.transform);
-                    panel.GetComponent<RectTransform>().anchorMin = new Vector2(1, 0);
-                    panel.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
-                    panel.GetComponent<RectTransform>().offsetMin = Vector2.zero;
-                    panel.GetComponent<RectTransform>().offsetMax = Vector2.zero;
+                    var rect = panel.GetComponent<RectTransform>();
+                    rect.anchorMin = new Vector2(0, 0);
+                    rect.anchorMax = new Vector2(1, 1);
+                    rect.offsetMin = Vector2.zero;
+                    rect.offsetMax = Vector2.zero;
+                    panel.GetComponent<Image>().color = new Color(0, 0, 0, 0.3f);
                 }
                 else
                 {
@@ -949,7 +953,6 @@ namespace UnityModManagerNet
                 return true;
             }
         }
-
     }
 }
 
