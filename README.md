@@ -1,5 +1,5 @@
-# unity-mod-manager
-This mod adds modding support for games created on Unity engine.
+# Autonauts Mod Manager
+This mod adds modding support for autonauts.
 
 [**Home page**](https://www.nexusmods.com/site/mods/21)
 
