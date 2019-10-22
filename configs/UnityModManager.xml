@@ -1,0 +1,445 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UnityModManager</name>
+    </assembly>
+    <members>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.PopupToggleGroup(System.Int32@,System.String[],UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.PopupToggleGroup(System.Int32@,System.String[],System.String,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.PopupToggleGroup(System.Int32,System.String[],System.Action{System.Int32},UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.16.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.PopupToggleGroup(System.Int32,System.String[],System.Action{System.Int32},System.String,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.16.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.ToggleGroup(System.Int32@,System.String[],UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.ToggleGroup(System.Int32,System.String[],System.Action{System.Int32},UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.16.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.UI.button">
+            <summary>
+            [0.13.1]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawKeybinding(UnityModManagerNet.KeyBinding@,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.20.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawVector(UnityEngine.Vector2@,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawVector(UnityEngine.Vector2,System.Action{UnityEngine.Vector2},UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawVector(UnityEngine.Vector3@,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawVector(UnityEngine.Vector3,System.Action{UnityEngine.Vector3},UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawVector(UnityEngine.Vector4@,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawVector(UnityEngine.Vector4,System.Action{UnityEngine.Vector4},UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawColor(UnityEngine.Color@,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawColor(UnityEngine.Color,System.Action{UnityEngine.Color},UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawFloatMultiField(System.Single[]@,System.String[],UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.18.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawFloatField(System.Single@,System.String,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.19.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawFloatField(System.Single,System.String,System.Action{System.Single},UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.19.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawIntField(System.Int32@,System.String,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.19.0]
+            </summary>
+            <returns>
+            Returns true if the value has changed.
+            </returns>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawIntField(System.Int32,System.String,System.Action{System.Int32},UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            [0.19.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.UI.DrawFields``1(``0@,UnityModManagerNet.UnityModManager.ModEntry,UnityModManagerNet.DrawFieldMask,System.Action)">
+            <summary>
+            Renders fields [0.18.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.ModEntry.ModLogger.LogException(System.String,System.Exception)">
+            <summary>
+            [0.17.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.ModEntry.ModLogger.LogException(System.Exception)">
+            <summary>
+            [0.17.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.Path">
+            <summary>
+            Path to mod folder
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.Version">
+            <summary>
+            Version of a mod
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.ManagerVersion">
+            <summary>
+            Required UMM version
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.GameVersion">
+            <summary>
+            Required game version [0.15.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.NewestVersion">
+            <summary>
+            Not used
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.Requirements">
+            <summary>
+            Required mods
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.CustomRequirements">
+            <summary>
+            Displayed in UMM UI. Add <color></color> tag to change colors. Can be used when custom verification game version [0.15.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.HasUpdate">
+            <summary>
+            Not used
+            </summary>
+        </member>
+        <member name="P:UnityModManagerNet.UnityModManager.ModEntry.CanReload">
+            <summary>
+            Show button to reload the mod [0.14.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnUnload">
+            <summary>
+            Called to unload old data for reloading mod [0.14.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnToggle">
+            <summary>
+            Called to activate / deactivate the mod
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnGUI">
+            <summary>
+            Called by MonoBehaviour.OnGUI when mod options are visible.
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnFixedGUI">
+            <summary>
+            Called by MonoBehaviour.OnGUI, always [0.21.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnShowGUI">
+            <summary>
+            Called when opening mod GUI [0.16.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnHideGUI">
+            <summary>
+            Called when closing mod GUI [0.16.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnSaveGUI">
+            <summary>
+            Called when the game closes
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnUpdate">
+            <summary>
+            Called by MonoBehaviour.Update [0.13.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnLateUpdate">
+            <summary>
+            Called by MonoBehaviour.LateUpdate [0.13.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.OnFixedUpdate">
+            <summary>
+            Called by MonoBehaviour.FixedUpdate [0.13.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModEntry.Enabled">
+            <summary>
+            UI checkbox
+            </summary>
+        </member>
+        <member name="P:UnityModManagerNet.UnityModManager.ModEntry.Toggleable">
+            <summary>
+            If OnToggle exists
+            </summary>
+        </member>
+        <member name="P:UnityModManagerNet.UnityModManager.ModEntry.Loaded">
+            <summary>
+            If Assembly is loaded [0.13.1]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.Logger.LogException(System.Exception)">
+            <summary>
+            [0.17.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.Logger.LogException(System.String,System.Exception)">
+            <summary>
+            [0.17.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.Logger.LogException(System.String,System.Exception,System.String)">
+            <summary>
+            [0.17.0]
+            </summary>
+        </member>
+        <member name="P:UnityModManagerNet.UnityModManager.unityVersion">
+            <summary>
+            Contains version of UnityEngine
+            </summary>
+        </member>
+        <member name="P:UnityModManagerNet.UnityModManager.gameVersion">
+            <summary>
+            Contains version of a game, if configured [0.15.0]
+            </summary>
+        </member>
+        <member name="P:UnityModManagerNet.UnityModManager.version">
+            <summary>
+            Contains version of UMM
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.UnityModManager.ModSettings.Save``1(``0,UnityModManagerNet.UnityModManager.ModEntry,System.Xml.Serialization.XmlAttributeOverrides)">
+            <summary>
+            [0.20.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.UnityModManager.ModInfo.IsCheat">
+            <summary>
+            Used for RoR2 game [0.17.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.SaveOnReloadAttribute">
+            <summary>
+            Copies a value from an old assembly to a new one [0.14.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.EnableReloadingAttribute">
+            <summary>
+            Allows reloading [0.14.1]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.Properties.Resources">
+            <summary>
+              Класс ресурса со строгой типизацией для поиска локализованных строк и т.д.
+            </summary>
+        </member>
+        <member name="P:UnityModManagerNet.Properties.Resources.ResourceManager">
+            <summary>
+              Возвращает кэшированный экземпляр ResourceManager, использованный этим классом.
+            </summary>
+        </member>
+        <member name="P:UnityModManagerNet.Properties.Resources.Culture">
+            <summary>
+              Перезаписывает свойство CurrentUICulture текущего потока для всех
+              обращений к ресурсу с помощью этого класса ресурса со строгой типизацией.
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.DrawType">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.DrawFieldMask">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.IDrawable">
+            <summary>
+            Provides the Draw method for rendering fields. [0.18.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.IDrawable.OnChange">
+            <summary>
+            Called when values change. For sliders it is called too often.
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.DrawFieldsAttribute">
+            <summary>
+            Specifies which fields to render. [0.18.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.DrawAttribute">
+            <summary>
+            Sets options for rendering. [0.19.0]
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.DrawAttribute.Precision">
+            <summary>
+            Rounds a double-precision floating-point value to a specified number of fractional digits, and rounds midpoint values to the nearest even number. 
+            Default 2
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.DrawAttribute.MaxLength">
+            <summary>
+            Maximum text length.
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.DrawAttribute.VisibleOn">
+            <summary>
+            Becomes visible if a field value matches. Use format "FieldName,Value". Supports only string, primitive and enum types.
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.DrawAttribute.InvisibleOn">
+            <summary>
+            Becomes invisible if a field value matches. Use format "FieldName,Value". Supports only string, primitive and enum types.
+            </summary>
+        </member>
+        <member name="F:UnityModManagerNet.DrawAttribute.Box">
+            <summary>
+            Applies box style.
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.HorizontalAttribute">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.KeyBinding">
+            <summary>
+            [0.20.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.Extensions.Draw``1(``0,UnityModManagerNet.UnityModManager.ModEntry)">
+            <summary>
+            Renders fields with mask OnlyDrawAttr. [0.18.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.Extensions.ResizeToIfLess(UnityEngine.Texture2D,System.Int32)">
+            <summary>
+            Only works on ARGB32, RGB24 and Alpha8 textures that are marked readable
+            </summary>
+            <param name="tex"></param>
+            <param name="size"></param>
+        </member>
+        <member name="M:UnityModManagerNet.Extensions.CopyFieldsTo``2(``0,``1@)">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.ICopyable">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.CopyFieldMask">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.CopyFieldsAttribute">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="T:UnityModManagerNet.CopyAttribute">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+        <member name="M:UnityModManagerNet.Utils.CopyFields``2(System.Object,System.Object,UnityModManagerNet.CopyFieldMask)">
+            <summary>
+            [0.18.0]
+            </summary>
+        </member>
+    </members>
+</doc>

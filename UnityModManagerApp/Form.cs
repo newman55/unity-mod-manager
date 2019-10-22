@@ -61,16 +61,15 @@ namespace UnityModManagerNet.Installer
         static ModuleDefMD injectedAssemblyDef = null;
         static ModuleDefMD managerDef = null;
 
-        //static string machineConfigPath = null;
-        //static XDocument machineDoc = null;
+		//static string machineConfigPath = null;
+		//static XDocument machineDoc = null;
 
-        GameInfo selectedGame => (GameInfo)gameList.SelectedItem;
+		GameInfo selectedGame;
         Param.GameParam selectedGameParams = null;
         ModInfo selectedMod => listMods.SelectedItems.Count > 0 ? mods.Find(x => x.DisplayName == listMods.SelectedItems[0].Text) : null;
 
         private void Init()
         {
-            FormBorderStyle = FormBorderStyle.FixedDialog;
             instance = this;
 
             Log.Init();
@@ -103,17 +102,6 @@ namespace UnityModManagerNet.Installer
                 }
             }
 
-            for (var i = (InstallType)0; i < InstallType.Count; i++)
-            {
-                var btn = new RadioButton();
-                btn.Name = i.ToString();
-                btn.Text = i.ToString();
-                btn.Dock = DockStyle.Left;
-                btn.AutoSize = true;
-                btn.Click += installType_Click;
-                installTypeGroup.Controls.Add(btn);
-            }
-
             version = typeof(UnityModManager).Assembly.GetName().Version;
             currentVersion.Text = version.ToString();
 
@@ -123,17 +111,18 @@ namespace UnityModManagerNet.Installer
             if (config != null && config.GameInfo != null && config.GameInfo.Length > 0)
             {
                 config.GameInfo = config.GameInfo.OrderBy(x => x.Name).ToArray();
-                gameList.Items.AddRange(config.GameInfo);
+				selectedGame = config.GameInfo.First();
 
-                GameInfo selected = null;
+				GameInfo selected = null;
                 if (!string.IsNullOrEmpty(param.LastSelectedGame))
                 {
                     selected = config.GameInfo.FirstOrDefault(x => x.Name == param.LastSelectedGame);
                 }
                 selected = selected ?? config.GameInfo.First();
-                gameList.SelectedItem = selected;
+                selectedGame = selected;
                 selectedGameParams = param.GetGameParam(selected);
-            }
+				RefreshForm();
+			}
             else
             {
                 InactiveForm();
@@ -170,14 +159,6 @@ namespace UnityModManagerNet.Installer
             tabControl.TabPages[1].Enabled = false;
             installedVersion.Text = "-";
             additionallyGroupBox.Visible = false;
-
-            foreach (var ctrl in installTypeGroup.Controls)
-            {
-                if (ctrl is RadioButton btn)
-                {
-                    btn.Enabled = false;
-                }
-            }
         }
 
         private bool IsValid(GameInfo gameInfo)
@@ -266,8 +247,8 @@ namespace UnityModManagerNet.Installer
                 {
                     InactiveForm();
                     btnOpenFolder.ForeColor = System.Drawing.Color.FromArgb(192, 0, 0);
-                    btnOpenFolder.Text = "Select";
-                    folderBrowserDialog.SelectedPath = null;
+                    btnOpenFolder.Text = "Please find Autonauts.exe";
+					openFileDialog1.Reset();
                     Log.Print($"Game folder '{selectedGame.Folder}' not found.");
                     return;
                 }
@@ -293,16 +274,18 @@ namespace UnityModManagerNet.Installer
 
             gamePath = selectedGameParams.Path;
             btnOpenFolder.ForeColor = System.Drawing.Color.Black;
-            btnOpenFolder.Text = new DirectoryInfo(gamePath).Name;
-            folderBrowserDialog.SelectedPath = gamePath;
+			btnOpenFolder.Text = "Found Autonauts.exe";
+			openFileDialog1.InitialDirectory = gamePath;
             managedPath = FindManagedFolder(gamePath);
             if (managedPath == null)
             {
                 InactiveForm();
-                Log.Print("Select the game folder that contains the 'Data' folder.");
+				btnOpenFolder.Enabled = true;
+				Log.Print("Select the game folder that contains the 'Data' folder.");
                 return;
             }
-            managerPath = Path.Combine(managedPath, nameof(UnityModManager));
+			btnOpenFolder.Enabled = false;
+			managerPath = Path.Combine(managedPath, nameof(UnityModManager));
             entryAssemblyPath = Path.Combine(managedPath, assemblyName);
             injectedEntryAssemblyPath = entryAssemblyPath;
             managerAssemblyPath = Path.Combine(managerPath, typeof(UnityModManager).Module.Name);
@@ -478,31 +461,6 @@ namespace UnityModManagerNet.Installer
                 disabledMethods.Add(InstallType.DoorstopProxy);
                 selectedGameParams.InstallType = InstallType.Assembly;
             }
-
-            foreach (var ctrl in installTypeGroup.Controls)
-            {
-                if (ctrl is RadioButton btn)
-                {
-                    if (unavailableMethods.Exists(x => x.ToString() == btn.Name))
-                    {
-                        btn.Visible = false;
-                        btn.Enabled = false;
-                        continue;
-                    }
-                    if (disabledMethods.Exists(x => x.ToString() == btn.Name))
-                    {
-                        btn.Visible = true;
-                        btn.Enabled = false;
-                        continue;
-                    }
-
-                    btn.Visible = true;
-                    btn.Enabled = true;
-                    btn.Checked = btn.Name == selectedGameParams.InstallType.ToString();
-                }
-            }
-
-            installTypeGroup.PerformLayout();
 
             //if (selectedGameParams.InstallType == InstallType.Config)
             //{
@@ -719,28 +677,31 @@ namespace UnityModManagerNet.Installer
 
         private void btnOpenFolder_Click(object sender, EventArgs e)
         {
-            var result = folderBrowserDialog.ShowDialog();
+			openFileDialog1.Filter = "exe (*.exe)|*.exe";
+			openFileDialog1.RestoreDirectory = true;
+
+			var result = openFileDialog1.ShowDialog();
             if (result == DialogResult.OK)
             {
-                selectedGameParams.Path = folderBrowserDialog.SelectedPath;
+                selectedGameParams.Path = Path.GetDirectoryName(openFileDialog1.FileName);
                 RefreshForm();
             }
         }
 
-        private void gameList_Changed(object sender, EventArgs e)
-        {
-            var selected = (GameInfo)((ComboBox)sender).SelectedItem;
-            if (selected != null)
-            {
-                Log.Print($"Game changed to '{selected.Name}'.");
-                param.LastSelectedGame = selected.Name;
-                selectedGameParams = param.GetGameParam(selected);
-                if (!string.IsNullOrEmpty(selectedGameParams.Path))
-                    Log.Print($"Game path '{selectedGameParams.Path}'.");
-            }
+        //private void gameList_Changed(object sender, EventArgs e)
+        //{
+        //    var selected = (GameInfo)((ComboBox)sender).SelectedItem;
+        //    if (selected != null)
+        //    {
+        //        Log.Print($"Game changed to '{selected.Name}'.");
+        //        param.LastSelectedGame = selected.Name;
+        //        selectedGameParams = param.GetGameParam(selected);
+        //        if (!string.IsNullOrEmpty(selectedGameParams.Path))
+        //            Log.Print($"Game path '{selectedGameParams.Path}'.");
+        //    }
 
-            RefreshForm();
-        }
+        //    RefreshForm();
+        //}
 
         enum Actions
         {
@@ -1326,11 +1287,11 @@ namespace UnityModManagerNet.Installer
             }
         }
 
-        private void folderBrowserDialog_HelpRequest(object sender, EventArgs e)
+        private void FolderBrowserDialog_HelpRequest(object sender, EventArgs e)
         {
         }
 
-        private void tabs_Changed(object sender, EventArgs e)
+        private void Tabs_Changed(object sender, EventArgs e)
         {
             switch (tabControl.SelectedIndex)
             {

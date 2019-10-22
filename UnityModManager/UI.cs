@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
 using Harmony12;
+using UnityEngine.UI;
+using UnityEngine.Events;
 
 namespace UnityModManagerNet
 {
