@@ -1,8 +1,6 @@
 # Autonauts Mod Manager
 This mod adds modding support for autonauts.
 
-[**Home page**](https://www.nexusmods.com/site/mods/21)
-
 ### Libraries used in the project.
 - [Harmony](https://github.com/pardeike/Harmony/wiki/Utilities)
 - [UnityDoorstop](https://github.com/NeighTools/UnityDoorstop)
