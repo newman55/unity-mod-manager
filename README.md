@@ -1,6 +1,9 @@
 # Autonauts Mod Manager
 This mod adds modding support for autonauts.
 
+## Mods
+[BigHeadMod](https://github.com/JohnGames/BigHeadMod/releases)
+
 ### Libraries used in the project.
 - [Harmony](https://github.com/pardeike/Harmony/wiki/Utilities)
 - [UnityDoorstop](https://github.com/NeighTools/UnityDoorstop)
