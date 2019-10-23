@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using Harmony12;
+using Harmony;
 
 namespace UnityModManagerNet
 {

@@ -25,8 +25,7 @@ namespace UnityModManagerNet.Installer
 
         static readonly string[] libraryFiles = new string[]
         {
-            "0Harmony12.dll",
-            "0Harmony-1.2.dll",
+            "0Harmony.dll",
             "dnlib.dll",
             "System.Xml.dll",
             nameof(UnityModManager) + ".dll",

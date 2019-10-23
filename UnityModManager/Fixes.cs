@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using Harmony12;
+using Harmony;
 
 namespace UnityModManagerNet
 {
