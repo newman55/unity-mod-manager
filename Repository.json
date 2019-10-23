@@ -1,6 +1,6 @@
 {
 	"Releases":
 	[
-		{"Id": "UnityModManager", "Version": "0.12.7", "DownloadUrl": "https://www.dropbox.com/s/2fipc0zhp0q4z7m/umm_update.zip?dl=1"}
+		{"Id": "UnityModManager", "Version": "0.21.1", "DownloadUrl": "https://github.com/JohnGames/unity-mod-manager/releases/download/v1.0/Autonauts.Mod.Manager.V1.zip"}
 	]
 }
