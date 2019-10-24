@@ -1,6 +1,15 @@
 # Autonauts Mod Manager
 This mod adds modding support for autonauts.
 
+## How to use
+1. Download the latest copy from [here](https://github.com/JohnGames/autonauts-mod-manager/releases/download/v0.21.4/AutonautsModManager.zip), you can put it anywhere you like.
+2. Make sure autonauts is not running
+2. Open mod manager and click install.
+4. Download mod zip files below, don't unzip them!
+5. Click on the mods tab in mod manager.
+6. Either drop the zip files or click install mod to pick the zip file
+7. Launch the game, you should see the mod loader window!
+
 ## Mods
 |Name|Creator|Description|
 |:-|:-|:-|
