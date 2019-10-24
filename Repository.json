@@ -1,14 +1,15 @@
 {
+  ,
+    {
+      "Id": "UnityModManager",
+      "Version": "0.21.4",
+      "DownloadUrl": "https://johngam.es/autonauts/modmanager/update-0.21.4.zip"
+    },
   "Releases": [
     {
       "Id": "UnityModManager",
       "Version": "0.21.3",
       "DownloadUrl": "https://johngam.es/autonauts/modmanager/update-0.21.3.zip"
-    },
-    {
-      "Id": "UnityModManager",
-      "Version": "0.21.4",
-      "DownloadUrl": "https://johngam.es/autonauts/modmanager/update-0.21.4.zip"
     }
   ]
 }
