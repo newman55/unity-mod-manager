@@ -21,8 +21,8 @@ namespace UnityModManagerNet.Downloader
         const string configFile = "UnityModManagerConfig.xml";
         const string managerName = "UnityModManager";
         const string managerFile = "UnityModManager.dll";
-        const string managerAppName = "UnityModManager";
-        const string managerAppFile = "UnityModManager.exe";
+        const string managerAppName = "AutonautsModManager";
+        const string managerAppFile = "AutonautsModManager.exe";
 
         public DownloaderForm()
         {
@@ -35,8 +35,6 @@ namespace UnityModManagerNet.Downloader
             //string[] args = Environment.GetCommandLineArgs();
             //if (args.Length <= 1 || string.IsNullOrEmpty(args[1]))
             //    return;
-
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
 
             if (!Utils.HasNetworkConnection())
             {
@@ -118,7 +116,7 @@ namespace UnityModManagerNet.Downloader
                 {
                     foreach (var p in Process.GetProcessesByName(managerAppName))
                     {
-                        status.Text = "Waiting for the UnityModManager to close.";
+                        status.Text = "Waiting for the AutonautsModManager to close.";
                         p.CloseMainWindow();
                         p.WaitForExit();
                     }
