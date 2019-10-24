@@ -273,17 +273,15 @@ namespace UnityModManagerNet.Installer
 
             gamePath = selectedGameParams.Path;
             btnOpenFolder.ForeColor = System.Drawing.Color.Black;
-			btnOpenFolder.Text = "Found Autonauts.exe";
+			btnOpenFolder.Text = "Change Autonauts Location";
 			openFileDialog1.InitialDirectory = gamePath;
             managedPath = FindManagedFolder(gamePath);
             if (managedPath == null)
             {
                 InactiveForm();
-				btnOpenFolder.Enabled = true;
-				Log.Print("Select the game folder that contains the 'Data' folder.");
+				Log.Print("Select Autonauts.exe");
                 return;
             }
-			btnOpenFolder.Enabled = false;
 			managerPath = Path.Combine(managedPath, nameof(UnityModManager));
             entryAssemblyPath = Path.Combine(managedPath, assemblyName);
             injectedEntryAssemblyPath = entryAssemblyPath;

@@ -235,12 +235,12 @@
 			// 
 			// btnOpenFolder
 			// 
-			this.btnOpenFolder.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+			this.btnOpenFolder.ForeColor = System.Drawing.SystemColors.ControlText;
 			this.btnOpenFolder.Location = new System.Drawing.Point(6, 178);
 			this.btnOpenFolder.Name = "btnOpenFolder";
 			this.btnOpenFolder.Size = new System.Drawing.Size(205, 26);
 			this.btnOpenFolder.TabIndex = 9;
-			this.btnOpenFolder.Text = "Find Autonauts.exe";
+			this.btnOpenFolder.Text = "Change Autonauts Location";
 			this.btnOpenFolder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.btnOpenFolder.UseVisualStyleBackColor = true;
 			this.btnOpenFolder.Click += new System.EventHandler(this.btnOpenFolder_Click);

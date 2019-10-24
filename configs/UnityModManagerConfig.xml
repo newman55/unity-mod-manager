@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Repository>https://raw.githubusercontent.com/newman55/unity-mod-manager/master/Repository_beta_13.json</Repository>
+	<Repository>https://raw.githubusercontent.com/JohnGames/unity-mod-manager/master/Repository.json</Repository>
 	<HomePage>https://github.com/JohnGames/unity-mod-manager</HomePage>
 	<GameInfo Name="Autonauts">
 		<Folder>Autonauts</Folder>

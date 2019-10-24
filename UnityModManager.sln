@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26228.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Updater", "Updater\Updater.csproj", "{0EEC949D-BF5C-4F12-9743-0A635ABC8DE4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModManagerApp", "UnityModManagerApp\UnityModManagerApp.csproj", "{6E8F8B45-2A2D-4E5A-8573-3559337E68F3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutonautsModManager", "UnityModManagerApp\AutonautsModManager.csproj", "{6E8F8B45-2A2D-4E5A-8573-3559337E68F3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModManager", "UnityModManager\UnityModManager.csproj", "{A1FCAE3E-523E-4E33-8860-DD39DDDF0F62}"
 EndProject

@@ -36,7 +36,7 @@ namespace UnityModManagerNet.Downloader
             //if (args.Length <= 1 || string.IsNullOrEmpty(args[1]))
             //    return;
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
 
             if (!Utils.HasNetworkConnection())
             {
