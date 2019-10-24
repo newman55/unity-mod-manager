@@ -5,7 +5,9 @@ This mod adds modding support for autonauts.
 |Name|Creator|Description|
 |:-|:-|:-:|
 |[BigHeadMod](https://github.com/JohnGames/BigHeadMod/releases)|JohnGames|Makes bots and player have a big head.|
+|[SkipIntro](https://github.com/JohnGames/SkipIntro/releases)|JohnGames|Skips intro video and Denki animation.|
 |[SuperBots](https://github.com/captncraig/AutonautsMods/releases/tag/superbots-1.0.1)|captncraig|gives bots infinite energy and other imbalanced upgrades|
+
 
 ### Libraries used in the project.
 - [Harmony](https://github.com/pardeike/Harmony/wiki/Utilities)
