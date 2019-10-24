@@ -614,18 +614,7 @@ namespace UnityModManagerNet.Installer
                 Directory.CreateDirectory(modsPath);
             }
 
-            //if (selectedGameParams.InstallType == InstallType.Config)
-            //{
-            //    InjectConfig(Actions.Install, machineDoc);
-            //}
-            if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
-            {
-                InstallDoorstop(Actions.Install);
-            }
-            else
-            {
-                InjectAssembly(Actions.Install, assemblyDef);
-            }
+            InjectAssembly(Actions.Install, assemblyDef);
 
             RefreshForm();
         }
