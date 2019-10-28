@@ -13,6 +13,7 @@ This mod adds modding support for autonauts.
 ## Mods
 |Name|Creator|Description|
 |:-|:-|:-|
+|[Always Day](https://github.com/JohnGames/AlwaysDay/releasess)|JohnGames|Set the time of day to any one you want, and keep it there!|
 |[BigHeadMod](https://github.com/JohnGames/BigHeadMod/releases)|JohnGames|Makes bots and player have a big head.|
 |[Remove Rain](https://github.com/JohnGames/RemoveRain/releases)|JohnGames|Removes rain from game.|
 |[SkipIntro](https://github.com/JohnGames/SkipIntro/releases)|JohnGames|Skips intro video and Denki animation.|
