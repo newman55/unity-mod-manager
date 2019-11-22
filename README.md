@@ -18,6 +18,7 @@ This mod adds modding support for autonauts.
 |[Remove Rain](https://github.com/JohnGames/RemoveRain/releases)|JohnGames|Removes rain from game.|
 |[SkipIntro](https://github.com/JohnGames/SkipIntro/releases)|JohnGames|Skips intro video and Denki animation.|
 |[SuperBots](https://github.com/captncraig/AutonautsMods/releases)|captncraig|gives bots infinite energy and other imbalanced upgrades|
+|[InfinityBots](https://github.com/Master-Guy/Autonauts_InfinityBots/blob/master/Builds/latest/InfiniteBots.zip)|Master-Guy|Gives bots the maximum amount of script possible|
 
 
 ### Libraries used in the project.
