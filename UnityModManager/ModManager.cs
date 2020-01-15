@@ -695,6 +695,7 @@ namespace UnityModManagerNet
 
                         OnToggle = null;
                         OnGUI = null;
+                        OnFixedGUI = null;
                         OnShowGUI = null;
                         OnHideGUI = null;
                         OnSaveGUI = null;

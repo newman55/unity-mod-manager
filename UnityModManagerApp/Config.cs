@@ -64,7 +64,6 @@ namespace UnityModManagerNet.Installer
         public string UIStartingPoint;
         public string GameVersionPoint;
         public string OldPatchTarget;
-        public string FixBlackUI;
         public string Additionally;
         //public string MachineConfig;
 

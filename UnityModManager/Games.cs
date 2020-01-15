@@ -71,11 +71,30 @@ namespace UnityModManagerNet
                 }
             }
 
+            public static void OnToggleWindow(bool value)
+            {
+                foreach (var o in scripts)
+                {
+                    try
+                    {
+                        o.OnToggleWindow(value);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogException("OnToggleWindow", e);
+                    }
+                }
+            }
+
             class GameScript
             {
                 public virtual void OnModToggle(ModEntry modEntry, bool value) { }
                 public virtual void OnBeforeLoadMods() { }
                 public virtual void OnAfterLoadMods() { }
+                /// <summary>
+                /// [0.21.3]
+                /// </summary>
+                public virtual void OnToggleWindow(bool value) { }
             }
 
             // Insert here a class named as game to execute custom script for a game.

@@ -180,7 +180,7 @@ namespace UnityModManagerNet
             {
                 window = new GUIStyle();
                 window.name = "umm window";
-                window.normal.background = !string.IsNullOrEmpty(Config.FixBlackUI) ? Textures.WindowLighter : Textures.Window;
+                window.normal.background = Textures.Window;
                 window.normal.background.wrapMode = TextureWrapMode.Repeat;
 
                 h1 = new GUIStyle();
@@ -885,6 +885,7 @@ namespace UnityModManagerNet
                             Cursor.lockState = CursorLockMode.Locked;
                         }
                     }
+                    GameScripts.OnToggleWindow(open);
                 }
                 catch (Exception e)
                 {
