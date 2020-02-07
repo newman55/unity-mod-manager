@@ -1152,7 +1152,8 @@ namespace UnityModManagerNet
             }
             foreach (var req in mods[id].Requirements.Keys)
             {
-                DFS(req, mods);
+                if (mods.ContainsKey(req))
+                    DFS(req, mods);
             }
             modEntries.Add(mods[id]);
         }
