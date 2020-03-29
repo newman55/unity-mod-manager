@@ -587,6 +587,13 @@ namespace UnityModManagerNet
                                         item.ResolutionScope = new AssemblyRefUser(thisModuleDef.Assembly);
                                     }
                                 }
+                                foreach (var item in modDef.GetMemberRefs().Where(member => member.IsFieldRef))
+                                {
+                                    if (item.Name == "modsPath" & item.Class.FullName == "UnityModManagerNet.UnityModManager")
+                                    {
+                                        item.Name = "OldModsPath";
+                                    }
+                                }
                                 modDef.Write(assemblyCachePath);
                             }
                             mAssembly = Assembly.LoadFile(assemblyCachePath);
@@ -865,6 +872,9 @@ namespace UnityModManagerNet
         public static readonly List<ModEntry> modEntries = new List<ModEntry>();
         public static string modsPath { get; private set; }
 
+        [Obsolete("Please use modsPath!!!!This is compatible with mod of ver before 0.13")]
+        public static string OldModsPath = "";
+
         internal static Param Params { get; set; } = new Param();
         internal static GameInfo Config { get; set; } = new GameInfo();
 
@@ -935,6 +945,7 @@ namespace UnityModManagerNet
             }
 
             Logger.Log($"Mods path: {modsPath}.");
+            OldModsPath = modsPath;
 
             //SceneManager.sceneLoaded += SceneManager_sceneLoaded; // Incompatible with Unity5
 
