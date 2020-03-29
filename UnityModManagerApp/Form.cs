@@ -575,7 +575,7 @@ namespace UnityModManagerNet.Installer
             {
                 disks = new string[] { Environment.GetEnvironmentVariable("HOME") };
                 roots = new string[] { "Library/Application Support", ".steam" };
-                folders = new string[] { "Steam/SteamApps/common", "steam/steamapps/common" };
+                folders = new string[] { "Steam/SteamApps/common", "steam/steamapps/common", "Steam/steamapps/common" };
             }
             foreach (var disk in disks)
             {
@@ -588,6 +588,17 @@ namespace UnityModManagerNet.Installer
                         path = Path.Combine(path, str);
                         if (Directory.Exists(path))
                         {
+                            if (Utils.IsMacPlatform())
+                            {
+                                foreach (var dir in Directory.GetDirectories(path))
+                                {
+                                    if (dir.EndsWith(".app"))
+                                    {
+                                        path = Path.Combine(path, dir);
+                                        break;
+                                    }
+                                }
+                            }
                             return path;
                         }
                     }
@@ -607,8 +618,12 @@ namespace UnityModManagerNet.Installer
                 }
             }
 
-            foreach (var dir in Directory.GetDirectories(path))
+            foreach (var di in new DirectoryInfo(path).GetDirectories())
             {
+                if ((di.Attributes & System.IO.FileAttributes.ReparsePoint) != 0)
+                    continue;
+
+                var dir = di.FullName;
                 if (dir.EndsWith("Managed"))
                 {
                     if (File.Exists(Path.Combine(dir, "Assembly-CSharp.dll")) || File.Exists(Path.Combine(dir, "UnityEngine.dll")))

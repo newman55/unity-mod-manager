@@ -825,7 +825,7 @@ namespace UnityModManagerNet
                             if (types == null)
                                 types = new Type[0];
 
-                            methodInfo = type.GetMethod(methodString, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, types, new ParameterModifier[0]);
+                            methodInfo = type.GetMethod(methodString, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, types, null);
                             if (methodInfo == null)
                             {
                                 if (showLog)
@@ -1133,7 +1133,22 @@ namespace UnityModManagerNet
 
                 Logger.Log($"Finish. Successful loaded {modEntries.Count(x => !x.ErrorOnLoading)}/{countMods} mods.".ToUpper());
                 Console.WriteLine();
+
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.ManifestModule.Name == "UnityModManager.dll");
+                if (assemblies.Count() > 1)
+                {
+                    Logger.Error($"Detected extra copies of UMM.");
+                    foreach(var ass in assemblies)
+                    {
+                        Logger.Log($"- {ass.CodeBase}");
+                    }
+                    Console.WriteLine();
+                }
                 Console.WriteLine();
+            }
+            else
+            {
+                Logger.Log($"Directory '{modsPath}' not exists.");
             }
 
             GameScripts.OnAfterLoadMods();
