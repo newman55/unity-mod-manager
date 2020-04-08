@@ -167,8 +167,12 @@ namespace UnityModManagerNet.Installer
                 }
                 catch (Exception e)
                 {
-                    Log.Print(e.ToString());
+                    Log.Print(e.ToString() + Environment.NewLine + filename);
                 }
+            }
+            else
+            {
+                Log.Print($"'{filename}' not found.");
             }
             return null;
         }
@@ -240,7 +244,7 @@ namespace UnityModManagerNet.Installer
             }
             catch (Exception e)
             {
-                Log.Print(e.ToString());
+                Log.Print(e.ToString() + Environment.NewLine + path);
             }
         }
 
@@ -259,7 +263,7 @@ namespace UnityModManagerNet.Installer
                 }
                 catch (Exception e)
                 {
-                    Log.Print(e.ToString());
+                    Log.Print(e.ToString() + Environment.NewLine + path);
                 }
             }
             return new Param();

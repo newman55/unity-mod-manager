@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows.Forms;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Net;
 
@@ -19,6 +18,11 @@ namespace UnityModManagerNet.Installer
         public UnityModManagerForm()
         {
             InitializeComponent();
+            Load += UnityModManagerForm_Load;
+        }
+
+        private void UnityModManagerForm_Load(object sender, EventArgs e)
+        {
             Init();
             InitPageMods();
         }
@@ -75,8 +79,11 @@ namespace UnityModManagerNet.Installer
 
             Log.Init();
 
+#if NET35
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
+#else
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-
+#endif
             if (!Utils.IsUnixPlatform())
             {
                 foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
@@ -157,6 +164,9 @@ namespace UnityModManagerNet.Installer
 
         private void UnityModLoaderForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (config == null)
+                return;
+
             //Properties.Settings.Default.Save();
             param.Sync(config.GameInfo);
             param.Save();
@@ -376,7 +386,7 @@ namespace UnityModManagerNet.Installer
             catch (Exception e)
             {
                 InactiveForm();
-                Log.Print(e.ToString());
+                Log.Print(e.ToString() + Environment.NewLine + entryAssemblyPath);
                 return;
             }
 
@@ -421,7 +431,7 @@ namespace UnityModManagerNet.Installer
             catch (Exception e)
             {
                 InactiveForm();
-                Log.Print(e.ToString());
+                Log.Print(e.ToString() + Environment.NewLine + injectedEntryAssemblyPath + Environment.NewLine + managerAssemblyPath);
                 return;
             }
 
