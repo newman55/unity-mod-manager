@@ -64,7 +64,10 @@ namespace UnityModManagerNet.Installer
         public string UIStartingPoint;
         public string GameVersionPoint;
         public string OldPatchTarget;
-        public string Additionally;
+        /// <summary>
+        /// [0.21.8]
+        /// </summary>
+        public string Comment;
         //public string MachineConfig;
 
         public override string ToString()

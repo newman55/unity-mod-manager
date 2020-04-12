@@ -191,7 +191,7 @@
             this.additionallyGroupBox.Size = new System.Drawing.Size(343, 74);
             this.additionallyGroupBox.TabIndex = 20;
             this.additionallyGroupBox.TabStop = false;
-            this.additionallyGroupBox.Text = "Additionally";
+            this.additionallyGroupBox.Text = "Comment";
             // 
             // notesTextBox
             // 
@@ -387,6 +387,7 @@
             this.listMods.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listMods.FullRowSelect = true;
             this.listMods.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.listMods.HideSelection = false;
             this.listMods.Location = new System.Drawing.Point(0, 0);
             this.listMods.MultiSelect = false;
             this.listMods.Name = "listMods";

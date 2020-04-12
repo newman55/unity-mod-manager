@@ -179,7 +179,6 @@ namespace UnityModManagerNet.Installer
             btnRestore.Enabled = false;
             tabControl.TabPages[1].Enabled = false;
             installedVersion.Text = "-";
-            additionallyGroupBox.Visible = false;
 
             foreach (var ctrl in installTypeGroup.Controls)
             {
@@ -205,7 +204,7 @@ namespace UnityModManagerNet.Installer
                 nameof(GameInfo.UIStartingPoint),
                 nameof(GameInfo.OldPatchTarget),
                 nameof(GameInfo.GameVersionPoint),
-                nameof(GameInfo.Additionally),
+                nameof(GameInfo.Comment),
             };
 
             var prefix = (!string.IsNullOrEmpty(gameInfo.Name) ? $"[{gameInfo.Name}]" : "[?]");
@@ -265,7 +264,6 @@ namespace UnityModManagerNet.Installer
 
             btnInstall.Text = "Install";
             btnRestore.Enabled = false;
-            additionallyGroupBox.Visible = false;
 
             gamePath = "";
             if (string.IsNullOrEmpty(selectedGameParams.Path) || !Directory.Exists(selectedGameParams.Path))
@@ -557,12 +555,6 @@ namespace UnityModManagerNet.Installer
                 btnInstall.Enabled = true;
                 btnRemove.Enabled = false;
             }
-
-            if (!string.IsNullOrEmpty(selectedGame.Additionally))
-            {
-                notesTextBox.Text = selectedGame.Additionally;
-                additionallyGroupBox.Visible = true;
-            }
         }
 
         //private void btnRunGame_SizeChanged(object sender, EventArgs e)
@@ -753,6 +745,8 @@ namespace UnityModManagerNet.Installer
 
         private void gameList_Changed(object sender, EventArgs e)
         {
+            additionallyGroupBox.Visible = false;
+
             var selected = (GameInfo)((ComboBox)sender).SelectedItem;
             if (selected != null)
             {
@@ -761,6 +755,12 @@ namespace UnityModManagerNet.Installer
                 selectedGameParams = param.GetGameParam(selected);
                 if (!string.IsNullOrEmpty(selectedGameParams.Path))
                     Log.Print($"Game path '{selectedGameParams.Path}'.");
+
+                if (!string.IsNullOrEmpty(selected.Comment))
+                {
+                    notesTextBox.Text = selected.Comment;
+                    additionallyGroupBox.Visible = true;
+                }
             }
 
             RefreshForm();
