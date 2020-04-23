@@ -74,8 +74,14 @@ namespace UnityModManagerNet.Installer
 
         private void Init()
         {
-            FormBorderStyle = FormBorderStyle.FixedDialog;
             instance = this;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            btnRemove.Click += btnRemove_Click;
+            btnInstall.Click += btnInstall_Click;
+            btnRestore.Click += btnRestore_Click;
+            gameList.SelectedIndexChanged += gameList_Changed;
+            btnOpenFolder.Click += btnOpenFolder_Click;
+            btnDownloadUpdate.Click += btnDownloadUpdate_Click;
 
             Log.Init();
 

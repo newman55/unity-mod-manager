@@ -237,7 +237,6 @@
             this.btnRestore.Text = "Restore original files";
             this.btnRestore.UseMnemonic = false;
             this.btnRestore.UseVisualStyleBackColor = true;
-            this.btnRestore.Click += new System.EventHandler(this.btnRestore_Click);
             // 
             // btnDownloadUpdate
             // 
@@ -251,7 +250,6 @@
             this.btnDownloadUpdate.Text = "Home Page";
             this.btnDownloadUpdate.UseMnemonic = false;
             this.btnDownloadUpdate.UseVisualStyleBackColor = false;
-            this.btnDownloadUpdate.Click += new System.EventHandler(this.btnDownloadUpdate_Click);
             // 
             // btnRemove
             // 
@@ -265,7 +263,6 @@
             this.btnRemove.Text = "Uninstall";
             this.btnRemove.UseMnemonic = false;
             this.btnRemove.UseVisualStyleBackColor = true;
-            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
             // 
             // btnOpenFolder
             // 
@@ -277,7 +274,6 @@
             this.btnOpenFolder.Text = "Select";
             this.btnOpenFolder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnOpenFolder.UseVisualStyleBackColor = true;
-            this.btnOpenFolder.Click += new System.EventHandler(this.btnOpenFolder_Click);
             // 
             // gameList
             // 
@@ -289,7 +285,6 @@
             this.gameList.Size = new System.Drawing.Size(169, 21);
             this.gameList.Sorted = true;
             this.gameList.TabIndex = 8;
-            this.gameList.SelectedIndexChanged += new System.EventHandler(this.gameList_Changed);
             // 
             // btnInstall
             // 
@@ -304,7 +299,6 @@
             this.btnInstall.Text = "Install";
             this.btnInstall.UseMnemonic = false;
             this.btnInstall.UseVisualStyleBackColor = true;
-            this.btnInstall.Click += new System.EventHandler(this.btnInstall_Click);
             // 
             // label3
             // 
@@ -492,7 +486,6 @@
             this.btnModInstall.TabIndex = 0;
             this.btnModInstall.Text = "Install Mod";
             this.btnModInstall.UseVisualStyleBackColor = true;
-            this.btnModInstall.Click += new System.EventHandler(this.btnModInstall_Click);
             // 
             // tabPage3
             // 

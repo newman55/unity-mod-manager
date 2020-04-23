@@ -14,6 +14,7 @@ namespace UnityModManagerNet.Installer
 
         private void InitPageMods()
         {
+            btnModInstall.Click += btnModInstall_Click;
             splitContainerModsInstall.Panel2.AllowDrop = true;
             splitContainerModsInstall.Panel2.DragEnter += new DragEventHandler(Mods_DragEnter);
             splitContainerModsInstall.Panel2.DragDrop += new DragEventHandler(Mods_DragDrop);
