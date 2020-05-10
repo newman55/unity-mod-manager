@@ -36,12 +36,6 @@
     </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony-1.2">
-      <HintPath>..\lib\0Harmony-1.2.dll</HintPath>
-    </Reference>
-    <Reference Include="0Harmony12">
-      <HintPath>..\lib\0Harmony12.dll</HintPath>
-    </Reference>
     <Reference Include="0Harmony">
       <HintPath>..\lib\0Harmony.dll</HintPath>
     </Reference>

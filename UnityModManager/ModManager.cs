@@ -557,7 +557,8 @@ namespace UnityModManagerNet
                                 if (File.Exists(pdbPath))
                                 {
                                     mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath), File.ReadAllBytes(pdbPath));
-                                } else
+                                }
+                                else
                                 {
                                     mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
                                 }
@@ -589,7 +590,7 @@ namespace UnityModManagerNet
                                 }
                                 foreach (var item in modDef.GetMemberRefs().Where(member => member.IsFieldRef))
                                 {
-                                    if (item.Name == "modsPath" & item.Class.FullName == "UnityModManagerNet.UnityModManager")
+                                    if (item.Name == "modsPath" && item.Class.FullName == "UnityModManagerNet.UnityModManager")
                                     {
                                         item.Name = "OldModsPath";
                                     }
@@ -692,8 +693,8 @@ namespace UnityModManagerNet
                     if (!Active && (OnUnload == null || OnUnload.Invoke(this)))
                     {
                         mCache.Clear();
-                        typeof(Harmony12.Traverse).GetField("Cache", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, new Harmony12.AccessCache());
-                        typeof(Harmony.Traverse).GetField("Cache", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, new Harmony.AccessCache());
+                        var AccessCacheType = typeof(HarmonyLib.Traverse).Assembly.GetType("HarmonyLib.AccessCache");
+                        typeof(HarmonyLib.Traverse).GetField("Cache", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, Activator.CreateInstance(AccessCacheType));
 
                         var oldAssembly = Assembly;
                         mAssembly = null;
@@ -919,6 +920,11 @@ namespace UnityModManagerNet
             unityVersion = ParseVersion(Application.unityVersion);
             Logger.Log($"Unity Engine: {unityVersion}.");
 
+            if (!Assembly.GetExecutingAssembly().Location.Contains($"Managed{Path.DirectorySeparatorChar}UnityModManager"))
+            {
+                Logger.Error(@"The UnityModManager folder must be located only in \Game\*Data\Managed\ directory. This folder is created automatically after installation via UnityModManager.exe.");
+            }
+
             Config = GameInfo.Load();
             if (Config == null)
             {
@@ -947,17 +953,10 @@ namespace UnityModManagerNet
             Logger.Log($"Mods path: {modsPath}.");
             OldModsPath = modsPath;
 
-            //SceneManager.sceneLoaded += SceneManager_sceneLoaded; // Incompatible with Unity5
-
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
             return true;
         }
-
-        //private static void SceneManager_sceneLoaded(Scene scene, LoadSceneMode mode)
-        //{
-        //    Logger.NativeLog($"Scene loaded: {scene.name} ({mode.ToString()})");
-        //}
 
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
@@ -965,24 +964,28 @@ namespace UnityModManagerNet
             if (assembly != null)
                 return assembly;
 
-            if (args.Name.StartsWith("0Harmony,"))
+            string filename = null;
+            if (args.Name == "0Harmony12, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null")
             {
-                var regex = new Regex(@"Version=(\d+\.\d+)");
-                var match = regex.Match(args.Name);
-                if (match.Success)
+                filename = "0Harmony12.dll";
+            }
+            else if (args.Name == "0Harmony-1.2, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null")
+            {
+                filename = "0Harmony-1.2.dll";
+            }
+
+            if (filename != null)
+            {
+                string filepath = Path.Combine(Path.GetDirectoryName(typeof(UnityModManager).Assembly.Location), filename);
+                if (File.Exists(filepath))
                 {
-                    var ver = match.Groups[1].Value;
-                    string filepath = Path.Combine(Path.GetDirectoryName(typeof(UnityModManager).Assembly.Location), $"0Harmony-{ver}.dll");
-                    if (File.Exists(filepath))
+                    try
                     {
-                        try
-                        {
-                            return Assembly.LoadFile(filepath);
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error(e.ToString());
-                        }
+                        return Assembly.LoadFile(filepath);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error(e.ToString());
                     }
                 }
             }
