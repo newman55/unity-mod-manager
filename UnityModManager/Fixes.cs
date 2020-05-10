@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using Harmony12;
+using HarmonyLib;
 
 namespace UnityModManagerNet
 {
@@ -10,7 +10,7 @@ namespace UnityModManagerNet
         {
             if (Environment.Version < new Version(4, 0))
             {
-                var harmony = HarmonyInstance.Create(nameof(UnityModManager));
+                var harmony = new HarmonyLib.Harmony(nameof(UnityModManager));
                 var original = typeof(Assembly).GetMethod(nameof(Assembly.GetTypes), BindingFlags.Instance | BindingFlags.Public, null, new Type[0], new ParameterModifier[0]);
                 var prefix = typeof(Fixes).GetMethod(nameof(Prefix_GetTypes), BindingFlags.Static | BindingFlags.NonPublic);
                 harmony.Patch(original, new HarmonyMethod(prefix));

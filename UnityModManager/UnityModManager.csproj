@@ -42,6 +42,9 @@
     <Reference Include="0Harmony12">
       <HintPath>..\lib\0Harmony12.dll</HintPath>
     </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\lib\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="dnlib">
       <HintPath>..\lib\dnlib.dll</HintPath>
     </Reference>
