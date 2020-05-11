@@ -973,6 +973,10 @@ namespace UnityModManagerNet
             {
                 filename = "0Harmony-1.2.dll";
             }
+            else if (args.Name.StartsWith("0Harmony, Version=2."))
+            {
+                filename = "0Harmony.dll";
+            }
 
             if (filename != null)
             {
