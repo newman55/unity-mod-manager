@@ -63,6 +63,7 @@ namespace UnityModManagerNet.Installer
         public string StartingPoint;
         public string UIStartingPoint;
         public string GameVersionPoint;
+        public string MinimalManagerVersion;
         public string OldPatchTarget;
         /// <summary>
         /// [0.21.8]

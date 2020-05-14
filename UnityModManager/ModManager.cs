@@ -404,7 +404,7 @@ namespace UnityModManagerNet
                 Path = path;
                 Logger = new ModLogger(Info.Id);
                 Version = ParseVersion(info.Version);
-                ManagerVersion = !string.IsNullOrEmpty(info.ManagerVersion) ? ParseVersion(info.ManagerVersion) : new Version();
+                ManagerVersion = !string.IsNullOrEmpty(info.ManagerVersion) ? ParseVersion(info.ManagerVersion) : !string.IsNullOrEmpty(Config.MinimalManagerVersion) ? ParseVersion(Config.MinimalManagerVersion) : new Version();
                 GameVersion = !string.IsNullOrEmpty(info.GameVersion) ? ParseVersion(info.GameVersion) : new Version();
 
                 if (info.Requirements != null && info.Requirements.Length > 0)
@@ -515,7 +515,7 @@ namespace UnityModManagerNet
 
                             if (!cacheExists)
                             {
-                                foreach (var filepath in Directory.GetFiles(Path, "*.cache"))
+                                foreach (var filepath in Directory.GetFiles(Path, "*.cache*"))
                                 {
                                     try
                                     {
@@ -534,14 +534,30 @@ namespace UnityModManagerNet
                             {
                                 if (!cacheExists)
                                 {
-                                    File.Copy(assemblyPath, assemblyCachePath, true);
-                                }
-                                if (File.Exists(pdbPath))
-                                {
-                                    File.Copy(pdbPath, pdbCachePath, true);
+                                    bool hasChanges = false;
+                                    var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
+                                    foreach (var item in modDef.GetAssemblyRefs())
+                                    {
+                                        if (item.FullName == "0Harmony, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null")
+                                        {
+                                            item.Name = "0Harmony-1.2";
+                                            hasChanges = true;
+                                        }
+                                    }
+                                    if (hasChanges)
+                                    {
+                                        modDef.Write(assemblyCachePath);
+                                    }
+                                    else
+                                    {
+                                        File.Copy(assemblyPath, assemblyCachePath, true);
+                                    }
+                                    if (File.Exists(pdbPath))
+                                    {
+                                        File.Copy(pdbPath, pdbCachePath, true);
+                                    }
                                 }
                                 mAssembly = Assembly.LoadFile(assemblyCachePath);
-                                //mAssembly = Assembly.LoadFile(assemblyPath);
 
                                 foreach (var type in mAssembly.GetTypes())
                                 {
@@ -969,7 +985,7 @@ namespace UnityModManagerNet
             {
                 filename = "0Harmony12.dll";
             }
-            else if (args.Name == "0Harmony-1.2, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null")
+            else if (args.Name == "0Harmony, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null" || args.Name == "0Harmony-1.2, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null")
             {
                 filename = "0Harmony-1.2.dll";
             }

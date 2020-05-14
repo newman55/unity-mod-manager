@@ -212,6 +212,7 @@ namespace UnityModManagerNet.Installer
                 nameof(GameInfo.OldPatchTarget),
                 nameof(GameInfo.GameVersionPoint),
                 nameof(GameInfo.Comment),
+                nameof(GameInfo.MinimalManagerVersion),
             };
 
             var prefix = (!string.IsNullOrEmpty(gameInfo.Name) ? $"[{gameInfo.Name}]" : "[?]");
