@@ -15,6 +15,9 @@ namespace UnityModManagerNet.Installer
     {
         const string REG_PATH = @"HKEY_CURRENT_USER\Software\UnityModManager";
 
+        private static readonly Version VER_0_13 = new Version(0, 13);
+        private static readonly Version VER_0_22 = new Version(0, 22);
+
         public UnityModManagerForm()
         {
             InitializeComponent();
@@ -27,18 +30,21 @@ namespace UnityModManagerNet.Installer
             InitPageMods();
         }
 
-        static readonly string[] libraryFiles = new string[]
+        [Flags]
+        enum LibIncParam { Normal = 0, Minimal_lt_0_22 = 1 }
+
+        static readonly Dictionary<string, LibIncParam> libraryFiles = new Dictionary<string, LibIncParam>
         {
-            "0Harmony.dll",
-            "0Harmony12.dll",
-            "0Harmony-1.2.dll",
-            "dnlib.dll",
-            "System.Xml.dll",
-            nameof(UnityModManager) + ".dll",
-            nameof(UnityModManager) + ".xml"
+            { "0Harmony.dll", LibIncParam.Normal },
+            { "0Harmony12.dll", LibIncParam.Minimal_lt_0_22 },
+            { "0Harmony-1.2.dll", LibIncParam.Minimal_lt_0_22 },
+            { "dnlib.dll", LibIncParam.Normal },
+            { "System.Xml.dll", LibIncParam.Normal },
+            { nameof(UnityModManager) + ".dll", LibIncParam.Normal },
+            { nameof(UnityModManager) + ".xml", LibIncParam.Normal },
         };
 
-        static string[] libraryPaths;
+        static List<string> libraryPaths;
 
         public static UnityModManagerForm instance = null;
 
@@ -346,10 +352,15 @@ namespace UnityModManagerNet.Installer
             doorstopPath = Path.Combine(gamePath, doorstopFilename);
             doorstopConfigPath = Path.Combine(gamePath, doorstopConfigFilename);
 
-            libraryPaths = new string[libraryFiles.Length];
-            for (int i = 0; i < libraryFiles.Length; i++)
+            var gameSupportVersion = Utils.ParseVersion(selectedGame.MinimalManagerVersion);
+            libraryPaths = new List<string>();
+            foreach (var item in libraryFiles)
             {
-                libraryPaths[i] = Path.Combine(managerPath, libraryFiles[i]);
+                if ((item.Value & LibIncParam.Minimal_lt_0_22) > 0 && gameSupportVersion >= VER_0_22)
+                {
+                    continue;
+                }
+                libraryPaths.Add(Path.Combine(managerPath, item.Key));
             }
 
             var parent = new DirectoryInfo(Application.StartupPath).Parent;
@@ -1308,10 +1319,9 @@ namespace UnityModManagerNet.Installer
                 Log.Print($"Deleting files from game...");
             }
 
-            for (int i = 0; i < libraryPaths.Length; i++)
+            foreach(var path in libraryPaths)
             {
-                var filename = libraryFiles[i];
-                var path = libraryPaths[i];
+                var filename = Path.GetFileName(path);
                 if (action == Actions.Install)
                 {
                     if (File.Exists(path))

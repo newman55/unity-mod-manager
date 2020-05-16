@@ -243,7 +243,7 @@ namespace UnityModManagerNet.Installer
             return true;
         }
 
-        public static bool MakeBackup(string[] arr)
+        public static bool MakeBackup(List<string> arr)
         {
             try
             {
@@ -283,7 +283,7 @@ namespace UnityModManagerNet.Installer
             return true;
         }
 
-        public static bool RestoreBackup(string[] arr)
+        public static bool RestoreBackup(List<string> arr)
         {
             try
             {
@@ -324,7 +324,7 @@ namespace UnityModManagerNet.Installer
             return true;
         }
 
-        public static bool DeleteBackup(string[] arr)
+        public static bool DeleteBackup(List<string> arr)
         {
             try
             {

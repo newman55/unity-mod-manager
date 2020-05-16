@@ -538,7 +538,7 @@ namespace UnityModManagerNet
                                     var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
                                     foreach (var item in modDef.GetAssemblyRefs())
                                     {
-                                        if (item.FullName == "0Harmony, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null")
+                                        if (item.FullName.StartsWith("0Harmony, Version=1."))
                                         {
                                             item.Name = "0Harmony-1.2";
                                             hasChanges = true;
@@ -596,12 +596,14 @@ namespace UnityModManagerNet
                             //}
                             if (!cacheExists)
                             {
+                                bool hasChanges = false;
                                 var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
                                 foreach (var item in modDef.GetTypeRefs())
                                 {
                                     if (item.FullName == "UnityModManagerNet.UnityModManager")
                                     {
                                         item.ResolutionScope = new AssemblyRefUser(thisModuleDef.Assembly);
+                                        hasChanges = true;
                                     }
                                 }
                                 foreach (var item in modDef.GetMemberRefs().Where(member => member.IsFieldRef))
@@ -609,9 +611,25 @@ namespace UnityModManagerNet
                                     if (item.Name == "modsPath" && item.Class.FullName == "UnityModManagerNet.UnityModManager")
                                     {
                                         item.Name = "OldModsPath";
+                                        hasChanges = true;
                                     }
                                 }
-                                modDef.Write(assemblyCachePath);
+                                foreach (var item in modDef.GetAssemblyRefs())
+                                {
+                                    if (item.FullName.StartsWith("0Harmony, Version=1."))
+                                    {
+                                        item.Name = "0Harmony-1.2";
+                                        hasChanges = true;
+                                    }
+                                }
+                                if (hasChanges)
+                                {
+                                    modDef.Write(assemblyCachePath);
+                                }
+                                else
+                                {
+                                    File.Copy(assemblyPath, assemblyCachePath, true);
+                                }
                             }
                             mAssembly = Assembly.LoadFile(assemblyCachePath);
                         }
@@ -981,11 +999,11 @@ namespace UnityModManagerNet
                 return assembly;
 
             string filename = null;
-            if (args.Name == "0Harmony12, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null")
+            if (args.Name.StartsWith("0Harmony12"))
             {
                 filename = "0Harmony12.dll";
             }
-            else if (args.Name == "0Harmony, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null" || args.Name == "0Harmony-1.2, Version=1.2.0.1, Culture=neutral, PublicKeyToken=null")
+            else if (args.Name.StartsWith("0Harmony, Version=1.") || args.Name.StartsWith("0Harmony-1.2"))
             {
                 filename = "0Harmony-1.2.dll";
             }
