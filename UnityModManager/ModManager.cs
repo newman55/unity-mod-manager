@@ -342,6 +342,7 @@ namespace UnityModManagerNet
             public bool Loaded => Assembly != null;
 
             bool mFirstLoading = true;
+            int mReloaderCount = 0;
 
             bool mActive = false;
             public bool Active
@@ -570,13 +571,20 @@ namespace UnityModManagerNet
                             }
                             else
                             {
-                                if (File.Exists(pdbPath))
+                                var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
+                                modDef.Assembly.Name += ++mReloaderCount;
+
+                                using (var buf = new MemoryStream())
                                 {
-                                    mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath), File.ReadAllBytes(pdbPath));
-                                }
-                                else
-                                {
-                                    mAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+                                    modDef.Write(buf);
+                                    if (File.Exists(pdbPath))
+                                    {
+                                        mAssembly = Assembly.Load(buf.ToArray(), File.ReadAllBytes(pdbPath));
+                                    }
+                                    else
+                                    {
+                                        mAssembly = Assembly.Load(buf.ToArray());
+                                    }
                                 }
                             }
                         }
@@ -688,22 +696,6 @@ namespace UnityModManagerNet
             {
                 if (!mStarted || !CanReload)
                     return;
-
-                try
-                {
-                    string assemblyPath = System.IO.Path.Combine(Path, Info.AssemblyName);
-                    var reflAssembly = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(assemblyPath));
-                    if (reflAssembly.GetName().Version == Assembly.GetName().Version)
-                    {
-                        this.Logger.Log("Reload is not needed. The version is exactly the same as the previous one.");
-                        return;
-                    }
-                }
-                catch (Exception e)
-                {
-                    this.Logger.Error(e.ToString());
-                    return;
-                }
 
                 if (OnSaveGUI != null)
                     OnSaveGUI.Invoke(this);
