@@ -172,6 +172,8 @@ namespace UnityModManagerNet
 
             public string[] Requirements;
 
+            public string[] LoadAfter;
+
             public string AssemblyName;
 
             public string EntryMethod;
@@ -247,6 +249,11 @@ namespace UnityModManagerNet
             /// Required mods
             /// </summary>
             public readonly Dictionary<string, Version> Requirements = new Dictionary<string, Version>();
+
+            /// <summary>
+            /// List of mods after which this mod should be loaded
+            /// </summary>
+            public readonly List<string> LoadAfter = new List<string>();
 
             /// <summary>
             /// Displayed in UMM UI. Add <color></color> tag to change colors. Can be used when custom verification game version [0.15.0]
@@ -423,6 +430,11 @@ namespace UnityModManagerNet
                             Requirements.Add(id, null);
                     }
                 }
+
+                if (info.LoadAfter != null && info.LoadAfter.Length > 0)
+                {
+                    LoadAfter.AddRange(info.LoadAfter);
+                }
             }
 
             public bool Load()
@@ -488,6 +500,26 @@ namespace UnityModManagerNet
                             mod.Active = true;
                             if (!mod.Active)
                                 this.Logger.Log($"Required mod '{id}' inactive.");
+                        }
+                    }
+                }
+
+                if (LoadAfter.Count > 0)
+                {
+                    foreach (var id in LoadAfter)
+                    {
+                        var mod = FindMod(id);
+                        if (mod == null)
+                        {
+                            this.Logger.Log($"Optional mod '{id}' not found.");
+                            continue;
+                        }
+
+                        if (!mod.Active && mod.Enabled)
+                        {
+                            mod.Active = true;
+                            if (!mod.Active)
+                                this.Logger.Log($"Optional mod '{id}' enabled, but inactive.");
                         }
                     }
                 }
@@ -1210,6 +1242,11 @@ namespace UnityModManagerNet
                 return;
             }
             foreach (var req in mods[id].Requirements.Keys)
+            {
+                if (mods.ContainsKey(req))
+                    DFS(req, mods);
+            }
+            foreach (var req in mods[id].LoadAfter)
             {
                 if (mods.ContainsKey(req))
                     DFS(req, mods);
