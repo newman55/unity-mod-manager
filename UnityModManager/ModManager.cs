@@ -251,7 +251,7 @@ namespace UnityModManagerNet
             public readonly Dictionary<string, Version> Requirements = new Dictionary<string, Version>();
 
             /// <summary>
-            /// List of mods after which this mod should be loaded
+            /// List of mods after which this mod should be loaded [0.22.5]
             /// </summary>
             public readonly List<string> LoadAfter = new List<string>();
 
