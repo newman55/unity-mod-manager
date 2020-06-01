@@ -410,7 +410,7 @@ namespace UnityModManagerNet
 
                 if (info.Requirements != null && info.Requirements.Length > 0)
                 {
-                    var regex = new Regex(@"(.*)-(\d\.\d\.\d).*");
+                    var regex = new Regex(@"(.*)-(\d+\.\d+\.\d+).*");
                     foreach (var id in info.Requirements)
                     {
                         var match = regex.Match(id);
