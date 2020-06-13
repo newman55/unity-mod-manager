@@ -752,7 +752,13 @@ namespace UnityModManagerNet
                     {
                         mCache.Clear();
                         var AccessCacheType = typeof(HarmonyLib.Traverse).Assembly.GetType("HarmonyLib.AccessCache");
-                        typeof(HarmonyLib.Traverse).GetField("Cache", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, Activator.CreateInstance(AccessCacheType));
+                        var accessCache = typeof(HarmonyLib.Traverse).GetField("Cache", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                        string[] fields = { "declaredFields", "declaredProperties", "declaredMethods", "inheritedFields", "inheritedProperties", "inheritedMethods" };
+                        foreach (var field in fields)
+                        {
+                            var accessCacheDict = (System.Collections.IDictionary)AccessCacheType.GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(accessCache);
+                            accessCacheDict.Clear();
+                        }
 
                         var oldAssembly = Assembly;
                         mAssembly = null;
