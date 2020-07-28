@@ -193,7 +193,7 @@ namespace UnityModManagerNet
             /// <returns>
             /// Returns true if the value has changed.
             /// </returns>
-            public static bool DrawKeybinding(ref KeyBinding key, GUIStyle style = null, params GUILayoutOption[] option)
+            public static bool DrawKeybinding(ref KeyBinding key, string title, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 var changed = false;
                 if (key == null)
@@ -217,7 +217,7 @@ namespace UnityModManagerNet
                 //GUILayout.Space(Scale(5));
                 GUILayout.Label(" + ", GUILayout.ExpandWidth(false));
                 var val = key.Index;
-                if (PopupToggleGroup(ref val, KeyBinding.KeyCodeNames, style, option))
+                if (PopupToggleGroup(ref val, KeyBinding.KeyCodeNames, title, style, option))
                 {
                     key.Change((KeyCode)Enum.Parse(typeof(KeyCode), KeyBinding.KeyCodeNames[val]), modifiers);
                     changed = true;
@@ -1109,7 +1109,7 @@ namespace UnityModManagerNet
                         if (!a.Vertical)
                             GUILayout.Space(Scale(5));
                         var key = (KeyBinding)f.GetValue(container);
-                        if (DrawKeybinding(ref key, null, options.ToArray()))
+                        if (DrawKeybinding(ref key, fieldName, null, options.ToArray()))
                         {
                             f.SetValue(container, key);
                             changed = true;
