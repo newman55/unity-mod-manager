@@ -193,7 +193,7 @@ namespace UnityModManagerNet
                 PopupToggleGroup_GUI obj = null;
                 foreach (var item in PopupToggleGroup_GUI.mList)
                 {
-                    if (item.values.SequenceEqual(values))
+                    if (item.values.SequenceEqual(values) && item.title == title)
                     {
                         obj = item;
                         break;
@@ -202,6 +202,7 @@ namespace UnityModManagerNet
                 if (obj == null)
                 {
                     obj = new PopupToggleGroup_GUI(values);
+                    obj.title = title;
                 }
                 if (obj.newSelected != null && selected != obj.newSelected.Value && obj.newSelected.Value < values.Length)
                 {
