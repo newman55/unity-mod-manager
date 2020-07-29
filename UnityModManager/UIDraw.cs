@@ -187,8 +187,14 @@ namespace UnityModManagerNet
             static Type[] specialTypes = new[] { typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(KeyBinding) };
             static float drawHeight = 22;
 
+            [Obsolete("Use new version with title.")]
+            public static bool DrawKeybinding(ref KeyBinding key, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                return DrawKeybinding(ref key, null, style, option);
+            }
+
             /// <summary>
-            /// [0.20.0]
+            /// [0.22.8]
             /// </summary>
             /// <returns>
             /// Returns true if the value has changed.
