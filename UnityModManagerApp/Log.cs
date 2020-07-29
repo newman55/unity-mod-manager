@@ -31,7 +31,7 @@ namespace UnityModManagerNet.Installer
                 }
             }
 
-            stream.Write(str);
+            stream?.Write(str);
             UnityModManagerForm.instance.inputLog.AppendText(str);
         }
 
@@ -42,9 +42,16 @@ namespace UnityModManagerNet.Installer
 
         public static void Init()
         {
-            File.Delete(fileLog);
-            stream = new StreamWriter(new FileStream(fileLog, FileMode.OpenOrCreate, FileAccess.Write));
-            stream.AutoFlush = true;
+            try
+            {
+                File.Delete(fileLog);
+                stream = new StreamWriter(new FileStream(fileLog, FileMode.OpenOrCreate, FileAccess.Write));
+                stream.AutoFlush = true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Print("Write error, insufficient permissions. Try to run app as administrator.");
+            }
         }
     }
 }

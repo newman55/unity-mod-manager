@@ -953,7 +953,7 @@ namespace UnityModManagerNet
 
         static void OnLoad(object sender, AssemblyLoadEventArgs args)
         {
-            if (args.LoadedAssembly.FullName == "Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null")
+            if (args.LoadedAssembly.GetName().Name == "Assembly-CSharp")
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnLoad;
                 Injector.Run(true);
