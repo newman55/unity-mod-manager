@@ -67,11 +67,11 @@ namespace UnityModManagerNet
         /// </summary>
         public int MaxLength = int.MaxValue;
         /// <summary>
-        /// Becomes visible if a field value matches. Use format "FieldName,Value". Supports only string, primitive and enum types.
+        /// Becomes visible if a field value matches. Use format "FieldName|Value". Supports only string, primitive and enum types.
         /// </summary>
         public string VisibleOn;
         /// <summary>
-        /// Becomes invisible if a field value matches. Use format "FieldName,Value". Supports only string, primitive and enum types.
+        /// Becomes invisible if a field value matches. Use format "FieldName|Value". Supports only string, primitive and enum types.
         /// </summary>
         public string InvisibleOn;
         /// <summary>
