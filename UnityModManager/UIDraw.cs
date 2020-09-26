@@ -401,7 +401,7 @@ namespace UnityModManagerNet
                     }
                     else
                     {
-                        if (float.TryParse(str, System.Globalization.NumberStyles.Any, System.Globalization.NumberFormatInfo.InvariantInfo, out var num))
+                        if (float.TryParse(str, System.Globalization.NumberStyles.Any, System.Globalization.NumberFormatInfo.CurrentInfo, out var num))
                         {
                             result[i] = num;
                         }
@@ -437,7 +437,7 @@ namespace UnityModManagerNet
                 }
                 else
                 {
-                    if (float.TryParse(str, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.InvariantInfo, out var num))
+                    if (float.TryParse(str, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.CurrentInfo, out var num))
                     {
                         value = num;
                     }
@@ -481,7 +481,7 @@ namespace UnityModManagerNet
                 }
                 else
                 {
-                    if (int.TryParse(str, System.Globalization.NumberStyles.Integer, System.Globalization.NumberFormatInfo.InvariantInfo, out var num))
+                    if (int.TryParse(str, System.Globalization.NumberStyles.Integer, System.Globalization.NumberFormatInfo.CurrentInfo, out var num))
                     {
                         value = num;
                     }
@@ -908,7 +908,7 @@ namespace UnityModManagerNet
                                     var val = values[i].ToString();
                                     if (a.Precision >= 0 && isFloat)
                                     {
-                                        if (Double.TryParse(val, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.InvariantInfo, out var num))
+                                        if (Double.TryParse(val, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.CurrentInfo, out var num))
                                         {
                                             val = num.ToString($"f{a.Precision}");
                                         }
@@ -932,7 +932,7 @@ namespace UnityModManagerNet
                                         }
                                         else
                                         {
-                                            if (Double.TryParse(result, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.InvariantInfo, out var num))
+                                            if (Double.TryParse(result, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.CurrentInfo, out var num))
                                             {
                                                 num = Math.Max(num, a.Min);
                                                 num = Math.Min(num, a.Max);
@@ -990,7 +990,7 @@ namespace UnityModManagerNet
                         if (!a.Vertical)
                             GUILayout.Space(Scale(5));
                         var val = f.GetValue(container).ToString();
-                        if (!Double.TryParse(val, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.InvariantInfo, out var num))
+                        if (!Double.TryParse(val, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.CurrentInfo, out var num))
                         {
                             num = 0;
                         }
