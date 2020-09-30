@@ -352,11 +352,9 @@ namespace UnityModManagerNet
             int mReloaderCount = 0;
 
             bool mActive = false;
-            public bool Active
-            {
+            public bool Active {
                 get => mActive;
-                set
-                {
+                set {
                     if (value && !Loaded)
                     {
                         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -745,7 +743,7 @@ namespace UnityModManagerNet
                 {
                     mActive = false;
                 }
-                
+
                 try
                 {
                     if (!Active && (OnUnload == null || OnUnload.Invoke(this)))
@@ -976,7 +974,7 @@ namespace UnityModManagerNet
                 Logger.Log($"OS: {Environment.OSVersion} {Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")}.");
                 Logger.Log($"Net Framework: {Environment.Version}.");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogException(e);
             }
@@ -1090,52 +1088,7 @@ namespace UnityModManagerNet
 
             started = true;
 
-            if (!string.IsNullOrEmpty(Config.GameVersionPoint))
-            {
-                try
-                {
-                    Logger.Log($"Start parsing game version.");
-                    if (Injector.TryParseEntryPoint(Config.GameVersionPoint, out var assembly, out var className, out var methodName, out _))
-                    {
-                        var asm = Assembly.Load(assembly);
-                        if (asm == null)
-                        {
-                            Logger.Error($"File '{assembly}' not found.");
-                            goto Next;
-                        }
-                        var foundClass = asm.GetType(className);
-                        if (foundClass == null)
-                        {
-                            Logger.Error($"Class '{className}' not found.");
-                            goto Next;
-                        }
-                        var foundMethod = foundClass.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                        if (foundMethod == null)
-                        {
-                            var foundField = foundClass.GetField(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                            if (foundField != null)
-                            {
-                                gameVersion = ParseVersion(foundField.GetValue(null).ToString());
-                                Logger.Log($"Game version detected as '{gameVersion}'.");
-                                goto Next;
-                            }
-
-                            UnityModManager.Logger.Error($"Method '{methodName}' not found.");
-                            goto Next;
-                        }
-
-                        gameVersion = ParseVersion(foundMethod.Invoke(null, null).ToString());
-                        Logger.Log($"Game version detected as '{gameVersion}'.");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                    OpenUnityFileLog();
-                }
-            }
-
-            Next:
+            ParseGameVersion();
 
             GameScripts.Init();
 
@@ -1220,7 +1173,7 @@ namespace UnityModManagerNet
                 if (assemblies.Count() > 1)
                 {
                     Logger.Error($"Detected extra copies of UMM.");
-                    foreach(var ass in assemblies)
+                    foreach (var ass in assemblies)
                     {
                         Logger.Log($"- {ass.CodeBase}");
                     }
@@ -1239,6 +1192,131 @@ namespace UnityModManagerNet
             {
                 Logger.Error($"Can't load UI.");
             }
+        }
+
+        private static void ParseGameVersion()
+        {
+            if (string.IsNullOrEmpty(Config.GameVersionPoint)) return;
+
+            try
+            {
+                Logger.Log("Start parsing game version.");
+
+                var version = TryGetValueFromDllPoint(Config.GameVersionPoint)?.ToString();
+                if (version == null) return;
+
+                Logger.Log($"Found game version string: '{version}'.");
+
+                gameVersion = ParseVersion(version);
+                Logger.Log($"Game version detected as '{gameVersion}'.");
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                OpenUnityFileLog();
+            }
+        }
+
+        private static object TryGetValueFromDllPoint(string point)
+        {
+            var regex = new Regex(@"^\[(.+\.dll)\](\w+)((?:\.\w+(?:\(\))?)+)$", RegexOptions.IgnoreCase);
+            var match = regex.Match(point);
+
+            if (!match.Success)
+            {
+                Logger.Error($"Malformed DLL point: '{point}'");
+                return null;
+            }
+
+            var dll = match.Groups[1].Value;
+            var path = match.Groups[2].Value;
+            var subpaths = match.Groups[3].Value.Split('.');
+
+            var asm = Assembly.Load(dll);
+            if (asm == null)
+            {
+                Logger.Error($"File '{dll}' not found.");
+                return null;
+            }
+
+            Type cls = asm.GetType(path);
+            var i = 0;
+
+            for (; i < subpaths.Length; i++)
+            {
+                var pathElement = subpaths[i];
+
+                if (pathElement.EndsWith("()")) break;
+
+                path += "." + pathElement;
+                var newCls = asm.GetType(path);
+                if (newCls != null) cls = newCls;
+                else if (cls != null) break;
+            }
+
+            if (cls == null)
+            {
+                Logger.Error($"No class found at '{path}'");
+                return null;
+            }
+            else if (i == subpaths.Length)
+            {
+                Logger.Error($"Could not provide a value because '{path}' is a type");
+                return null;
+            }
+
+            object instance = null;
+
+            for (var first = i; i < subpaths.Length; i++)
+            {
+                var pathElement = subpaths[i];
+
+                if (pathElement.EndsWith("()"))
+                {
+                    pathElement = pathElement.Substring(0, pathElement.Length - 2);
+                }
+
+                if (!GetValueFromMember(cls, ref instance, pathElement, i == first)) return null;
+
+                if (instance == null)
+                {
+                    Logger.Error($"'{cls.FullName}.{pathElement}' returned null");
+                    return null;
+                }
+
+                cls = instance.GetType();
+            }
+
+            return instance;
+        }
+
+        private static bool GetValueFromMember(Type cls, ref object instance, string name, bool _static)
+        {
+            var flags = BindingFlags.Public | BindingFlags.NonPublic | (_static ? BindingFlags.Static : BindingFlags.FlattenHierarchy | BindingFlags.Instance);
+
+            var field = cls.GetField(name, flags);
+            if (field != null)
+            {
+                instance = field.GetValue(instance);
+                return true;
+            }
+
+            var property = cls.GetProperty(name, flags);
+            if (property != null)
+            {
+                instance = property.GetValue(instance, null);
+                return true;
+            }
+
+            var method = cls.GetMethod(name, flags, null, Type.EmptyTypes, null);
+            if (method != null)
+            {
+                instance = method.Invoke(instance, null);
+                return true;
+            }
+
+            Logger.Error($"Class '{cls.FullName}' does not have a {(_static ? "static" : "non-static")} member '{name}'");
+            return false;
         }
 
         private static void DFS(string id, Dictionary<string, ModEntry> mods)
