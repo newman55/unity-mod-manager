@@ -1230,7 +1230,7 @@ namespace UnityModManagerNet
 
             var dll = match.Groups[1].Value;
             var path = match.Groups[2].Value;
-            var subpaths = match.Groups[3].Value.Split('.');
+            var subpaths = match.Groups[3].Value.Trim('.').Split('.');
 
             var asm = Assembly.Load(dll);
             if (asm == null)
