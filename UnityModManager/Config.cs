@@ -19,6 +19,8 @@ namespace UnityModManagerNet
                 public bool Enabled = true;
             }
 
+            public static KeyBinding DefaultHotkey = new KeyBinding { keyCode = KeyCode.F10, modifiers = 1 };
+            public static KeyBinding EscapeHotkey = new KeyBinding { keyCode = KeyCode.Escape };
             public KeyBinding Hotkey = new KeyBinding();
             public int CheckUpdates = 1;
             public int ShowOnStart = 1;

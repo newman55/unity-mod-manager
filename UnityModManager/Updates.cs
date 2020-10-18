@@ -15,7 +15,7 @@ namespace UnityModManagerNet
     {
         private static void CheckModUpdates()
         {
-            Logger.Log("Checking for updates.");
+            Logger.Log("Checking updates.");
 
             if (!HasNetworkConnection())
             {

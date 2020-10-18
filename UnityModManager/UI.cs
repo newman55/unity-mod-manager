@@ -68,6 +68,8 @@ namespace UnityModManagerNet
 
             private void Awake()
             {
+                Logger.Log("Spawning.");
+
                 mInstance = this;
                 DontDestroyOnLoad(this);
                 mWindowSize = ClampWindowSize(new Vector2(Params.WindowWidth, Params.WindowHeight));
@@ -97,6 +99,7 @@ namespace UnityModManagerNet
 
             private void OnDestroy()
             {
+                Logger.Log("Destroying when exit.");
                 SaveSettingsAndParams();
                 Logger.WriteBuffers();
             }
@@ -107,6 +110,15 @@ namespace UnityModManagerNet
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
+                }
+
+                try
+                {
+                    KeyBinding.BindKeyboard();
+                }
+                catch (Exception e)
+                {
+                    Logger.LogException("BindKeyboard", e);
                 }
 
                 var deltaTime = Time.deltaTime;
@@ -125,12 +137,12 @@ namespace UnityModManagerNet
                     }
                 }
 
-                if (Params.Hotkey.Up() || Input.GetKeyUp(KeyCode.F10) && KeyBinding.Ctrl())
+                if (Params.Hotkey.Up() || Param.DefaultHotkey.Up())
                 {
                     ToggleWindow();
                 }
 
-                if (mOpened && Input.GetKey(KeyCode.Escape))
+                if (mOpened && Param.EscapeHotkey.Up())
                 {
                     ToggleWindow();
                 }
@@ -222,6 +234,7 @@ namespace UnityModManagerNet
             private void ScaleGUI()
             {
                 GUI.skin.font = Font.CreateDynamicFontFromOSFont(new[] { "Arial" }, Scale(globalFontSize));
+                GUI.skin.label.clipping = TextClipping.Overflow;
                 GUI.skin.button.padding = new RectOffset(Scale(10), Scale(10), Scale(3), Scale(3));
                 //GUI.skin.button.margin = RectOffset(Scale(4), Scale(2));
 
@@ -442,7 +455,7 @@ namespace UnityModManagerNet
 
             private void WindowFunction(int windowId)
             {
-                if (Input.GetKey(KeyCode.LeftControl))
+                if (KeyBinding.Ctrl())
                     GUI.DragWindow(mWindowRect);
 
                 UnityAction buttons = () => { };

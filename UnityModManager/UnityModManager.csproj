@@ -56,6 +56,7 @@
     <Compile Include="Fixes.cs" />
     <Compile Include="Games.cs" />
     <Compile Include="Json.cs" />
+    <Compile Include="KeyBinding.cs" />
     <Compile Include="ToggleGroup.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="ModManager.cs" />

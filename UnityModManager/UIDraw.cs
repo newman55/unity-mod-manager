@@ -3,8 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using UnityEngine;
 
 namespace UnityModManagerNet
@@ -110,72 +108,6 @@ namespace UnityModManagerNet
     {
     }
 
-    /// <summary>
-    /// [0.20.0]
-    /// </summary>
-    [Serializable]
-    public class KeyBinding
-    {
-        public KeyCode keyCode = KeyCode.None;
-        public byte modifiers;
-        private int m_Index = -1;
-        public int Index
-        {
-            get
-            {
-                if (m_Index == -1)
-                {
-                    m_Index = Array.FindIndex(KeyCodeNames, x => x == keyCode.ToString());
-                }
-                return m_Index;
-            }
-        }
-
-        public readonly static string[] KeyCodeNames = Enum.GetNames(typeof(KeyCode));
-
-        public static bool Ctrl()
-        {
-            return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-        }
-
-        public static bool Shift()
-        {
-            return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        }
-
-        public static bool Alt()
-        {
-            return Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-        }
-
-        public void Change(KeyCode key, bool ctrl, bool shift, bool alt)
-        {
-            Change(key, (byte)((ctrl ? 1 : 0) + (shift ? 2 : 0) + (alt ? 4 : 0)));
-        }
-
-        public void Change(KeyCode key, byte modifier = 0)
-        {
-            keyCode = key;
-            modifiers = modifier;
-            m_Index = -1;
-        }
-
-        public bool Pressed()
-        {
-            return keyCode != KeyCode.None && Input.GetKey(keyCode) && ((modifiers & 1) == 0 || Ctrl()) && ((modifiers & 2) == 0 || Shift()) && ((modifiers & 4) == 0 || Alt());
-        }
-
-        public bool Down()
-        {
-            return keyCode != KeyCode.None && Input.GetKeyDown(keyCode) && ((modifiers & 1) == 0 || Ctrl()) && ((modifiers & 2) == 0 || Shift()) && ((modifiers & 4) == 0 || Alt());
-        }
-
-        public bool Up()
-        {
-            return keyCode != KeyCode.None && Input.GetKeyUp(keyCode) && ((modifiers & 1) == 0 || Ctrl()) && ((modifiers & 2) == 0 || Shift()) && ((modifiers & 4) == 0 || Alt());
-        }
-    }
-
     public partial class UnityModManager
     {
         public partial class UI : MonoBehaviour
@@ -223,9 +155,9 @@ namespace UnityModManagerNet
                 //GUILayout.Space(Scale(5));
                 GUILayout.Label(" + ", GUILayout.ExpandWidth(false));
                 var val = key.Index;
-                if (PopupToggleGroup(ref val, KeyBinding.KeyCodeNames, title, style, option))
+                if (PopupToggleGroup(ref val, KeyBinding.KeysName, title, style, option))
                 {
-                    key.Change((KeyCode)Enum.Parse(typeof(KeyCode), KeyBinding.KeyCodeNames[val]), modifiers);
+                    key.Change((KeyCode)Enum.Parse(typeof(KeyCode), KeyBinding.KeysCode[val]), modifiers);
                     changed = true;
                 }
 
