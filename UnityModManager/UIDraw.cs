@@ -668,7 +668,7 @@ namespace UnityModManagerNet
                     {
                         if (!Array.Exists(fieldTypes, x => x == f.FieldType) && !f.FieldType.IsArray)
                         {
-                            throw new Exception($"Type {f.FieldType} can't be drawed as {DrawType.Field}");
+                            throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.Field}");
                         }
 
                         options.Add(a.Width != 0 ? GUILayout.Width(a.Width) : GUILayout.Width(Scale(100)));
@@ -909,7 +909,7 @@ namespace UnityModManagerNet
                     {
                         if (!Array.Exists(sliderTypes, x => x == f.FieldType))
                         {
-                            throw new Exception($"Type {f.FieldType} can't be drawed as {DrawType.Slider}");
+                            throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.Slider}");
                         }
 
                         options.Add(a.Width != 0 ? GUILayout.Width(a.Width) : GUILayout.Width(Scale(200)));
@@ -951,7 +951,7 @@ namespace UnityModManagerNet
                     {
                         if (!Array.Exists(toggleTypes, x => x == f.FieldType))
                         {
-                            throw new Exception($"Type {f.FieldType} can't be drawed as {DrawType.Toggle}");
+                            throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.Toggle}");
                         }
 
                         options.Add(GUILayout.ExpandWidth(false));
@@ -977,7 +977,7 @@ namespace UnityModManagerNet
                     {
                         if (!f.FieldType.IsEnum || f.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
                         {
-                            throw new Exception($"Type {f.FieldType} can't be drawed as {DrawType.ToggleGroup}");
+                            throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.ToggleGroup}");
                         }
 
                         options.Add(GUILayout.ExpandWidth(false));
@@ -1007,7 +1007,7 @@ namespace UnityModManagerNet
                     {
                         if (!f.FieldType.IsEnum || f.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
                         {
-                            throw new Exception($"Type {f.FieldType} can't be drawed as {DrawType.PopupList}");
+                            throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.PopupList}");
                         }
 
                         options.Add(GUILayout.ExpandWidth(false));
@@ -1036,7 +1036,7 @@ namespace UnityModManagerNet
                     {
                         if (f.FieldType != typeof(KeyBinding))
                         {
-                            throw new Exception($"Type {f.FieldType} can't be drawed as {DrawType.KeyBinding}");
+                            throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.KeyBinding}");
                         }
 
                         if (a.Vertical)
