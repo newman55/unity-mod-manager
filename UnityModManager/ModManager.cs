@@ -382,6 +382,7 @@ namespace UnityModManagerNet
                             else
                             {
                                 this.Logger.Log($"Unsuccessfully.");
+                                this.Logger.NativeLog($"OnToggle(true) failed.");
                             }
                         }
                         else if (!forbidDisableMods)
@@ -394,6 +395,10 @@ namespace UnityModManagerNet
                                 mActive = false;
                                 this.Logger.Log($"Inactive.");
                                 GameScripts.OnModToggle(this, false);
+                            }
+                            else if (OnToggle != null)
+                            {
+                                this.Logger.NativeLog($"OnToggle(false) failed.");
                             }
                         }
                     }
