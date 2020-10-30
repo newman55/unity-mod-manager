@@ -103,7 +103,7 @@ namespace UnityModManagerNet
     /// <summary>
     /// [0.18.0]
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field, AllowMultiple = false)]
     public class HorizontalAttribute : Attribute
     {
     }
@@ -583,7 +583,7 @@ namespace UnityModManagerNet
                         }
                             
                         var box = a.Box || a.Collapsible && collapsibleStates.Exists(x => x == f.MetadataToken);
-                        var horizontal = f.GetCustomAttributes(typeof(HorizontalAttribute), false).Length > 0;
+                        var horizontal = f.GetCustomAttributes(typeof(HorizontalAttribute), false).Length > 0 || f.GetType().GetCustomAttributes(typeof(HorizontalAttribute), false).Length > 0;
                         if (horizontal)
                         {
                             GUILayout.BeginHorizontal(box ? "box" : "");
