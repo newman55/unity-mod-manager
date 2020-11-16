@@ -583,7 +583,7 @@ namespace UnityModManagerNet
                         }
                             
                         var box = a.Box || a.Collapsible && collapsibleStates.Exists(x => x == f.MetadataToken);
-                        var horizontal = f.GetCustomAttributes(typeof(HorizontalAttribute), false).Length > 0 || f.GetType().GetCustomAttributes(typeof(HorizontalAttribute), false).Length > 0;
+                        var horizontal = f.GetCustomAttributes(typeof(HorizontalAttribute), false).Length > 0 || f.FieldType.GetCustomAttributes(typeof(HorizontalAttribute), false).Length > 0;
                         if (horizontal)
                         {
                             GUILayout.BeginHorizontal(box ? "box" : "");
