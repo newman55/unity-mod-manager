@@ -101,7 +101,7 @@ namespace UnityModManagerNet
     }
 
     /// <summary>
-    /// [0.18.0]
+    /// [0.22.14]
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field, AllowMultiple = false)]
     public class HorizontalAttribute : Attribute
