@@ -456,7 +456,8 @@ namespace UnityModManagerNet
             private void WindowFunction(int windowId)
             {
                 if (KeyBinding.Ctrl())
-                    GUI.DragWindow(mWindowRect);
+                    GUI.DragWindow(new Rect(0, 0, 10000, 10000));
+                GUI.DragWindow(new Rect(0, 0, 10000, 20));
 
                 UnityAction buttons = () => { };
 

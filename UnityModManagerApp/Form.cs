@@ -316,6 +316,12 @@ namespace UnityModManagerNet.Installer
             btnOpenFolder.ForeColor = System.Drawing.Color.Black;
             btnOpenFolder.Text = new DirectoryInfo(gamePath).Name;
             folderBrowserDialog.SelectedPath = gamePath;
+            if (File.Exists(Path.Combine(gamePath, "GameAssembly.dll")))
+            {
+                InactiveForm();
+                Log.Print("This game version (IL2CPP) is not supported.");
+                return;
+            }
             managedPath = FindManagedFolder(gamePath);
             if (managedPath == null)
             {

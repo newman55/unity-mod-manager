@@ -133,6 +133,17 @@ namespace UnityModManagerNet
             /// </returns>
             public static bool DrawKeybinding(ref KeyBinding key, string title, GUIStyle style = null, params GUILayoutOption[] option)
             {
+                return DrawKeybinding(ref key, title, 0, style, option);
+            }
+
+            /// <summary>
+            /// [0.22.15]
+            /// </summary>
+            /// <returns>
+            /// Returns true if the value has changed.
+            /// </returns>
+            public static bool DrawKeybinding(ref KeyBinding key, string title, int unique, GUIStyle style = null, params GUILayoutOption[] option)
+            {
                 var changed = false;
                 if (key == null)
                     key = new KeyBinding();
@@ -155,7 +166,7 @@ namespace UnityModManagerNet
                 //GUILayout.Space(Scale(5));
                 GUILayout.Label(" + ", GUILayout.ExpandWidth(false));
                 var val = key.Index;
-                if (PopupToggleGroup(ref val, KeyBinding.KeysName, title, style, option))
+                if (PopupToggleGroup(ref val, KeyBinding.KeysName, title, unique, style, option))
                 {
                     key.Change((KeyCode)Enum.Parse(typeof(KeyCode), KeyBinding.KeysCode[val]), modifiers);
                     changed = true;
@@ -500,7 +511,7 @@ namespace UnityModManagerNet
                 return value.GetHashCode() == dependsOnValue.GetHashCode();
             }
 
-            private static bool Draw(object container, Type type, ModEntry mod, DrawFieldMask defaultMask)
+            private static bool Draw(object container, Type type, ModEntry mod, DrawFieldMask defaultMask, int unique)
             {
                 bool changed = false;
                 var options = new List<GUILayoutOption>();
@@ -627,7 +638,7 @@ namespace UnityModManagerNet
                             }
                             else
                             {
-                                if (Draw(val, f.FieldType, mod, defaultMask))
+                                if (Draw(val, f.FieldType, mod, defaultMask, f.Name.GetHashCode() + unique))
                                 {
                                     changed = true;
                                     f.SetValue(container, val);
@@ -975,9 +986,13 @@ namespace UnityModManagerNet
                     }
                     else if (a.Type == DrawType.ToggleGroup)
                     {
-                        if (!f.FieldType.IsEnum || f.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
+                        if (!f.FieldType.IsEnum)
                         {
                             throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.ToggleGroup}");
+                        }
+                        if (f.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
+                        {
+                            throw new Exception($"Type {f.FieldType}/{DrawType.ToggleGroup} incompatible with Flag attribute.");
                         }
 
                         options.Add(GUILayout.ExpandWidth(false));
@@ -1005,9 +1020,13 @@ namespace UnityModManagerNet
                     }
                     else if (a.Type == DrawType.PopupList)
                     {
-                        if (!f.FieldType.IsEnum || f.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
+                        if (!f.FieldType.IsEnum)
                         {
                             throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.PopupList}");
+                        }
+                        if (f.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
+                        {
+                            throw new Exception($"Type {f.FieldType}/{DrawType.ToggleGroup} incompatible with Flag attribute.");
                         }
 
                         options.Add(GUILayout.ExpandWidth(false));
@@ -1021,7 +1040,7 @@ namespace UnityModManagerNet
                             GUILayout.Space(Scale(5));
                         var values = Enum.GetNames(f.FieldType);
                         var val = (int)f.GetValue(container);
-                        if (PopupToggleGroup(ref val, values, null, options.ToArray()))
+                        if (PopupToggleGroup(ref val, values, fieldName, unique, null, options.ToArray()))
                         {
                             var v = Enum.Parse(f.FieldType, values[val]);
                             f.SetValue(container, v);
@@ -1047,7 +1066,7 @@ namespace UnityModManagerNet
                         if (!a.Vertical)
                             GUILayout.Space(Scale(5));
                         var key = (KeyBinding)f.GetValue(container);
-                        if (DrawKeybinding(ref key, fieldName, null, options.ToArray()))
+                        if (DrawKeybinding(ref key, fieldName, unique, null, options.ToArray()))
                         {
                             f.SetValue(container, key);
                             changed = true;
@@ -1071,8 +1090,16 @@ namespace UnityModManagerNet
             /// </summary>
             public static void DrawFields<T>(ref T container, ModEntry mod, DrawFieldMask defaultMask, Action onChange = null) where T : new()
             {
+                DrawFields<T>(ref container, mod, 0, defaultMask, onChange);
+            }
+
+            /// <summary>
+            /// Renders fields [0.22.15]
+            /// </summary>
+            public static void DrawFields<T>(ref T container, ModEntry mod, int unique, DrawFieldMask defaultMask, Action onChange = null) where T : new()
+            {
                 object obj = container;
-                var changed = Draw(obj, typeof(T), mod, defaultMask);
+                var changed = Draw(obj, typeof(T), mod, defaultMask, unique);
                 if (changed)
                 {
                     container = (T)obj;
@@ -1100,6 +1127,14 @@ namespace UnityModManagerNet
         public static void Draw<T>(this T instance, UnityModManager.ModEntry mod) where T : class, IDrawable, new()
         {
             UnityModManager.UI.DrawFields(ref instance, mod, DrawFieldMask.OnlyDrawAttr, instance.OnChange);
+        }
+
+        /// <summary>
+        /// Renders fields with mask OnlyDrawAttr. [0.22.15]
+        /// </summary>
+        public static void Draw<T>(this T instance, UnityModManager.ModEntry mod, int unique) where T : class, IDrawable, new()
+        {
+            UnityModManager.UI.DrawFields(ref instance, mod, unique, DrawFieldMask.OnlyDrawAttr, instance.OnChange);
         }
     }
 }
