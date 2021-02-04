@@ -115,7 +115,6 @@ namespace UnityModManagerNet.Installer
     public sealed class Config
     {
         public const string filename = "UnityModManagerConfig.xml";
-        public const string localFilename = "UnityModManagerConfigLocal.xml";
 
         public string Repository;
         public string HomePage;
@@ -166,28 +165,31 @@ namespace UnityModManagerNet.Installer
                     {
                         var serializer = new XmlSerializer(typeof(Config));
                         var result = serializer.Deserialize(stream) as Config;
-                        if (File.Exists(localFilename))
+
+                        foreach(var file in new DirectoryInfo(Application.StartupPath).GetFiles("UnityModManagerConfig*.xml", SearchOption.TopDirectoryOnly))
                         {
-                            try
+                            if (file.Name != filename)
                             {
-                                using (var localStream = File.OpenRead(localFilename))
+                                try
                                 {
-                                    var localResult = serializer.Deserialize(localStream) as Config;
-                                    var concatanatedArray = new GameInfo[result.GameInfo.Length + localResult.GameInfo.Length];
-                                    result.GameInfo.CopyTo(concatanatedArray, 0);
-                                    localResult.GameInfo.CopyTo(concatanatedArray, result.GameInfo.Length);
-                                    result.GameInfo = concatanatedArray;
+                                    using (var localStream = File.OpenRead(file.Name))
+                                    {
+                                        var localResult = serializer.Deserialize(localStream) as Config;
+                                        if (localResult.GameInfo == null)
+                                            continue;
+                                        var concatanatedArray = new GameInfo[result.GameInfo.Length + localResult.GameInfo.Length];
+                                        result.GameInfo.CopyTo(concatanatedArray, 0);
+                                        localResult.GameInfo.CopyTo(concatanatedArray, result.GameInfo.Length);
+                                        result.GameInfo = concatanatedArray;
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Print(e.ToString() + Environment.NewLine + file.Name);
                                 }
                             }
-                            catch (Exception e)
-                            {
-                                Log.Print(e.ToString() + Environment.NewLine + localFilename);
-                            }
                         }
-                        else
-                        {
-                            Log.Print($"'{localFilename}' not found, ignoring.");
-                        }
+
                         OnDeserialize(result);
                         return result;
                     }
