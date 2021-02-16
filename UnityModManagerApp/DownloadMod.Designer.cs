@@ -1,6 +1,6 @@
 ﻿namespace UnityModManagerNet.Installer
 {
-    partial class DownloadForm
+    partial class DownloadMod
     {
         /// <summary>
         /// Required designer variable.
@@ -49,7 +49,7 @@
             this.status.Text = "Downloading";
             this.status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // Download
+            // DownloadMod
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -59,10 +59,10 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "Download";
+            this.Name = "DownloadMod";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "Downloading";
+            this.Text = "Mod";
             this.TopMost = true;
             this.ResumeLayout(false);
 

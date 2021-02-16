@@ -219,6 +219,7 @@ namespace UnityModManagerNet.Installer
                 nameof(GameInfo.GameVersionPoint),
                 nameof(GameInfo.Comment),
                 nameof(GameInfo.MinimalManagerVersion),
+                nameof(GameInfo.ExtraFilesUrl)
             };
 
             var prefix = (!string.IsNullOrEmpty(gameInfo.Name) ? $"[{gameInfo.Name}]" : "[?]");
@@ -770,7 +771,10 @@ namespace UnityModManagerNet.Installer
 
         private void gameList_Changed(object sender, EventArgs e)
         {
+            notesTextBox.Text = "";
             additionallyGroupBox.Visible = false;
+            extraFilesTextBox.Text = "";
+            extraFilesGroupBox.Visible = false;
 
             var selected = (GameInfo)((ComboBox)sender).SelectedItem;
             if (selected != null)
@@ -785,6 +789,12 @@ namespace UnityModManagerNet.Installer
                 {
                     notesTextBox.Text = selected.Comment;
                     additionallyGroupBox.Visible = true;
+                }
+                
+                if (!string.IsNullOrEmpty(selected.ExtraFilesUrl))
+                {
+                    extraFilesTextBox.Text = $"Click on the Manual and unzip archive to game folder. Or click on the Auto for automatic installation. This must be done before installing mod loader to game.";
+                    extraFilesGroupBox.Visible = true;
                 }
             }
 
@@ -1394,6 +1404,26 @@ namespace UnityModManagerNet.Installer
         private void notesTextBox_LinkClicked(object sender, LinkClickedEventArgs e)
         {
             Process.Start(e.LinkText);
+        }
+
+        private void extraFilesAutoButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(selectedGame.ExtraFilesUrl))
+            {
+                var form = new DownloadExtraFiles(selectedGame.ExtraFilesUrl, gamePath);
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                }
+            }
+        }
+
+        private void extraFilesManualButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(selectedGame.ExtraFilesUrl))
+            {
+                Process.Start(selectedGame.ExtraFilesUrl);
+            }
         }
     }
 }

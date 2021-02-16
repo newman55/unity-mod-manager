@@ -70,6 +70,7 @@ namespace UnityModManagerNet.Installer
         /// </summary>
         public string Comment;
         //public string MachineConfig;
+        public string ExtraFilesUrl;
 
         public override string ToString()
         {

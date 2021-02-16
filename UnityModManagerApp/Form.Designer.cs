@@ -33,10 +33,15 @@
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.labelFolder = new System.Windows.Forms.Label();
-            this.labelGame = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.additionallyGroupBox = new System.Windows.Forms.GroupBox();
             this.notesTextBox = new System.Windows.Forms.RichTextBox();
+            this.extraFilesGroupBox = new System.Windows.Forms.GroupBox();
+            this.extraFilesManualButton = new System.Windows.Forms.Button();
+            this.extraFilesAutoButton = new System.Windows.Forms.Button();
+            this.extraFilesTextBox = new System.Windows.Forms.RichTextBox();
+            this.labelFolder = new System.Windows.Forms.Label();
+            this.labelGame = new System.Windows.Forms.Label();
             this.installTypeGroup = new System.Windows.Forms.GroupBox();
             this.btnRestore = new System.Windows.Forms.Button();
             this.btnDownloadUpdate = new System.Windows.Forms.Button();
@@ -76,7 +81,9 @@
             this.splitContainerMain.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.additionallyGroupBox.SuspendLayout();
+            this.extraFilesGroupBox.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMods)).BeginInit();
             this.splitContainerMods.Panel1.SuspendLayout();
@@ -96,7 +103,7 @@
             this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelMain.Location = new System.Drawing.Point(0, 0);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(358, 398);
+            this.panelMain.Size = new System.Drawing.Size(358, 469);
             this.panelMain.TabIndex = 3;
             // 
             // splitContainerMain
@@ -118,8 +125,8 @@
             // 
             this.splitContainerMain.Panel2.Controls.Add(this.statusStrip1);
             this.splitContainerMain.Panel2MinSize = 20;
-            this.splitContainerMain.Size = new System.Drawing.Size(358, 398);
-            this.splitContainerMain.SplitterDistance = 369;
+            this.splitContainerMain.Size = new System.Drawing.Size(358, 469);
+            this.splitContainerMain.SplitterDistance = 440;
             this.splitContainerMain.TabIndex = 11;
             // 
             // tabControl
@@ -134,7 +141,7 @@
             this.tabControl.Name = "tabControl";
             this.tabControl.Padding = new System.Drawing.Point(0, 4);
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(358, 369);
+            this.tabControl.Size = new System.Drawing.Size(358, 440);
             this.tabControl.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.tabControl.TabIndex = 10;
             this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabs_Changed);
@@ -142,9 +149,9 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.Controls.Add(this.panel1);
             this.tabPage1.Controls.Add(this.labelFolder);
             this.tabPage1.Controls.Add(this.labelGame);
-            this.tabPage1.Controls.Add(this.additionallyGroupBox);
             this.tabPage1.Controls.Add(this.installTypeGroup);
             this.tabPage1.Controls.Add(this.btnRestore);
             this.tabPage1.Controls.Add(this.btnDownloadUpdate);
@@ -160,38 +167,31 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 28);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(350, 337);
+            this.tabPage1.Size = new System.Drawing.Size(350, 408);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Install";
             // 
-            // labelFolder
+            // panel1
             // 
-            this.labelFolder.AutoSize = true;
-            this.labelFolder.Location = new System.Drawing.Point(3, 185);
-            this.labelFolder.Name = "labelFolder";
-            this.labelFolder.Size = new System.Drawing.Size(36, 13);
-            this.labelFolder.TabIndex = 22;
-            this.labelFolder.Text = "Folder";
-            // 
-            // labelGame
-            // 
-            this.labelGame.AutoSize = true;
-            this.labelGame.Location = new System.Drawing.Point(3, 151);
-            this.labelGame.Name = "labelGame";
-            this.labelGame.Size = new System.Drawing.Size(35, 13);
-            this.labelGame.TabIndex = 21;
-            this.labelGame.Text = "Game";
+            this.panel1.Controls.Add(this.additionallyGroupBox);
+            this.panel1.Controls.Add(this.extraFilesGroupBox);
+            this.panel1.Location = new System.Drawing.Point(4, 259);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(343, 151);
+            this.panel1.TabIndex = 23;
             // 
             // additionallyGroupBox
             // 
             this.additionallyGroupBox.Controls.Add(this.notesTextBox);
-            this.additionallyGroupBox.Location = new System.Drawing.Point(6, 265);
+            this.additionallyGroupBox.Dock = System.Windows.Forms.DockStyle.Top;
+            this.additionallyGroupBox.Location = new System.Drawing.Point(0, 74);
             this.additionallyGroupBox.Name = "additionallyGroupBox";
             this.additionallyGroupBox.Padding = new System.Windows.Forms.Padding(6, 3, 6, 3);
             this.additionallyGroupBox.Size = new System.Drawing.Size(343, 74);
             this.additionallyGroupBox.TabIndex = 20;
             this.additionallyGroupBox.TabStop = false;
             this.additionallyGroupBox.Text = "Comment";
+            this.additionallyGroupBox.Visible = false;
             // 
             // notesTextBox
             // 
@@ -214,9 +214,83 @@
             this.notesTextBox.Text = "";
             this.notesTextBox.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.notesTextBox_LinkClicked);
             // 
+            // extraFilesGroupBox
+            // 
+            this.extraFilesGroupBox.Controls.Add(this.extraFilesManualButton);
+            this.extraFilesGroupBox.Controls.Add(this.extraFilesAutoButton);
+            this.extraFilesGroupBox.Controls.Add(this.extraFilesTextBox);
+            this.extraFilesGroupBox.Dock = System.Windows.Forms.DockStyle.Top;
+            this.extraFilesGroupBox.Location = new System.Drawing.Point(0, 0);
+            this.extraFilesGroupBox.Name = "extraFilesGroupBox";
+            this.extraFilesGroupBox.Padding = new System.Windows.Forms.Padding(6, 3, 6, 3);
+            this.extraFilesGroupBox.Size = new System.Drawing.Size(343, 74);
+            this.extraFilesGroupBox.TabIndex = 21;
+            this.extraFilesGroupBox.TabStop = false;
+            this.extraFilesGroupBox.Text = "Extra Files";
+            // 
+            // extraFilesManualButton
+            // 
+            this.extraFilesManualButton.BackColor = System.Drawing.Color.Transparent;
+            this.extraFilesManualButton.Location = new System.Drawing.Point(215, 45);
+            this.extraFilesManualButton.Name = "extraFilesManualButton";
+            this.extraFilesManualButton.Size = new System.Drawing.Size(60, 23);
+            this.extraFilesManualButton.TabIndex = 21;
+            this.extraFilesManualButton.Text = "Manual";
+            this.extraFilesManualButton.UseVisualStyleBackColor = false;
+            this.extraFilesManualButton.Click += new System.EventHandler(this.extraFilesManualButton_Click);
+            // 
+            // extraFilesAutoButton
+            // 
+            this.extraFilesAutoButton.BackColor = System.Drawing.Color.PaleGreen;
+            this.extraFilesAutoButton.Location = new System.Drawing.Point(277, 45);
+            this.extraFilesAutoButton.Name = "extraFilesAutoButton";
+            this.extraFilesAutoButton.Size = new System.Drawing.Size(60, 23);
+            this.extraFilesAutoButton.TabIndex = 20;
+            this.extraFilesAutoButton.Text = "Auto";
+            this.extraFilesAutoButton.UseVisualStyleBackColor = false;
+            this.extraFilesAutoButton.Click += new System.EventHandler(this.extraFilesAutoButton_Click);
+            // 
+            // extraFilesTextBox
+            // 
+            this.extraFilesTextBox.AcceptsTab = true;
+            this.extraFilesTextBox.AutoWordSelection = true;
+            this.extraFilesTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.extraFilesTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.extraFilesTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.extraFilesTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.extraFilesTextBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.extraFilesTextBox.Location = new System.Drawing.Point(6, 16);
+            this.extraFilesTextBox.Margin = new System.Windows.Forms.Padding(0);
+            this.extraFilesTextBox.Name = "extraFilesTextBox";
+            this.extraFilesTextBox.ReadOnly = true;
+            this.extraFilesTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.extraFilesTextBox.ShortcutsEnabled = false;
+            this.extraFilesTextBox.Size = new System.Drawing.Size(331, 55);
+            this.extraFilesTextBox.TabIndex = 19;
+            this.extraFilesTextBox.TabStop = false;
+            this.extraFilesTextBox.Text = "";
+            // 
+            // labelFolder
+            // 
+            this.labelFolder.AutoSize = true;
+            this.labelFolder.Location = new System.Drawing.Point(3, 185);
+            this.labelFolder.Name = "labelFolder";
+            this.labelFolder.Size = new System.Drawing.Size(36, 13);
+            this.labelFolder.TabIndex = 22;
+            this.labelFolder.Text = "Folder";
+            // 
+            // labelGame
+            // 
+            this.labelGame.AutoSize = true;
+            this.labelGame.Location = new System.Drawing.Point(3, 151);
+            this.labelGame.Name = "labelGame";
+            this.labelGame.Size = new System.Drawing.Size(35, 13);
+            this.labelGame.TabIndex = 21;
+            this.labelGame.Text = "Game";
+            // 
             // installTypeGroup
             // 
-            this.installTypeGroup.Location = new System.Drawing.Point(6, 213);
+            this.installTypeGroup.Location = new System.Drawing.Point(4, 213);
             this.installTypeGroup.Name = "installTypeGroup";
             this.installTypeGroup.Padding = new System.Windows.Forms.Padding(10, 3, 10, 5);
             this.installTypeGroup.Size = new System.Drawing.Size(343, 46);
@@ -344,7 +418,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 28);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(350, 337);
+            this.tabPage2.Size = new System.Drawing.Size(350, 412);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Mods";
             // 
@@ -366,8 +440,8 @@
             // 
             this.splitContainerMods.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.splitContainerMods.Panel2.Controls.Add(this.splitContainerModsInstall);
-            this.splitContainerMods.Size = new System.Drawing.Size(344, 331);
-            this.splitContainerMods.SplitterDistance = 185;
+            this.splitContainerMods.Size = new System.Drawing.Size(344, 406);
+            this.splitContainerMods.SplitterDistance = 260;
             this.splitContainerMods.TabIndex = 0;
             // 
             // listMods
@@ -385,7 +459,7 @@
             this.listMods.Location = new System.Drawing.Point(0, 0);
             this.listMods.MultiSelect = false;
             this.listMods.Name = "listMods";
-            this.listMods.Size = new System.Drawing.Size(344, 185);
+            this.listMods.Size = new System.Drawing.Size(344, 260);
             this.listMods.TabIndex = 0;
             this.listMods.UseCompatibleStateImageBehavior = false;
             this.listMods.View = System.Windows.Forms.View.Details;
@@ -494,7 +568,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 28);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(350, 337);
+            this.tabPage3.Size = new System.Drawing.Size(350, 412);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Log";
             // 
@@ -507,7 +581,7 @@
             this.inputLog.Name = "inputLog";
             this.inputLog.ReadOnly = true;
             this.inputLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.inputLog.Size = new System.Drawing.Size(344, 331);
+            this.inputLog.Size = new System.Drawing.Size(344, 406);
             this.inputLog.TabIndex = 10;
             // 
             // statusStrip1
@@ -548,7 +622,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(358, 398);
+            this.ClientSize = new System.Drawing.Size(358, 469);
             this.Controls.Add(this.panelMain);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.MaximizeBox = false;
@@ -565,7 +639,9 @@
             this.tabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            this.panel1.ResumeLayout(false);
             this.additionallyGroupBox.ResumeLayout(false);
+            this.extraFilesGroupBox.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.splitContainerMods.Panel1.ResumeLayout(false);
             this.splitContainerMods.Panel2.ResumeLayout(false);
@@ -624,6 +700,11 @@
         private System.Windows.Forms.GroupBox additionallyGroupBox;
         private System.Windows.Forms.Label labelGame;
         private System.Windows.Forms.Label labelFolder;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.GroupBox extraFilesGroupBox;
+        private System.Windows.Forms.RichTextBox extraFilesTextBox;
+        private System.Windows.Forms.Button extraFilesAutoButton;
+        private System.Windows.Forms.Button extraFilesManualButton;
     }
 }
 
