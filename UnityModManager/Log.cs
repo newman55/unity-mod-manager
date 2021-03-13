@@ -135,7 +135,8 @@ namespace UnityModManagerNet
                     Write($"{prefix}{key}: {e.GetType().Name} - {e.Message}");
                 Console.WriteLine(e.ToString());
             }
-
+            
+            private static bool hasErrors;
             private static int bufferCapacity = 100;
             private static List<string> buffer = new List<string>(bufferCapacity);
             internal static int historyCapacity = 200;
@@ -180,7 +181,7 @@ namespace UnityModManagerNet
             {
                 try
                 {
-                    if (buffer.Count > 0)
+                    if (buffer.Count > 0 && !hasErrors)
                     {
                         if (!File.Exists(filepath))
                         {
@@ -196,9 +197,19 @@ namespace UnityModManagerNet
                         }
                     }
                 }
+                catch (UnauthorizedAccessException e)
+                {
+                    hasErrors = true;
+                    Console.WriteLine(PrefixException + e.ToString());
+                    Console.WriteLine(Prefix + "Uncheck the read-only box from the UnityModManager folder.");
+                    history.Add(PrefixException + e.ToString());
+                    history.Add(Prefix + "Uncheck the read-only box from the UnityModManager folder.");
+                }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    hasErrors = true;
+                    Console.WriteLine(PrefixException + e.ToString());
+                    history.Add(PrefixException + e.ToString());
                 }
 
                 buffer.Clear();
@@ -209,15 +220,25 @@ namespace UnityModManagerNet
             {
                 buffer.Clear();
                 history.Clear();
-                if (File.Exists(filepath))
+                if (File.Exists(filepath) && !hasErrors)
                 {
                     try
                     {
                         File.Delete(filepath);
                     }
+                    catch (UnauthorizedAccessException e)
+                    {
+                        hasErrors = true;
+                        Console.WriteLine(PrefixException + e.ToString());
+                        Console.WriteLine(Prefix + "Uncheck the read-only box from the UnityModManager folder.");
+                        history.Add(PrefixException + e.ToString());
+                        history.Add(Prefix + "Uncheck the read-only box from the UnityModManager folder.");
+                    }
                     catch (Exception e)
                     {
-                        Debug.LogException(e);
+                        hasErrors = true;
+                        Console.WriteLine(PrefixException + e.ToString());
+                        history.Add(PrefixException + e.ToString());
                     }
                 }
             }

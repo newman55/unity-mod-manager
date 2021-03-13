@@ -7,6 +7,7 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using System.Diagnostics;
 using System.Net;
+using System.Reflection;
 
 namespace UnityModManagerNet.Installer
 {
@@ -17,6 +18,8 @@ namespace UnityModManagerNet.Installer
 
         private static readonly Version VER_0_13 = new Version(0, 13);
         private static readonly Version VER_0_22 = new Version(0, 22);
+
+        private static readonly Version HARMONY_VER = new Version(2, 0);
 
         public UnityModManagerForm()
         {
@@ -695,6 +698,10 @@ namespace UnityModManagerNet.Installer
             {
                 return;
             }
+            if (!TestCompatibility())
+            {
+                return;
+            }
             var modsPath = Path.Combine(gamePath, selectedGame.ModsDirectory);
             if (!Directory.Exists(modsPath))
             {
@@ -1280,13 +1287,36 @@ namespace UnityModManagerNet.Installer
         {
             var success = true;
 
-            success = Utils.IsDirectoryWritable(managedPath) && success;
-            success = Utils.IsFileWritable(managerAssemblyPath) && success;
-            success = Utils.IsFileWritable(GameInfo.filepathInGame) && success;
+            if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
+            {
+                success &= Utils.RemoveReadOnly(doorstopPath);
+                success &= Utils.RemoveReadOnly(doorstopConfigPath);
+            }
+            else
+            {
+                success &= Utils.RemoveReadOnly(entryAssemblyPath);
+                if (injectedEntryAssemblyPath != entryAssemblyPath)
+                    success &= Utils.RemoveReadOnly(injectedEntryAssemblyPath);
+            }
+
+            if (Directory.Exists(managerPath))
+            {
+                foreach (var f in Directory.GetFiles(managerPath))
+                {
+                    success &= Utils.RemoveReadOnly(f);
+                }
+            }
+
+            if (!success)
+                return false;
+
+            success &= Utils.IsDirectoryWritable(managedPath);
+            success &= Utils.IsFileWritable(managerAssemblyPath);
+            success &= Utils.IsFileWritable(GameInfo.filepathInGame);
 
             foreach (var file in libraryPaths)
             {
-                success = Utils.IsFileWritable(file) && success;
+                success &= Utils.IsFileWritable(file);
             }
 
             //if (machineDoc != null)
@@ -1295,16 +1325,36 @@ namespace UnityModManagerNet.Installer
             //}
             if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
             {
-                success = Utils.IsFileWritable(doorstopPath) && success;
+                success &= Utils.IsFileWritable(doorstopPath);
+                success &= Utils.IsFileWritable(doorstopConfigPath);
             }
             else
             {
-                success = Utils.IsFileWritable(entryAssemblyPath) && success;
+                success &= Utils.IsFileWritable(entryAssemblyPath);
                 if (injectedEntryAssemblyPath != entryAssemblyPath)
-                    success = Utils.IsFileWritable(injectedEntryAssemblyPath) && success;
+                    success &= Utils.IsFileWritable(injectedEntryAssemblyPath);
             }
 
             return success;
+        }
+
+        private bool TestCompatibility()
+        {
+            foreach (var f in new DirectoryInfo(gamePath).GetFiles("0Harmony.dll", SearchOption.AllDirectories))
+            {
+                if (!f.FullName.EndsWith(Path.Combine("UnityModManager", "0Harmony.dll")))
+                {
+                    var asm = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(f.FullName));
+                    if (asm.GetName().Version < HARMONY_VER)
+                    {
+                        Log.Print($"Game has extra library 0Harmony.dll in path {f.FullName}, which may not be compatible with UMM. Recommended to delete it.");
+                        return false;
+                    }
+                    Log.Print($"Game has extra library 0Harmony.dll in path {f.FullName}.");
+                }
+            }
+
+            return true;
         }
 
         private static bool RestoreOriginal(string file, string backup)

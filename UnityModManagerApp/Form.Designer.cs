@@ -418,7 +418,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 28);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(350, 412);
+            this.tabPage2.Size = new System.Drawing.Size(350, 408);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Mods";
             // 
@@ -440,8 +440,8 @@
             // 
             this.splitContainerMods.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.splitContainerMods.Panel2.Controls.Add(this.splitContainerModsInstall);
-            this.splitContainerMods.Size = new System.Drawing.Size(344, 406);
-            this.splitContainerMods.SplitterDistance = 260;
+            this.splitContainerMods.Size = new System.Drawing.Size(344, 402);
+            this.splitContainerMods.SplitterDistance = 256;
             this.splitContainerMods.TabIndex = 0;
             // 
             // listMods
@@ -459,7 +459,7 @@
             this.listMods.Location = new System.Drawing.Point(0, 0);
             this.listMods.MultiSelect = false;
             this.listMods.Name = "listMods";
-            this.listMods.Size = new System.Drawing.Size(344, 260);
+            this.listMods.Size = new System.Drawing.Size(344, 256);
             this.listMods.TabIndex = 0;
             this.listMods.UseCompatibleStateImageBehavior = false;
             this.listMods.View = System.Windows.Forms.View.Details;
@@ -568,7 +568,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 28);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(350, 412);
+            this.tabPage3.Size = new System.Drawing.Size(350, 408);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Log";
             // 
@@ -581,7 +581,7 @@
             this.inputLog.Name = "inputLog";
             this.inputLog.ReadOnly = true;
             this.inputLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.inputLog.Size = new System.Drawing.Size(344, 406);
+            this.inputLog.Size = new System.Drawing.Size(344, 402);
             this.inputLog.TabIndex = 10;
             // 
             // statusStrip1

@@ -38,8 +38,6 @@ namespace UnityModManagerNet.Installer
                 return;
             }
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-
             try
             {
                 status.Text = $"Downloading ...";
