@@ -125,9 +125,10 @@ namespace UnityModManagerNet.Installer
 
         public static void Create()
         {
+            var filepath = Path.Combine(Application.StartupPath, filename);
             try
             {
-                using (var writer = new StreamWriter(filename))
+                using (var writer = new StreamWriter(filepath))
                 {
                     var config = new Config()
                     {
@@ -158,11 +159,12 @@ namespace UnityModManagerNet.Installer
 
         public static Config Load()
         {
-            if (File.Exists(filename))
+            var filepath = Path.Combine(Application.StartupPath, filename);
+            if (File.Exists(filepath))
             {
                 try
                 {
-                    using (var stream = File.OpenRead(filename))
+                    using (var stream = File.OpenRead(filepath))
                     {
                         var serializer = new XmlSerializer(typeof(Config));
                         var result = serializer.Deserialize(stream) as Config;
@@ -173,7 +175,7 @@ namespace UnityModManagerNet.Installer
                             {
                                 try
                                 {
-                                    using (var localStream = File.OpenRead(file.Name))
+                                    using (var localStream = File.OpenRead(file.FullName))
                                     {
                                         var localResult = serializer.Deserialize(localStream) as Config;
                                         if (localResult.GameInfo == null)
@@ -186,7 +188,7 @@ namespace UnityModManagerNet.Installer
                                 }
                                 catch (Exception e)
                                 {
-                                    Log.Print(e.ToString() + Environment.NewLine + file.Name);
+                                    Log.Print(e.ToString());
                                 }
                             }
                         }
