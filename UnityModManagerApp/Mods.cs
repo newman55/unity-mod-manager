@@ -206,29 +206,38 @@ namespace UnityModManagerNet.Installer
 
             try
             {
-                foreach(var e in zip.EntriesSorted)
+                var modId = ReadModInfoFromZip(zip).Id; //obtain the name of the folder the mod should have
+                var modPath = Path.Combine(modsPath, modId); //assume the mod's zip file does not contain said folder, but only its contents.
+                foreach (var e in zip.EntriesSorted)
                 {
                     if (e.IsDirectory)
+                    {
+                        if (e.FileName.Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, '/') == modId)
+                        {
+                            modPath = modsPath; //if the zip file does contain the directory entry matching what the mod should have, revert to extracting directly into the mods folder
+                        }
                         continue;
-
-                    var filepath = Path.Combine(modsPath, e.FileName);
+                    }
+                    //commenting the following out since we will overwrite any files mentioned in the zipfile anyways.
+                    /*var filepath = Path.Combine(modsPath, e.FileName);
                     if (File.Exists(filepath))
                     {
                         File.Delete(filepath);
-                    }
+                    }*/
                 }
-                foreach(var entry in zip.EntriesSorted)
+                foreach (var entry in zip.EntriesSorted)
                 {
                     if (entry.IsDirectory)
                     {
-                        Directory.CreateDirectory(Path.Combine(modsPath, entry.FileName));
-                    } else
+                        Directory.CreateDirectory(Path.Combine(modPath, entry.FileName));
+                    }
+                    else
                     {
-                        Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(modsPath, entry.FileName)));
-                        using (FileStream fs = new FileStream(Path.Combine(modsPath, entry.FileName), FileMode.Create, FileAccess.Write))
+                        Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(modPath, entry.FileName)));
+                        using (FileStream fs = new FileStream(Path.Combine(modPath, entry.FileName), FileMode.Create, FileAccess.Write)) //the way this filestream is opened, it shouldn't fail if the file already exists[according to documentation anyways]
                         {
                             entry.Extract(fs);
-                        }                       
+                        }
                     }
                 }
                 Log.Print($"Unpacking '{Path.GetFileName(zip.Name)}' - SUCCESS.");
@@ -307,7 +316,7 @@ namespace UnityModManagerNet.Installer
                     modInfo.AvailableVersions.Add(modInfo.ParsedVersion, filepath);
                     mods.Add(modInfo);
                 }
-                else 
+                else
                 {
                     if (!mods[index].AvailableVersions.ContainsKey(modInfo.ParsedVersion))
                     {
@@ -466,7 +475,7 @@ namespace UnityModManagerNet.Installer
                         }
                     }
                 }
-                
+
                 var newest = modInfo.AvailableVersions.Keys.Max(x => x);
                 if (newest != null && newest > modInfo.ParsedVersion && inRepository <= newest)
                 {
