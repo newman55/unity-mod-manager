@@ -218,12 +218,6 @@ namespace UnityModManagerNet.Installer
                         }
                         continue;
                     }
-                    //commenting the following out since we will overwrite any files mentioned in the zipfile anyways.
-                    /*var filepath = Path.Combine(modsPath, e.FileName);
-                    if (File.Exists(filepath))
-                    {
-                        File.Delete(filepath);
-                    }*/
                 }
                 foreach (var entry in zip.EntriesSorted)
                 {
