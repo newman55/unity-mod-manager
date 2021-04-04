@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -32,10 +30,7 @@ namespace UnityModManagerNet.Downloader
 
         public void Start()
         {
-            //string[] args = Environment.GetCommandLineArgs();
-            //if (args.Length <= 1 || string.IsNullOrEmpty(args[1]))
-            //    return;
-
+            // NOTE: SecurityProtocolType.Ssl3 no longer supported
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
             if (!Utils.HasNetworkConnection())
@@ -122,6 +117,7 @@ namespace UnityModManagerNet.Downloader
                         p.CloseMainWindow();
                         p.WaitForExit();
                     }
+                    
                     using (var zip = ZipFile.Read(updateFile))
                     {
                         foreach (var entry in zip.EntriesSorted)
