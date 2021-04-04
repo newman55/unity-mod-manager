@@ -8,6 +8,7 @@ using dnlib.DotNet.Emit;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace UnityModManagerNet.Installer
 {
@@ -21,8 +22,17 @@ namespace UnityModManagerNet.Installer
 
         private static readonly Version HARMONY_VER = new Version(2, 0);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetForegroundWindow(IntPtr hwnd);
+
         public UnityModManagerForm()
         {
+            if (!Utils.IsUnixPlatform() && CheckApplicationAlreadyRunning(out var process))
+            {
+                SetForegroundWindow(process.MainWindowHandle);
+                Close();
+                return;
+            }
             InitializeComponent();
             Load += UnityModManagerForm_Load;
         }
@@ -31,6 +41,22 @@ namespace UnityModManagerNet.Installer
         {
             Init();
             InitPageMods();
+        }
+
+        static bool CheckApplicationAlreadyRunning(out Process result)
+        {
+            result = null;
+            var id = Process.GetCurrentProcess().Id;
+            var name = Process.GetCurrentProcess().ProcessName;
+            foreach(var p in Process.GetProcessesByName(name))
+            {
+                if (p.Id != id)
+                {
+                    result = p;
+                    return true;
+                }
+            }
+            return false;
         }
 
         [Flags]
@@ -93,6 +119,8 @@ namespace UnityModManagerNet.Installer
             btnDownloadUpdate.Click += btnDownloadUpdate_Click;
 
             Log.Init();
+            
+            Height = Properties.Settings.Default.WindowHeght;
 
 #if NET35
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
@@ -182,7 +210,8 @@ namespace UnityModManagerNet.Installer
             if (config == null)
                 return;
 
-            //Properties.Settings.Default.Save();
+            Properties.Settings.Default.WindowHeght = Height;
+            Properties.Settings.Default.Save();
             param.Sync(config.GameInfo);
             param.Save();
         }

@@ -555,7 +555,7 @@
             // splitContainerModsInstall.Panel2
             // 
             this.splitContainerModsInstall.Panel2.BackgroundImage = global::UnityModManagerNet.Installer.Properties.Resources.dragdropfiles;
-            this.splitContainerModsInstall.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.splitContainerModsInstall.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.splitContainerModsInstall.Size = new System.Drawing.Size(344, 142);
             this.splitContainerModsInstall.SplitterDistance = 45;
             this.splitContainerModsInstall.TabIndex = 0;
@@ -638,7 +638,9 @@
             this.Controls.Add(this.panelMain);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(374, 1000);
             this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(374, 508);
             this.Name = "UnityModManagerForm";
             this.ShowIcon = false;
             this.Text = "UnityModManager Installer";
