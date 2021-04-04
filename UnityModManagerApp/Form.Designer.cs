@@ -554,7 +554,7 @@
             // 
             // splitContainerModsInstall.Panel2
             // 
-            this.splitContainerModsInstall.Panel2.BackgroundImage = global::UnityModManagerNet.Installer.Properties.Resources.dragdropfiles;
+            this.splitContainerModsInstall.Panel2.BackgroundImage = global::UnityModManagerApp.Properties.Resources.dragdropfiles;
             this.splitContainerModsInstall.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.splitContainerModsInstall.Size = new System.Drawing.Size(344, 142);
             this.splitContainerModsInstall.SplitterDistance = 45;

@@ -120,7 +120,7 @@ namespace UnityModManagerNet.Installer
 
             Log.Init();
             
-            Height = Properties.Settings.Default.WindowHeght;
+            Height = UnityModManagerApp.Properties.Settings.Default.WindowHeight;
 
 #if NET35
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
@@ -210,8 +210,8 @@ namespace UnityModManagerNet.Installer
             if (config == null)
                 return;
 
-            Properties.Settings.Default.WindowHeght = Height;
-            Properties.Settings.Default.Save();
+            UnityModManagerApp.Properties.Settings.Default.WindowHeight = Height;
+            UnityModManagerApp.Properties.Settings.Default.Save();
             param.Sync(config.GameInfo);
             param.Save();
         }
