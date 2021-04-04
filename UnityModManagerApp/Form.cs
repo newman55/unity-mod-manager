@@ -85,7 +85,6 @@ namespace UnityModManagerNet.Installer
         private void Init()
         {
             instance = this;
-            FormBorderStyle = FormBorderStyle.FixedDialog;
             btnRemove.Click += btnRemove_Click;
             btnInstall.Click += btnInstall_Click;
             btnRestore.Click += btnRestore_Click;

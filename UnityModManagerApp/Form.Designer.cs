@@ -314,6 +314,7 @@
             // 
             // btnDownloadUpdate
             // 
+            this.btnDownloadUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnDownloadUpdate.AutoSize = true;
             this.btnDownloadUpdate.BackColor = System.Drawing.Color.PaleGreen;
             this.btnDownloadUpdate.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -340,6 +341,8 @@
             // 
             // btnOpenFolder
             // 
+            this.btnOpenFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOpenFolder.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnOpenFolder.Location = new System.Drawing.Point(40, 178);
             this.btnOpenFolder.Name = "btnOpenFolder";
@@ -351,6 +354,8 @@
             // 
             // gameList
             // 
+            this.gameList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.gameList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.gameList.FormattingEnabled = true;
             this.gameList.ImeMode = System.Windows.Forms.ImeMode.NoControl;
@@ -376,6 +381,7 @@
             // 
             // label3
             // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(219, 160);
             this.label3.Name = "label3";
@@ -385,6 +391,7 @@
             // 
             // currentVersion
             // 
+            this.currentVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.currentVersion.AutoSize = true;
             this.currentVersion.Location = new System.Drawing.Point(299, 144);
             this.currentVersion.Name = "currentVersion";
@@ -394,6 +401,7 @@
             // 
             // label2
             // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(219, 144);
             this.label2.Name = "label2";
@@ -403,6 +411,7 @@
             // 
             // installedVersion
             // 
+            this.installedVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.installedVersion.AutoSize = true;
             this.installedVersion.Location = new System.Drawing.Point(299, 160);
             this.installedVersion.Name = "installedVersion";
@@ -486,6 +495,7 @@
             // 
             // ModcontextMenuStrip1
             // 
+            this.ModcontextMenuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.ModcontextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.installToolStripMenuItem,
             this.updateToolStripMenuItem,
@@ -545,7 +555,7 @@
             // splitContainerModsInstall.Panel2
             // 
             this.splitContainerModsInstall.Panel2.BackgroundImage = global::UnityModManagerNet.Installer.Properties.Resources.dragdropfiles;
-            this.splitContainerModsInstall.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.splitContainerModsInstall.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.splitContainerModsInstall.Size = new System.Drawing.Size(344, 142);
             this.splitContainerModsInstall.SplitterDistance = 45;
             this.splitContainerModsInstall.TabIndex = 0;
@@ -588,6 +598,7 @@
             // 
             this.statusStrip1.AutoSize = false;
             this.statusStrip1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel});
             this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
@@ -595,6 +606,7 @@
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.ShowItemToolTips = true;
             this.statusStrip1.Size = new System.Drawing.Size(358, 20);
+            this.statusStrip1.SizingGrip = false;
             this.statusStrip1.TabIndex = 0;
             this.statusStrip1.Text = "statusStrip1";
             // 
