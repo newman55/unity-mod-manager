@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.10
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Updater", "Updater\Updater.csproj", "{0EEC949D-BF5C-4F12-9743-0A635ABC8DE4}"
 EndProject
@@ -13,27 +13,20 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-		Release-Net35|Any CPU = Release-Net35|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0EEC949D-BF5C-4F12-9743-0A635ABC8DE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0EEC949D-BF5C-4F12-9743-0A635ABC8DE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EEC949D-BF5C-4F12-9743-0A635ABC8DE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EEC949D-BF5C-4F12-9743-0A635ABC8DE4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0EEC949D-BF5C-4F12-9743-0A635ABC8DE4}.Release-Net35|Any CPU.ActiveCfg = Release|Any CPU
-		{0EEC949D-BF5C-4F12-9743-0A635ABC8DE4}.Release-Net35|Any CPU.Build.0 = Release|Any CPU
 		{6E8F8B45-2A2D-4E5A-8573-3559337E68F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6E8F8B45-2A2D-4E5A-8573-3559337E68F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E8F8B45-2A2D-4E5A-8573-3559337E68F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E8F8B45-2A2D-4E5A-8573-3559337E68F3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E8F8B45-2A2D-4E5A-8573-3559337E68F3}.Release-Net35|Any CPU.ActiveCfg = Release|Any CPU
-		{6E8F8B45-2A2D-4E5A-8573-3559337E68F3}.Release-Net35|Any CPU.Build.0 = Release|Any CPU
 		{A1FCAE3E-523E-4E33-8860-DD39DDDF0F62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A1FCAE3E-523E-4E33-8860-DD39DDDF0F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1FCAE3E-523E-4E33-8860-DD39DDDF0F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1FCAE3E-523E-4E33-8860-DD39DDDF0F62}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A1FCAE3E-523E-4E33-8860-DD39DDDF0F62}.Release-Net35|Any CPU.ActiveCfg = Release|Any CPU
-		{A1FCAE3E-523E-4E33-8860-DD39DDDF0F62}.Release-Net35|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
