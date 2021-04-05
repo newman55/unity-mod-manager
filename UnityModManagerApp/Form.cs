@@ -68,7 +68,12 @@ namespace UnityModManagerNet.Installer
             { "0Harmony12.dll", LibIncParam.Minimal_lt_0_22 },
             { "0Harmony-1.2.dll", LibIncParam.Minimal_lt_0_22 },
             { "dnlib.dll", LibIncParam.Normal },
-            { "System.Xml.dll", LibIncParam.Normal },
+            { "mono.cecil.dll", LibIncParam.Normal },
+            { "mono.cecil.mdb.dll", LibIncParam.Normal },
+            { "mono.cecil.pdb.dll", LibIncParam.Normal },
+            { "mono.cecil.rocks.dll", LibIncParam.Normal },
+            { "monomod.runtimedetour.dll", LibIncParam.Normal },
+            { "monomod.utils.dll", LibIncParam.Normal },
             { nameof(UnityModManager) + ".dll", LibIncParam.Normal },
             { nameof(UnityModManager) + ".xml", LibIncParam.Normal },
         };

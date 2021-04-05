@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net35; net472;</TargetFrameworks>
+		<TargetFramework>net35</TargetFramework>
 		<Authors>Newman55</Authors>
 		<Company />
 		<AssemblyVersion>0.23.3.0</AssemblyVersion>

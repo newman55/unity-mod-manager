@@ -14,6 +14,21 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Include="..\lib\0Harmony-1.2.dll" Link="0Harmony-1.2.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Include="..\lib\0Harmony12.dll" Link="0Harmony12.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Include="..\lib\winhttp_x64.dll" Link="winhttp_x64.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Include="..\lib\winhttp_x86.dll" Link="winhttp_x86.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Ionic.Zip" Version="1.9.1.8" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	</ItemGroup>
