@@ -124,8 +124,11 @@ namespace UnityModManagerNet.Installer
             btnDownloadUpdate.Click += btnDownloadUpdate_Click;
 
             Log.Init();
-            
-            Height = UnityModManagerApp.Properties.Settings.Default.WindowHeight;
+
+            if (!DesignMode)
+            {
+                Height = UnityModManagerApp.Properties.Settings.Default.WindowHeight;
+            }
 
 #if NET35
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;

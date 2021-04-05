@@ -103,7 +103,7 @@
             this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelMain.Location = new System.Drawing.Point(0, 0);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(358, 469);
+            this.panelMain.Size = new System.Drawing.Size(358, 475);
             this.panelMain.TabIndex = 3;
             // 
             // splitContainerMain
@@ -125,8 +125,8 @@
             // 
             this.splitContainerMain.Panel2.Controls.Add(this.statusStrip1);
             this.splitContainerMain.Panel2MinSize = 20;
-            this.splitContainerMain.Size = new System.Drawing.Size(358, 469);
-            this.splitContainerMain.SplitterDistance = 440;
+            this.splitContainerMain.Size = new System.Drawing.Size(358, 475);
+            this.splitContainerMain.SplitterDistance = 446;
             this.splitContainerMain.TabIndex = 11;
             // 
             // tabControl
@@ -141,7 +141,7 @@
             this.tabControl.Name = "tabControl";
             this.tabControl.Padding = new System.Drawing.Point(0, 4);
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(358, 440);
+            this.tabControl.Size = new System.Drawing.Size(358, 446);
             this.tabControl.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.tabControl.TabIndex = 10;
             this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabs_Changed);
@@ -167,7 +167,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 28);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(350, 408);
+            this.tabPage1.Size = new System.Drawing.Size(350, 414);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Install";
             // 
@@ -634,15 +634,14 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(358, 469);
+            this.ClientSize = new System.Drawing.Size(358, 475);
             this.Controls.Add(this.panelMain);
-            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Icon = global::UnityModManagerApp.Properties.Resources.icon;
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(374, 1000);
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(374, 508);
             this.Name = "UnityModManagerForm";
-            this.ShowIcon = false;
             this.Text = "UnityModManager Installer";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.UnityModLoaderForm_FormClosing);
             this.panelMain.ResumeLayout(false);
