@@ -35,6 +35,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\UnityModManager\UnityModManager.csproj" />
+		<ProjectReference Include="..\Updater\Updater.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
