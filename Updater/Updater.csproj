@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFrameworks>net472</TargetFrameworks>
+		<TargetFrameworks>net472;net35;</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
 		<Product>Downloader</Product>
 		<Copyright>Copyright © 2019</Copyright>
@@ -12,6 +12,14 @@
 		<Authors>Newman55</Authors>
 		<Company></Company>
 		<PackageId>Downloader</PackageId>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
+	  <OutputPath></OutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|AnyCPU'">
+	  <OutputPath></OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>

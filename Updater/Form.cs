@@ -30,9 +30,11 @@ namespace UnityModManagerNet.Downloader
 
         public void Start()
         {
-            // NOTE: SecurityProtocolType.Ssl3 no longer supported
+#if NET35
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Ssl3;
+#else
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-
+#endif
             if (!Utils.HasNetworkConnection())
             {
                 status.Text = $"No network connection.";
