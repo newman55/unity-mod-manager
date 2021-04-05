@@ -30,6 +30,13 @@ namespace UnityModManagerNet.Downloader
 
         public void Start()
         {
+            var rewrite = false;
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 0)
+            {
+                rewrite = args.Contains("-rewrite");
+            }
+
 #if NET35
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Ssl3;
 #else
@@ -72,7 +79,7 @@ namespace UnityModManagerNet.Downloader
                     return;
                 }
                 var release = repository.Releases.FirstOrDefault(x => x.Id == managerName);
-                if (File.Exists(managerFile))
+                if (!rewrite && File.Exists(managerFile))
                 {
                     var managerAssembly = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(managerFile));
                     if (Utils.ParseVersion(release.Version) <= managerAssembly.GetName().Version)
