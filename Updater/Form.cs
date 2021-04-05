@@ -32,9 +32,12 @@ namespace UnityModManagerNet.Downloader
 
         public void Start()
         {
-            //string[] args = Environment.GetCommandLineArgs();
-            //if (args.Length <= 1 || string.IsNullOrEmpty(args[1]))
-            //    return;
+            var rewrite = false;
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 0)
+            {
+                rewrite = args.Contains("-rewrite");
+            }
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
@@ -75,7 +78,7 @@ namespace UnityModManagerNet.Downloader
                     return;
                 }
                 var release = repository.Releases.FirstOrDefault(x => x.Id == managerName);
-                if (File.Exists(managerFile))
+                if (!rewrite && File.Exists(managerFile))
                 {
                     var managerAssembly = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(managerFile));
                     if (Utils.ParseVersion(release.Version) <= managerAssembly.GetName().Version)

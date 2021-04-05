@@ -130,7 +130,7 @@ namespace UnityModManagerNet.Installer
             }
         }
 
-        private void UninstallMod(string name)
+        private void UninstallMod(ModInfo modInfo)
         {
             if (selectedGame == null)
             {
@@ -145,24 +145,22 @@ namespace UnityModManagerNet.Installer
                 return;
             }
 
-            var modPath = Path.Combine(modsPath, name);
-
-            if (Directory.Exists(modPath))
+            if (Directory.Exists(modInfo.Path))
             {
                 try
                 {
-                    Directory.Delete(modPath, true);
-                    Log.Print($"Deleting '{name}' - SUCCESS.");
+                    Directory.Delete(modInfo.Path, true);
+                    Log.Print($"Deleting '{modInfo.Id}' - SUCCESS.");
                 }
                 catch (Exception ex)
                 {
                     Log.Print(ex.Message);
-                    Log.Print($"Error when uninstalling '{name}'.");
+                    Log.Print($"Error when uninstalling '{modInfo.Id}'.");
                 }
             }
             else
             {
-                Log.Print($"Directory '{modPath}' - not found.");
+                Log.Print($"Directory '{modInfo.Path}' - not found.");
             }
 
             ReloadMods();
@@ -206,29 +204,39 @@ namespace UnityModManagerNet.Installer
 
             try
             {
-                var modId = ReadModInfoFromZip(zip).Id; //obtain the name of the folder the mod should have
-                var modPath = Path.Combine(modsPath, modId); //assume the mod's zip file does not contain said folder, but only its contents.
-                foreach (var e in zip.EntriesSorted)
+                var modInfo = ReadModInfoFromZip(zip);
+                if (modInfo == null)
                 {
-                    if (e.IsDirectory)
+                    Log.Print($"{Path.GetFileName(zip.Name)} is not supported.");
+                    return;
+                }
+                var modInstalled = mods.Find(x => x.Id == modInfo.Id && x.Status == ModStatus.Installed);
+                var modPath = modInstalled ? modInstalled.Path : Path.Combine(modsPath, modInfo.Id);
+                var replaceModDir = "";
+                if (zip.EntriesSorted.Count(x => x.FileName.Equals(selectedGame.ModInfo, StringComparison.CurrentCultureIgnoreCase)) == 0)
+                {
+                    modPath = modsPath;
+                    if (modInstalled)
                     {
-                        if (e.FileName.Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, '/') == modId)
-                        {
-                            modPath = modsPath; //if the zip file does contain the directory entry matching what the mod should have, revert to extracting directly into the mods folder
-                        }
-                        continue;
+                        replaceModDir = modInstalled.Path.Split(Path.DirectorySeparatorChar).Last();
                     }
                 }
+                
                 foreach (var entry in zip.EntriesSorted)
                 {
+                    var filename = entry.FileName;
+                    if (!string.IsNullOrEmpty(replaceModDir))
+                    {
+                        var pos = filename.IndexOf(Path.AltDirectorySeparatorChar);
+                        filename = replaceModDir + filename.Substring(pos, filename.Length - pos);
+                    }
                     if (entry.IsDirectory)
                     {
-                        Directory.CreateDirectory(Path.Combine(modPath, entry.FileName));
+                        Directory.CreateDirectory(Path.Combine(modPath, filename));
                     }
                     else
                     {
-                        Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(modPath, entry.FileName)));
-                        using (FileStream fs = new FileStream(Path.Combine(modPath, entry.FileName), FileMode.Create, FileAccess.Write)) //the way this filestream is opened, it shouldn't fail if the file already exists[according to documentation anyways]
+                        using (FileStream fs = new FileStream(Path.Combine(modPath, filename), FileMode.Create, FileAccess.Write))
                         {
                             entry.Extract(fs);
                         }
@@ -537,7 +545,7 @@ namespace UnityModManagerNet.Installer
             var modInfo = selectedMod;
             if (modInfo)
             {
-                UninstallMod(modInfo.Id);
+                UninstallMod(modInfo);
             }
         }
 
@@ -549,6 +557,7 @@ namespace UnityModManagerNet.Installer
                 var previous = modInfo.AvailableVersions.Where(x => x.Key < modInfo.ParsedVersion).OrderByDescending(x => x.Key).FirstOrDefault();
                 if (!string.IsNullOrEmpty(previous.Value))
                 {
+                    UninstallMod(modInfo);
                     InstallMod(previous.Value);
                 }
             }

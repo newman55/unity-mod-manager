@@ -26,12 +26,12 @@ namespace UnityModManagerNet.Installer.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("508")]
-        public int WindowHeght {
+        public int WindowHeight {
             get {
-                return ((int)(this["WindowHeght"]));
+                return ((int)(this["WindowHeight"]));
             }
             set {
-                this["WindowHeght"] = value;
+                this["WindowHeight"] = value;
             }
         }
     }
