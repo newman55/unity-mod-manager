@@ -12,10 +12,12 @@
 
 	<ItemGroup>
 	  <PackageReference Include="dnlib" Version="3.3.2" />
-	  <PackageReference Include="HarmonyX" Version="2.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Reference Include="0Harmony">
+	    <HintPath>..\lib\0Harmony.dll</HintPath>
+	  </Reference>
 	  <Reference Include="UnityEngine">
 	    <HintPath>..\lib\UnityEngine.dll</HintPath>
 	  </Reference>
