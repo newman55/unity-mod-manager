@@ -68,6 +68,7 @@ namespace UnityModManagerNet.Installer
             { "0Harmony12.dll", LibIncParam.Minimal_lt_0_22 },
             { "0Harmony-1.2.dll", LibIncParam.Minimal_lt_0_22 },
             { "dnlib.dll", LibIncParam.Normal },
+            { "System.Xml.dll", LibIncParam.Normal },
             { nameof(UnityModManager) + ".dll", LibIncParam.Normal },
             { nameof(UnityModManager) + ".xml", LibIncParam.Normal },
         };

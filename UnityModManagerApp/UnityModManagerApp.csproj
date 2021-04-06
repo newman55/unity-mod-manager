@@ -20,6 +20,9 @@
 	  <None Include="..\lib\0Harmony12.dll" Link="0Harmony12.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Include="..\lib\System.Xml.dll" Link="System.Xml.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Include="..\lib\winhttp_x64.dll" Link="winhttp_x64.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
