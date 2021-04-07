@@ -75,7 +75,9 @@
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.modInstallFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.panelMain.SuspendLayout();
+#if NET40_OR_GREATER
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
+#endif
             this.splitContainerMain.Panel1.SuspendLayout();
             this.splitContainerMain.Panel2.SuspendLayout();
             this.splitContainerMain.SuspendLayout();
@@ -85,12 +87,16 @@
             this.additionallyGroupBox.SuspendLayout();
             this.extraFilesGroupBox.SuspendLayout();
             this.tabPage2.SuspendLayout();
+#if NET40_OR_GREATER
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMods)).BeginInit();
+#endif
             this.splitContainerMods.Panel1.SuspendLayout();
             this.splitContainerMods.Panel2.SuspendLayout();
             this.splitContainerMods.SuspendLayout();
             this.ModcontextMenuStrip1.SuspendLayout();
+#if NET40_OR_GREATER
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerModsInstall)).BeginInit();
+#endif
             this.splitContainerModsInstall.Panel1.SuspendLayout();
             this.splitContainerModsInstall.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -341,7 +347,7 @@
             // 
             // btnOpenFolder
             // 
-            this.btnOpenFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.btnOpenFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOpenFolder.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnOpenFolder.Location = new System.Drawing.Point(40, 178);
@@ -354,7 +360,7 @@
             // 
             // gameList
             // 
-            this.gameList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.gameList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.gameList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.gameList.FormattingEnabled = true;
@@ -647,7 +653,9 @@
             this.panelMain.ResumeLayout(false);
             this.splitContainerMain.Panel1.ResumeLayout(false);
             this.splitContainerMain.Panel2.ResumeLayout(false);
+#if NET40_OR_GREATER
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).EndInit();
+#endif
             this.splitContainerMain.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
@@ -658,11 +666,15 @@
             this.tabPage2.ResumeLayout(false);
             this.splitContainerMods.Panel1.ResumeLayout(false);
             this.splitContainerMods.Panel2.ResumeLayout(false);
+#if NET40_OR_GREATER
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMods)).EndInit();
+#endif
             this.splitContainerMods.ResumeLayout(false);
             this.ModcontextMenuStrip1.ResumeLayout(false);
             this.splitContainerModsInstall.Panel1.ResumeLayout(false);
+#if NET40_OR_GREATER
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerModsInstall)).EndInit();
+#endif
             this.splitContainerModsInstall.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
