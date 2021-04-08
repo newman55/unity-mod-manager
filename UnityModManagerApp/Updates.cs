@@ -106,6 +106,10 @@ namespace UnityModManagerNet.Installer
 
             try
             {
+#if NET35
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+#endif
                 using (var wc = new WebClient())
                 {
                     wc.Encoding = System.Text.Encoding.UTF8;
