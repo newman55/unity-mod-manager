@@ -236,6 +236,7 @@ namespace UnityModManagerNet.Installer
                     }
                     else
                     {
+                        Directory.CreateDirectory(Path.Combine(modPath, Path.GetDirectoryName(filename)));
                         using (FileStream fs = new FileStream(Path.Combine(modPath, filename), FileMode.Create, FileAccess.Write))
                         {
                             entry.Extract(fs);
@@ -450,6 +451,7 @@ namespace UnityModManagerNet.Installer
             updateToolStripMenuItem.Visible = false;
             revertToolStripMenuItem.Visible = false;
             wwwToolStripMenuItem1.Visible = false;
+            openFolderToolStripMenuItem.Visible = false;
 
             var modInfo = selectedMod;
             if (!modInfo)
@@ -461,6 +463,7 @@ namespace UnityModManagerNet.Installer
             if (modInfo.Status == ModStatus.Installed)
             {
                 uninstallToolStripMenuItem.Visible = true;
+                openFolderToolStripMenuItem.Visible = true;
 
                 Version inRepository = new Version();
                 if (repositories.ContainsKey(selectedGame))
@@ -569,6 +572,15 @@ namespace UnityModManagerNet.Installer
             if (modInfo)
             {
                 System.Diagnostics.Process.Start(modInfo.HomePage);
+            }
+        }
+
+        private void openFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var modInfo = selectedMod;
+            if (modInfo)
+            {
+                System.Diagnostics.Process.Start(modInfo.Path);
             }
         }
     }
