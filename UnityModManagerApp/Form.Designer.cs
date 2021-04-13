@@ -66,6 +66,7 @@
             this.revertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.wwwToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainerModsInstall = new System.Windows.Forms.SplitContainer();
             this.btnModInstall = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
@@ -507,45 +508,53 @@
             this.updateToolStripMenuItem,
             this.revertToolStripMenuItem,
             this.uninstallToolStripMenuItem,
-            this.wwwToolStripMenuItem1});
+            this.wwwToolStripMenuItem1,
+            this.openFolderToolStripMenuItem});
             this.ModcontextMenuStrip1.Name = "ModcontextMenuStrip1";
-            this.ModcontextMenuStrip1.Size = new System.Drawing.Size(137, 114);
+            this.ModcontextMenuStrip1.Size = new System.Drawing.Size(140, 136);
             this.ModcontextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.ModcontextMenuStrip1_Opening);
             // 
             // installToolStripMenuItem
             // 
             this.installToolStripMenuItem.Name = "installToolStripMenuItem";
-            this.installToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.installToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.installToolStripMenuItem.Text = "Install";
             this.installToolStripMenuItem.Click += new System.EventHandler(this.installToolStripMenuItem_Click);
             // 
             // updateToolStripMenuItem
             // 
             this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
-            this.updateToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.updateToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.updateToolStripMenuItem.Text = "Update";
             this.updateToolStripMenuItem.Click += new System.EventHandler(this.updateToolStripMenuItem_Click);
             // 
             // revertToolStripMenuItem
             // 
             this.revertToolStripMenuItem.Name = "revertToolStripMenuItem";
-            this.revertToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.revertToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.revertToolStripMenuItem.Text = "Revert";
             this.revertToolStripMenuItem.Click += new System.EventHandler(this.revertToolStripMenuItem_Click);
             // 
             // uninstallToolStripMenuItem
             // 
             this.uninstallToolStripMenuItem.Name = "uninstallToolStripMenuItem";
-            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.uninstallToolStripMenuItem.Text = "Uninstall";
             this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
             // 
             // wwwToolStripMenuItem1
             // 
             this.wwwToolStripMenuItem1.Name = "wwwToolStripMenuItem1";
-            this.wwwToolStripMenuItem1.Size = new System.Drawing.Size(136, 22);
+            this.wwwToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
             this.wwwToolStripMenuItem1.Text = "Home Page";
             this.wwwToolStripMenuItem1.Click += new System.EventHandler(this.wwwToolStripMenuItem1_Click);
+            // 
+            // openFolderToolStripMenuItem
+            // 
+            this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
+            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.openFolderToolStripMenuItem.Text = "Open Folder";
+            this.openFolderToolStripMenuItem.Click += new System.EventHandler(this.openFolderToolStripMenuItem_Click);
             // 
             // splitContainerModsInstall
             // 
@@ -730,6 +739,7 @@
         private System.Windows.Forms.RichTextBox extraFilesTextBox;
         private System.Windows.Forms.Button extraFilesAutoButton;
         private System.Windows.Forms.Button extraFilesManualButton;
+        private System.Windows.Forms.ToolStripMenuItem openFolderToolStripMenuItem;
     }
 }
 

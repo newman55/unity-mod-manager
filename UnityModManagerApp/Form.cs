@@ -27,9 +27,10 @@ namespace UnityModManagerNet.Installer
 
         public UnityModManagerForm()
         {
-            if (!Utils.IsUnixPlatform() && CheckApplicationAlreadyRunning(out var process))
+            if (CheckApplicationAlreadyRunning(out var process) && MessageBox.Show("Already running", "Notice", MessageBoxButtons.OK) == DialogResult.OK)
             {
-                SetForegroundWindow(process.MainWindowHandle);
+                if (!Utils.IsUnixPlatform())
+                    SetForegroundWindow(process.MainWindowHandle);
                 Close();
                 return;
             }
@@ -126,7 +127,7 @@ namespace UnityModManagerNet.Installer
             }
 
 #if NET35
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls| (SecurityProtocolType)768 | (SecurityProtocolType)3072;
 #else
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 #endif
