@@ -14,14 +14,6 @@
 		<PackageId>Downloader</PackageId>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
-	  <OutputPath></OutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|AnyCPU'">
-	  <OutputPath></OutputPath>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Ionic.Zip" Version="1.9.1.8" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
