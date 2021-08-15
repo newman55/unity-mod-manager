@@ -27,19 +27,23 @@ namespace UnityModManagerNet.Installer
 
         public UnityModManagerForm()
         {
-            if (CheckApplicationAlreadyRunning(out var process) && MessageBox.Show("Already running", "Notice", MessageBoxButtons.OK) == DialogResult.OK)
-            {
-                if (!Utils.IsUnixPlatform())
-                    SetForegroundWindow(process.MainWindowHandle);
-                Close();
-                return;
-            }
             InitializeComponent();
             Load += UnityModManagerForm_Load;
         }
 
         private void UnityModManagerForm_Load(object sender, EventArgs e)
         {
+            try
+            {
+                if (CheckApplicationAlreadyRunning(out var process) && MessageBox.Show("Already running", "Notice", MessageBoxButtons.OK) == DialogResult.OK)
+                {
+                    if (!Utils.IsUnixPlatform())
+                        SetForegroundWindow(process.MainWindowHandle);
+                    Close();
+                    return;
+                }
+            }
+            catch (Exception _) {}
             Init();
             InitPageMods();
         }

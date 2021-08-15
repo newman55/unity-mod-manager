@@ -166,7 +166,7 @@ namespace UnityModManagerNet
             foundClass = null;
             foundMethod = null;
             insertionPlace = null;
-
+            
             if (TryParseEntryPoint(str, out string assemblyName, out _, out _, out _))
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -176,7 +176,16 @@ namespace UnityModManagerNet
                         return TryGetEntryPoint(assembly, str, out foundClass, out foundMethod, out insertionPlace);
                     }
                 }
-                UnityModManager.Logger.Error($"Assembly '{assemblyName}' not found.");
+                try
+                {
+                    var asm = Assembly.Load(assemblyName);
+                    return TryGetEntryPoint(asm, str, out foundClass, out foundMethod, out insertionPlace);
+                }
+                catch (Exception e)
+                {
+                    UnityModManager.Logger.Error($"File '{assemblyName}' cant't be loaded.");
+                    UnityModManager.Logger.LogException(e);
+                }
 
                 return false;
             }
