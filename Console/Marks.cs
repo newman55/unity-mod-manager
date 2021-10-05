@@ -5,7 +5,7 @@ using System.Text;
 
 namespace UnityModManagerNet.Marks
 {
-    static class IsDirty
+    public static class IsDirty
     {
     }
 }

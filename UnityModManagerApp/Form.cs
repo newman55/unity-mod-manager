@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using UnityModManagerNet.ConsoleInstaller;
 
 namespace UnityModManagerNet.Installer
 {
@@ -47,7 +48,7 @@ namespace UnityModManagerNet.Installer
             Init();
             InitPageMods();
         }
-
+        
         static bool CheckApplicationAlreadyRunning(out Process result)
         {
             result = null;
@@ -123,7 +124,7 @@ namespace UnityModManagerNet.Installer
             btnOpenFolder.Click += btnOpenFolder_Click;
             btnDownloadUpdate.Click += btnDownloadUpdate_Click;
 
-            Log.Init();
+            Log.Init<Log>();
             
             Height = Properties.Settings.Default.WindowHeight;
 

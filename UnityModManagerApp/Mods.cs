@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Ionic.Zip;
+using UnityModManagerNet.ConsoleInstaller;
 
 namespace UnityModManagerNet.Installer
 {

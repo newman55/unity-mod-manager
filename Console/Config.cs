@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 
-namespace UnityModManagerNet.Installer
+namespace UnityModManagerNet.ConsoleInstaller
 {
     public enum ModStatus { NotInstalled, Installed }
     public enum InstallType { Assembly, DoorstopProxy, /*Config,*/ Count }
@@ -125,7 +124,7 @@ namespace UnityModManagerNet.Installer
 
         public static void Create()
         {
-            var filepath = Path.Combine(Application.StartupPath, filename);
+            var filepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename);
             try
             {
                 using (var writer = new StreamWriter(filepath))
@@ -159,7 +158,7 @@ namespace UnityModManagerNet.Installer
 
         public static Config Load()
         {
-            var filepath = Path.Combine(Application.StartupPath, filename);
+            var filepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename);
             if (File.Exists(filepath))
             {
                 try
@@ -169,7 +168,7 @@ namespace UnityModManagerNet.Installer
                         var serializer = new XmlSerializer(typeof(Config));
                         var result = serializer.Deserialize(stream) as Config;
 
-                        foreach(var file in new DirectoryInfo(Application.StartupPath).GetFiles("UnityModManagerConfig*.xml", SearchOption.TopDirectoryOnly))
+                        foreach(var file in new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).GetFiles("UnityModManagerConfig*.xml", SearchOption.TopDirectoryOnly))
                         {
                             if (file.Name != filename)
                             {
@@ -265,7 +264,7 @@ namespace UnityModManagerNet.Installer
 
         public void Save()
         {
-            var path = Path.Combine(Application.LocalUserAppDataPath, filename);
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), filename);
             try
             {
                 using (var writer = new StreamWriter(path))
@@ -282,7 +281,7 @@ namespace UnityModManagerNet.Installer
 
         public static Param Load()
         {
-            var path = Path.Combine(Application.LocalUserAppDataPath, filename);
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), filename);
             if (File.Exists(path))
             {
                 try

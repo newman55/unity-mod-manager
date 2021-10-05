@@ -5,7 +5,7 @@ using System.Text;
 
 namespace UnityModManagerNet.Injection
 {
-    class UnityModManagerStarter
+    public class UnityModManagerStarter
     {
         public static void Start()
         {

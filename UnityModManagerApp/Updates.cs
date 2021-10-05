@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.NetworkInformation;
+using UnityModManagerNet.ConsoleInstaller;
 
 namespace UnityModManagerNet.Installer
 {
