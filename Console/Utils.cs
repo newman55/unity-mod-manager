@@ -499,15 +499,24 @@ namespace UnityModManagerNet.ConsoleInstaller
 
         public static bool? UnmanagedDllIs64Bit(string dllPath)
         {
-            switch (GetDllMachineType(dllPath))
+            try
             {
-                case MachineType.IMAGE_FILE_MACHINE_AMD64:
-                case MachineType.IMAGE_FILE_MACHINE_IA64:
-                    return true;
-                case MachineType.IMAGE_FILE_MACHINE_I386:
-                    return false;
-                default:
-                    return null;
+                switch (GetDllMachineType(dllPath))
+                {
+                    case MachineType.IMAGE_FILE_MACHINE_AMD64:
+                    case MachineType.IMAGE_FILE_MACHINE_IA64:
+                        return true;
+                    case MachineType.IMAGE_FILE_MACHINE_I386:
+                        return false;
+                    default:
+                        return null;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Print(e.ToString());
+                Log.Print($"Unable to determine the bitness of {dllPath}");
+                return null;
             }
         }
 

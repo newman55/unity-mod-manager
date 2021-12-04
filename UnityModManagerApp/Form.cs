@@ -97,6 +97,7 @@ namespace UnityModManagerNet.Installer
         static string injectedEntryPoint = null;
 
         static string gameExePath = null;
+        static string unityPlayerPath = null;
 
         static string doorstopFilename = "winhttp.dll";
         static string doorstopConfigFilename = "doorstop_config.ini";
@@ -351,6 +352,8 @@ namespace UnityModManagerNet.Installer
             Utils.TryParseEntryPoint(selectedGame.EntryPoint, out var assemblyName);
 
             gamePath = selectedGameParams.Path;
+            if (File.Exists(Path.Combine(gamePath, "UnityPlayer.dll"))) ;
+                unityPlayerPath = Path.Combine(gamePath, "UnityPlayer.dll");
             btnOpenFolder.ForeColor = System.Drawing.Color.Black;
             btnOpenFolder.Text = new DirectoryInfo(gamePath).Name;
             folderBrowserDialog.SelectedPath = gamePath;
@@ -872,9 +875,11 @@ namespace UnityModManagerNet.Installer
                             Log.Print("Installation failed. Can't uninstall the previous version.");
                             goto EXIT;
                         }
-
+                        
                         Log.Print($"Copying files to game...");
                         var arch = Utils.UnmanagedDllIs64Bit(gameExePath);
+                        if (arch == null && !string.IsNullOrEmpty(unityPlayerPath))
+                            arch = Utils.UnmanagedDllIs64Bit(unityPlayerPath);
                         var filename = arch == true ? "winhttp_x64.dll" : "winhttp_x86.dll";
                         Log.Print($"  '{filename}'");
                         File.Copy(filename, doorstopPath, true);

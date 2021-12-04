@@ -26,7 +26,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
@@ -38,17 +38,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net35|AnyCPU'">
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <OutputPath>bin\Release-Net35\</OutputPath>
-    <DefineConstants>TRACE;NET35</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -158,12 +147,6 @@ start XCOPY /Y /R "$(SolutionDir)\lib\winhttp_x64.dll" "$(TargetDir)winhttp_x64.
 start XCOPY /Y /R "$(SolutionDir)\lib\System.Xml.dll" "$(TargetDir)System.Xml.dll*"
 if $(ConfigurationName) == Release (
 start XCOPY /Y /R "$(TargetPath)" "$(TargetDir)UnityModManager.exe*"
-start XCOPY /Y /R "$(TargetPath)" "$(TargetDir)UnityModManager-net45.exe*"
-start XCOPY /Y /R "$(TargetDir)UnityModManagerApp.exe.config" "$(TargetDir)UnityModManager-net45.exe.config*"
-)
-if $(ConfigurationName) == Release-Net35 (
-start XCOPY /Y /R "$(TargetPath)" "$(ProjectDir)bin/Release/UnityModManager-net35.exe*"
-start XCOPY /Y /R "$(TargetDir)UnityModManagerApp.exe.config" "$(ProjectDir)bin/Release/UnityModManager-net35.exe.config*"
 )</PostBuildEvent>
   </PropertyGroup>
 </Project>
