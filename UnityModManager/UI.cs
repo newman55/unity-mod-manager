@@ -64,6 +64,10 @@ namespace UnityModManagerNet
             private float mExpectedUIScale = 1f;
             private bool mUIScaleChanged;
 
+            private string[] mOSfonts = null;
+            private string mDefaultFont = "Arial";
+            private int mSelectedFont;
+
             public int globalFontSize = 13;
 
             private void Awake()
@@ -74,9 +78,25 @@ namespace UnityModManagerNet
                 DontDestroyOnLoad(this);
                 mWindowSize = ClampWindowSize(new Vector2(Params.WindowWidth, Params.WindowHeight));
                 mExpectedWindowSize = mWindowSize;
-                mUIScale = Mathf.Clamp(Params.UIScale, 0.5f, 2f);
+                mUIScale = Mathf.Clamp(Params.UIScale, 0.5f, 5f);
                 mExpectedUIScale = mUIScale;
                 Textures.Init();
+                
+                mOSfonts = Font.GetOSInstalledFontNames();
+                if (mOSfonts.Length == 0)
+                {
+                    Logger.Error("No compatible font found in OS. If you play through Wine, install winetricks allfonts.");
+                    OpenUnityFileLog();
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(Params.UIFont))
+                        Params.UIFont = mDefaultFont;
+                    if (!mOSfonts.Contains(Params.UIFont))
+                        Params.UIFont = mOSfonts.First();
+
+                    mSelectedFont = Array.IndexOf(mOSfonts, Params.UIFont);
+                }
 
                 var harmony = new HarmonyLib.Harmony("UnityModManager.UI");
                 var original = typeof(Screen).GetMethod("set_lockCursor");
@@ -233,7 +253,7 @@ namespace UnityModManagerNet
 
             private void ScaleGUI()
             {
-                GUI.skin.font = Font.CreateDynamicFontFromOSFont(new[] { "Arial" }, Scale(globalFontSize));
+                GUI.skin.font = Font.CreateDynamicFontFromOSFont(Params.UIFont, Scale(globalFontSize));
                 GUI.skin.label.clipping = TextClipping.Overflow;
                 GUI.skin.button.padding = new RectOffset(Scale(10), Scale(10), Scale(3), Scale(3));
                 //GUI.skin.button.margin = RectOffset(Scale(4), Scale(2));
@@ -812,18 +832,21 @@ namespace UnityModManagerNet
 
                             GUILayout.BeginVertical("box");
                             GUILayout.Label("UI", bold, GUILayout.ExpandWidth(false));
+                            GUILayout.Label("Font", GUILayout.ExpandWidth(false), GUILayout.ExpandWidth(false));
+                            PopupToggleGroup(ref mSelectedFont, mOSfonts, null, GUI.skin.button, GUILayout.Width(200));
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Scale", GUILayout.ExpandWidth(false), GUILayout.ExpandWidth(false));
-                            mExpectedUIScale = GUILayout.HorizontalSlider(mExpectedUIScale, 0.5f, 2f, GUILayout.Width(200));
+                            mExpectedUIScale = GUILayout.HorizontalSlider(mExpectedUIScale, 0.5f, 5f, GUILayout.Width(200));
                             GUILayout.Label(" " + mExpectedUIScale.ToString("f2"), GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
                             if (GUILayout.Button("Apply", button, GUILayout.ExpandWidth(false)))
                             {
-                                if (mUIScale != mExpectedUIScale)
+                                if (mUIScale != mExpectedUIScale || mOSfonts[mSelectedFont] != Params.UIFont)
                                 {
                                     mUIScaleChanged = true;
                                     mUIScale = mExpectedUIScale;
                                     Params.UIScale = mUIScale;
+                                    Params.UIFont = mOSfonts[mSelectedFont];
                                 }
                             }
                             GUILayout.EndVertical();

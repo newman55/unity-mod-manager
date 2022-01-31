@@ -27,6 +27,7 @@ namespace UnityModManagerNet
             public float WindowWidth;
             public float WindowHeight;
             public float UIScale = 1f;
+            public string UIFont = null;
 
             public List<Mod> ModParams = new List<Mod>();
 

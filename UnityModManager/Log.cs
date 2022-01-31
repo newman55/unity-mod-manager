@@ -167,7 +167,7 @@ namespace UnityModManagerNet
 
             internal static void Watcher(float dt)
             {
-                if (buffer.Count >= bufferCapacity || timer > 1f)
+                if (buffer.Count >= bufferCapacity || timer > 0.5f)
                 {
                     WriteBuffers();
                 }

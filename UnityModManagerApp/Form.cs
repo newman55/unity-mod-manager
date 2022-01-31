@@ -352,7 +352,7 @@ namespace UnityModManagerNet.Installer
             Utils.TryParseEntryPoint(selectedGame.EntryPoint, out var assemblyName);
 
             gamePath = selectedGameParams.Path;
-            if (File.Exists(Path.Combine(gamePath, "UnityPlayer.dll"))) ;
+            if (File.Exists(Path.Combine(gamePath, "UnityPlayer.dll")))
                 unityPlayerPath = Path.Combine(gamePath, "UnityPlayer.dll");
             btnOpenFolder.ForeColor = System.Drawing.Color.Black;
             btnOpenFolder.Text = new DirectoryInfo(gamePath).Name;
@@ -1383,8 +1383,10 @@ namespace UnityModManagerNet.Installer
             {
                 if (!f.FullName.EndsWith(Path.Combine("UnityModManager", "0Harmony.dll")))
                 {
-                    var asm = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(f.FullName));
-                    if (asm.GetName().Version < HARMONY_VER)
+                    //var asm = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(f.FullName));
+                    //if (asm.GetName().Version < HARMONY_VER)
+                    var asm = ModuleDefMD.Load(File.ReadAllBytes(f.FullName));
+                    if (asm.Assembly.Version < HARMONY_VER)
                     {
                         Log.Print($"Game has extra library 0Harmony.dll in path {f.FullName}, which may not be compatible with UMM. Recommended to delete it.");
                         return false;

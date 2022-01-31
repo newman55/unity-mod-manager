@@ -784,8 +784,10 @@ namespace UnityModManagerNet.ConsoleInstaller
             {
                 if (!f.FullName.EndsWith(Path.Combine("UnityModManager", "0Harmony.dll")))
                 {
-                    var asm = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(f.FullName));
-                    if (asm.GetName().Version < HARMONY_VER)
+                    //var asm = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(f.FullName));
+                    //if (asm.GetName().Version < HARMONY_VER)
+                    var asm = ModuleDefMD.Load(File.ReadAllBytes(f.FullName));
+                    if (asm.Assembly.Version < HARMONY_VER)
                     {
                         Log.Print($"Game has extra library 0Harmony.dll in path {f.FullName}, which may not be compatible with UMM. Recommended to delete it.");
                         return false;
