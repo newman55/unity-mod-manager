@@ -957,7 +957,7 @@ namespace UnityModManagerNet
         static void OnLoad(object sender, AssemblyLoadEventArgs args)
         {
             var name = args.LoadedAssembly.GetName().Name;
-            if (name == "Assembly-CSharp" || name == "assembly_valheim")
+            if (name == "Assembly-CSharp" || name == "GH.Runtime")
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnLoad;
                 Injector.Run(true);
