@@ -458,57 +458,115 @@ namespace UnityModManagerNet
                 var param = str.Split('|');
                 if (param.Length != 2)
                 {
-                    throw new Exception($"VisibleOn/InvisibleOn({str}) must have 2 params, name and value, e.g (FieldName|True).");
+                    throw new Exception($"VisibleOn/InvisibleOn({str}) must have 2 params, name and value, e.g (FieldName|True) or (#PropertyName|True).");
                 }
-                var dependsOnField = type.GetField(param[0], System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (dependsOnField == null)
+
+                var isField = !str.StartsWith("#");
+                if (isField)
                 {
-                    throw new Exception($"Field '{param[0]}' not found.");
-                }
-                if (!dependsOnField.FieldType.IsPrimitive && !dependsOnField.FieldType.IsEnum)
-                {
-                    throw new Exception($"Type '{dependsOnField.FieldType.Name}' is not supported.");
-                }
-                object dependsOnValue = null;
-                if (dependsOnField.FieldType.IsEnum)
-                {
-                    try
+                    var dependsOnField = type.GetField(param[0], System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (dependsOnField == null)
                     {
-                        dependsOnValue = Enum.Parse(dependsOnField.FieldType, param[1]);
-                        if (dependsOnValue == null)
+                        throw new Exception($"Field '{param[0]}' not found. Insert # at the beginning for properties.");
+                    }
+                    if (!dependsOnField.FieldType.IsPrimitive && !dependsOnField.FieldType.IsEnum)
+                    {
+                        throw new Exception($"Type '{dependsOnField.FieldType.Name}' is not supported.");
+                    }
+                    object dependsOnValue = null;
+                    if (dependsOnField.FieldType.IsEnum)
+                    {
+                        try
                         {
-                            throw new Exception($"Value '{param[1]}' cannot be parsed.");
+                            dependsOnValue = Enum.Parse(dependsOnField.FieldType, param[1]);
+                            if (dependsOnValue == null)
+                            {
+                                throw new Exception($"Value '{param[1]}' cannot be parsed.");
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            mod.Logger.Log($"Parse value VisibleOn/InvisibleOn({str})");
+                            throw e;
                         }
                     }
-                    catch (Exception e)
+                    else if (dependsOnField.FieldType == typeof(string))
                     {
-                        mod.Logger.Log($"Parse value VisibleOn/InvisibleOn({str})");
-                        throw e;
+                        dependsOnValue = param[1];
                     }
-                }
-                else if (dependsOnField.FieldType == typeof(string))
-                {
-                    dependsOnValue = param[1];
+                    else
+                    {
+                        try
+                        {
+                            dependsOnValue = Convert.ChangeType(param[1], dependsOnField.FieldType);
+                            if (dependsOnValue == null)
+                            {
+                                throw new Exception($"Value '{param[1]}' cannot be parsed.");
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            mod.Logger.Log($"Parse value VisibleOn/InvisibleOn({str})");
+                            throw e;
+                        }
+                    }
+
+                    var value = dependsOnField.GetValue(container);
+                    return value.GetHashCode() == dependsOnValue.GetHashCode();
                 }
                 else
                 {
-                    try
+                    param[0] = param[0].TrimStart('#');
+                    var dependsOnProperty = type.GetProperty(param[0], System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (dependsOnProperty == null)
                     {
-                        dependsOnValue = Convert.ChangeType(param[1], dependsOnField.FieldType);
-                        if (dependsOnValue == null)
+                        throw new Exception($"Property '{param[0]}' not found.");
+                    }
+                    if (!dependsOnProperty.PropertyType.IsPrimitive && !dependsOnProperty.PropertyType.IsEnum)
+                    {
+                        throw new Exception($"Type '{dependsOnProperty.PropertyType.Name}' is not supported.");
+                    }
+                    object dependsOnValue = null;
+                    if (dependsOnProperty.PropertyType.IsEnum)
+                    {
+                        try
                         {
-                            throw new Exception($"Value '{param[1]}' cannot be parsed.");
+                            dependsOnValue = Enum.Parse(dependsOnProperty.PropertyType, param[1]);
+                            if (dependsOnValue == null)
+                            {
+                                throw new Exception($"Value '{param[1]}' cannot be parsed.");
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            mod.Logger.Log($"Parse value VisibleOn/InvisibleOn({str})");
+                            throw e;
                         }
                     }
-                    catch (Exception e)
+                    else if (dependsOnProperty.PropertyType == typeof(string))
                     {
-                        mod.Logger.Log($"Parse value VisibleOn/InvisibleOn({str})");
-                        throw e;
+                        dependsOnValue = param[1];
                     }
+                    else
+                    {
+                        try
+                        {
+                            dependsOnValue = Convert.ChangeType(param[1], dependsOnProperty.PropertyType);
+                            if (dependsOnValue == null)
+                            {
+                                throw new Exception($"Value '{param[1]}' cannot be parsed.");
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            mod.Logger.Log($"Parse value VisibleOn/InvisibleOn({str})");
+                            throw e;
+                        }
+                    }
+
+                    var value = dependsOnProperty.GetValue(container, null);
+                    return value.GetHashCode() == dependsOnValue.GetHashCode();
                 }
-                
-                var value = dependsOnField.GetValue(container);
-                return value.GetHashCode() == dependsOnValue.GetHashCode();
             }
 
             private static bool Draw(object container, Type type, ModEntry mod, DrawFieldMask defaultMask, int unique)
