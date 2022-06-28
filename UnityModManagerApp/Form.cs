@@ -321,7 +321,7 @@ namespace UnityModManagerNet.Installer
             gamePath = "";
             if (string.IsNullOrEmpty(selectedGameParams.Path) || !Directory.Exists(selectedGameParams.Path))
             {
-                var result = FindGameFolder(selectedGame.Folder);
+                var result = Utils.FindGameFolder(selectedGame.Folder);
                 if (string.IsNullOrEmpty(result))
                 {
                     InactiveForm();
@@ -363,7 +363,7 @@ namespace UnityModManagerNet.Installer
                 Log.Print("This game version (IL2CPP) is not supported.");
                 return;
             }
-            managedPath = FindManagedFolder(gamePath);
+            managedPath = Utils.FindManagedFolder(gamePath);
             if (managedPath == null)
             {
                 InactiveForm();
@@ -584,7 +584,7 @@ namespace UnityModManagerNet.Installer
 
             if (selectedGameParams.InstallType == InstallType.Assembly)
             {
-                btnRestore.Enabled = IsDirty(injectedAssemblyDef) && File.Exists($"{injectedEntryAssemblyPath}.original_");
+                btnRestore.Enabled = Utils.IsDirty(injectedAssemblyDef) && File.Exists($"{injectedEntryAssemblyPath}.original_");
             }
 
             tabControl.TabPages[1].Enabled = true;
@@ -621,90 +621,6 @@ namespace UnityModManagerNet.Installer
                 btnInstall.Enabled = true;
                 btnRemove.Enabled = false;
             }
-        }
-
-        //private void btnRunGame_SizeChanged(object sender, EventArgs e)
-        //{
-        //    var btn = sender as Button;
-        //    btn.Location = new System.Drawing.Point((int)(btn.Parent.Size.Width / 2f - btn.Size.Width / 2f), btn.Location.Y);
-        //}
-
-        //private void btnRunGame_Click(object sender, EventArgs e)
-        //{
-            //Process.Start(gameExePath);
-        //}
-
-        private string FindGameFolder(string str)
-        {
-            string[] disks = new string[] { @"C:\", @"D:\", @"E:\", @"F:\" };
-            string[] roots = new string[] { "Games", "Program files", "Program files (x86)", "" };
-            string[] folders = new string[] { @"Steam\SteamApps\common", @"GoG Galaxy\Games", "" };
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-                disks = new string[] { Environment.GetEnvironmentVariable("HOME") };
-                roots = new string[] { "Library/Application Support", ".steam" };
-                folders = new string[] { "Steam/SteamApps/common", "steam/steamapps/common", "Steam/steamapps/common" };
-            }
-            foreach (var disk in disks)
-            {
-                foreach (var root in roots)
-                {
-                    foreach (var folder in folders)
-                    {
-                        var path = Path.Combine(disk, root);
-                        path = Path.Combine(path, folder);
-                        path = Path.Combine(path, str);
-                        if (Directory.Exists(path))
-                        {
-                            if (Utils.IsMacPlatform())
-                            {
-                                foreach (var dir in Directory.GetDirectories(path))
-                                {
-                                    if (dir.EndsWith(".app"))
-                                    {
-                                        path = Path.Combine(path, dir);
-                                        break;
-                                    }
-                                }
-                            }
-                            return path;
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        private string FindManagedFolder(string path)
-        {
-            if (Utils.IsMacPlatform())
-            {
-                var dir = $"{path}/Contents/Resources/Data/Managed";
-                if (Directory.Exists(dir))
-                {
-                    return dir;
-                }
-            }
-
-            foreach (var di in new DirectoryInfo(path).GetDirectories())
-            {
-                if ((di.Attributes & System.IO.FileAttributes.ReparsePoint) != 0)
-                    continue;
-
-                var dir = di.FullName;
-                if (dir.EndsWith("Managed"))
-                {
-                    if (File.Exists(Path.Combine(dir, "Assembly-CSharp.dll")) || File.Exists(Path.Combine(dir, "UnityEngine.dll")))
-                    {
-                        return dir;
-                    }
-                }
-                var result = FindManagedFolder(dir);
-                if (!string.IsNullOrEmpty(result))
-                    return result;
-            }
-
-            return null;
         }
 
         private void btnRemove_Click(object sender, EventArgs e)
@@ -803,8 +719,15 @@ namespace UnityModManagerNet.Installer
             }
         }
 
+        private bool showChoosePathNotice = true;
+
         private void btnOpenFolder_Click(object sender, EventArgs e)
         {
+            if (showChoosePathNotice)
+            {
+                MessageBox.Show("Choose path to the game, for example /Steam/steamapps/common/YourGame", "Game path", MessageBoxButtons.OK);
+                showChoosePathNotice = false;
+            }
             var result = folderBrowserDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -884,8 +807,9 @@ namespace UnityModManagerNet.Installer
                         Log.Print($"  '{filename}'");
                         File.Copy(filename, doorstopPath, true);
                         Log.Print($"  '{doorstopConfigFilename}'");
-                        File.WriteAllText(doorstopConfigPath, "[UnityDoorstop]" + Environment.NewLine + "enabled = true" + Environment.NewLine + "targetAssembly = " + managerAssemblyPath);
-
+                        var relativeManagerAssemblyPath = managerAssemblyPath.Substring(gamePath.Length).Trim(Path.DirectorySeparatorChar);
+                        File.WriteAllText(doorstopConfigPath, "[General]" + Environment.NewLine + "enabled = true" + Environment.NewLine + "target_assembly = " + relativeManagerAssemblyPath);
+                        
                         DoactionLibraries(Actions.Install);
                         DoactionGameConfig(Actions.Install);
                         Log.Print("Installation was successful.");
@@ -1140,10 +1064,10 @@ namespace UnityModManagerNet.Installer
                             Utils.MakeBackup(assemblyPath);
                             Utils.MakeBackup(libraryPaths);
 
-                            if (!IsDirty(assemblyDef))
+                            if (!Utils.IsDirty(assemblyDef))
                             {
                                 File.Copy(assemblyPath, originalAssemblyPath, true);
-                                MakeDirty(assemblyDef);
+                                Utils.MakeDirty(assemblyDef);
                             }
 
                             if (!InjectAssembly(Actions.Remove, injectedAssemblyDef, assemblyDef != injectedAssemblyDef))
@@ -1250,9 +1174,9 @@ namespace UnityModManagerNet.Installer
                                 else if (v0_12_Installed != null)
                                     assemblyDef.Types.Remove(v0_12_Installed);
 
-                                if (!IsDirty(assemblyDef))
+                                if (!Utils.IsDirty(assemblyDef))
                                 {
-                                    MakeDirty(assemblyDef);
+                                    Utils.MakeDirty(assemblyDef);
                                 }
 
                                 if (write)
@@ -1309,18 +1233,6 @@ namespace UnityModManagerNet.Installer
         //    doc.Root.Element("mscorlib").SetAttributeValue(nameof(UnityModManager), UnityModManager.version);
         //}
 
-        private static bool IsDirty(ModuleDefMD assembly)
-        {
-            return assembly.Types.FirstOrDefault(x => x.FullName == typeof(Marks.IsDirty).FullName || x.Name == typeof(UnityModManager).Name) != null;
-        }
-
-        private static void MakeDirty(ModuleDefMD assembly)
-        {
-            var moduleDef = ModuleDefMD.Load(typeof(Marks.IsDirty).Module);
-            var typeDef = moduleDef.Types.FirstOrDefault(x => x.FullName == typeof(Marks.IsDirty).FullName);
-            moduleDef.Types.Remove(typeDef);
-            assembly.Types.Add(typeDef);
-        }
 
         private bool TestWritePermissions()
         {

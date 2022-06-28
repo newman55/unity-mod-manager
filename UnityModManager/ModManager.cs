@@ -533,45 +533,156 @@ namespace UnityModManagerNet
                 string assemblyPath = System.IO.Path.Combine(Path, Info.AssemblyName);
                 string pdbPath = assemblyPath.Replace(".dll", ".pdb");
 
+                var replacedAssemblyPath = string.Empty;
+                var commandArgs = Environment.GetCommandLineArgs();
+                var idx = Array.IndexOf(commandArgs, $"--umm-{Info.Id}-assembly-path");
+                if (idx != -1 && commandArgs.Length > idx + 1)
+                {
+                    replacedAssemblyPath = assemblyPath = commandArgs[idx + 1];
+                }
+
                 if (File.Exists(assemblyPath))
                 {
-                    try
+                    if (!string.IsNullOrEmpty(replacedAssemblyPath))
                     {
-                        var assemblyCachePath = assemblyPath;
-                        var pdbCachePath = pdbPath;
-                        var cacheExists = false;
-
-                        if (mFirstLoading)
+                        try
                         {
-                            var fi = new FileInfo(assemblyPath);
-                            var hash = (ushort)((long)fi.LastWriteTimeUtc.GetHashCode() + version.GetHashCode() + ManagerVersion.GetHashCode()).GetHashCode();
-                            assemblyCachePath = assemblyPath + $".{hash}.cache";
-                            pdbCachePath = assemblyCachePath + ".pdb";
-                            cacheExists = File.Exists(assemblyCachePath);
+                            mAssembly = Assembly.LoadFile(assemblyPath);
+                            mFirstLoading = false;
+                        }
+                        catch (Exception exception)
+                        {
+                            mErrorOnLoading = true;
+                            this.Logger.Error($"Error loading file '{assemblyPath}'.");
+                            this.Logger.LogException(exception);
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var assemblyCachePath = assemblyPath;
+                            var pdbCachePath = pdbPath;
+                            var cacheExists = false;
 
-                            if (!cacheExists)
+                            if (mFirstLoading)
                             {
-                                foreach (var filepath in Directory.GetFiles(Path, "*.cache*"))
+                                var fi = new FileInfo(assemblyPath);
+                                var hash = (ushort)((long)fi.LastWriteTimeUtc.GetHashCode() + version.GetHashCode() + ManagerVersion.GetHashCode()).GetHashCode();
+                                assemblyCachePath = assemblyPath + $".{hash}.cache";
+                                pdbCachePath = assemblyCachePath + ".pdb";
+                                cacheExists = File.Exists(assemblyCachePath);
+
+                                if (!cacheExists)
                                 {
-                                    try
+                                    foreach (var filepath in Directory.GetFiles(Path, "*.cache*"))
                                     {
-                                        File.Delete(filepath);
-                                    }
-                                    catch (Exception)
-                                    {
+                                        try
+                                        {
+                                            File.Delete(filepath);
+                                        }
+                                        catch (Exception)
+                                        {
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (ManagerVersion >= VER_0_13)
-                        {
-                            if (mFirstLoading)
+                            if (ManagerVersion >= VER_0_13)
                             {
+                                if (mFirstLoading)
+                                {
+                                    if (!cacheExists)
+                                    {
+                                        bool hasChanges = false;
+                                        var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
+                                        foreach (var item in modDef.GetAssemblyRefs())
+                                        {
+                                            if (item.FullName.StartsWith("0Harmony, Version=1."))
+                                            {
+                                                item.Name = "0Harmony-1.2";
+                                                hasChanges = true;
+                                            }
+                                        }
+                                        if (hasChanges)
+                                        {
+                                            modDef.Write(assemblyCachePath);
+                                        }
+                                        else
+                                        {
+                                            File.Copy(assemblyPath, assemblyCachePath, true);
+                                        }
+                                        if (File.Exists(pdbPath))
+                                        {
+                                            File.Copy(pdbPath, pdbCachePath, true);
+                                        }
+                                    }
+
+                                    mAssembly = Assembly.LoadFile(assemblyCachePath);
+
+                                    foreach (var type in mAssembly.GetTypes())
+                                    {
+                                        if (type.GetCustomAttributes(typeof(EnableReloadingAttribute), true).Any())
+                                        {
+                                            CanReload = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
+                                    modDef.Assembly.Name += ++mReloaderCount;
+
+                                    using (var buf = new MemoryStream())
+                                    {
+                                        modDef.Write(buf);
+                                        if (File.Exists(pdbPath))
+                                        {
+                                            mAssembly = Assembly.Load(buf.ToArray(), File.ReadAllBytes(pdbPath));
+                                        }
+                                        else
+                                        {
+                                            mAssembly = Assembly.Load(buf.ToArray());
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                //var asmDef = AssemblyDefinition.ReadAssembly(assemblyPath);
+                                //var modDef = asmDef.MainModule;
+                                //if (modDef.TryGetTypeReference("UnityModManagerNet.UnityModManager", out var typeRef))
+                                //{
+                                //    var managerAsmRef = new AssemblyNameReference("UnityModManager", version);
+                                //    if (typeRef.Scope is AssemblyNameReference asmNameRef)
+                                //    {
+                                //        typeRef.Scope = managerAsmRef;
+                                //        modDef.AssemblyReferences.Add(managerAsmRef);
+                                //        asmDef.Write(assemblyCachePath);
+                                //    }
+                                //}
                                 if (!cacheExists)
                                 {
                                     bool hasChanges = false;
                                     var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
+                                    foreach (var item in modDef.GetTypeRefs())
+                                    {
+                                        if (item.FullName == "UnityModManagerNet.UnityModManager")
+                                        {
+                                            item.ResolutionScope = new AssemblyRefUser(thisModuleDef.Assembly);
+                                            hasChanges = true;
+                                        }
+                                    }
+                                    foreach (var item in modDef.GetMemberRefs().Where(member => member.IsFieldRef))
+                                    {
+                                        if (item.Name == "modsPath" && item.Class.FullName == "UnityModManagerNet.UnityModManager")
+                                        {
+                                            item.Name = "OldModsPath";
+                                            hasChanges = true;
+                                        }
+                                    }
                                     foreach (var item in modDef.GetAssemblyRefs())
                                     {
                                         if (item.FullName.StartsWith("0Harmony, Version=1."))
@@ -588,103 +699,19 @@ namespace UnityModManagerNet
                                     {
                                         File.Copy(assemblyPath, assemblyCachePath, true);
                                     }
-                                    if (File.Exists(pdbPath))
-                                    {
-                                        File.Copy(pdbPath, pdbCachePath, true);
-                                    }
                                 }
                                 mAssembly = Assembly.LoadFile(assemblyCachePath);
-
-                                foreach (var type in mAssembly.GetTypes())
-                                {
-                                    if (type.GetCustomAttributes(typeof(EnableReloadingAttribute), true).Any())
-                                    {
-                                        CanReload = true;
-                                        break;
-                                    }
-                                }
                             }
-                            else
-                            {
-                                var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
-                                modDef.Assembly.Name += ++mReloaderCount;
 
-                                using (var buf = new MemoryStream())
-                                {
-                                    modDef.Write(buf);
-                                    if (File.Exists(pdbPath))
-                                    {
-                                        mAssembly = Assembly.Load(buf.ToArray(), File.ReadAllBytes(pdbPath));
-                                    }
-                                    else
-                                    {
-                                        mAssembly = Assembly.Load(buf.ToArray());
-                                    }
-                                }
-                            }
+                            mFirstLoading = false;
                         }
-                        else
+                        catch (Exception exception)
                         {
-                            //var asmDef = AssemblyDefinition.ReadAssembly(assemblyPath);
-                            //var modDef = asmDef.MainModule;
-                            //if (modDef.TryGetTypeReference("UnityModManagerNet.UnityModManager", out var typeRef))
-                            //{
-                            //    var managerAsmRef = new AssemblyNameReference("UnityModManager", version);
-                            //    if (typeRef.Scope is AssemblyNameReference asmNameRef)
-                            //    {
-                            //        typeRef.Scope = managerAsmRef;
-                            //        modDef.AssemblyReferences.Add(managerAsmRef);
-                            //        asmDef.Write(assemblyCachePath);
-                            //    }
-                            //}
-                            if (!cacheExists)
-                            {
-                                bool hasChanges = false;
-                                var modDef = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath));
-                                foreach (var item in modDef.GetTypeRefs())
-                                {
-                                    if (item.FullName == "UnityModManagerNet.UnityModManager")
-                                    {
-                                        item.ResolutionScope = new AssemblyRefUser(thisModuleDef.Assembly);
-                                        hasChanges = true;
-                                    }
-                                }
-                                foreach (var item in modDef.GetMemberRefs().Where(member => member.IsFieldRef))
-                                {
-                                    if (item.Name == "modsPath" && item.Class.FullName == "UnityModManagerNet.UnityModManager")
-                                    {
-                                        item.Name = "OldModsPath";
-                                        hasChanges = true;
-                                    }
-                                }
-                                foreach (var item in modDef.GetAssemblyRefs())
-                                {
-                                    if (item.FullName.StartsWith("0Harmony, Version=1."))
-                                    {
-                                        item.Name = "0Harmony-1.2";
-                                        hasChanges = true;
-                                    }
-                                }
-                                if (hasChanges)
-                                {
-                                    modDef.Write(assemblyCachePath);
-                                }
-                                else
-                                {
-                                    File.Copy(assemblyPath, assemblyCachePath, true);
-                                }
-                            }
-                            mAssembly = Assembly.LoadFile(assemblyCachePath);
+                            mErrorOnLoading = true;
+                            this.Logger.Error($"Error loading file '{assemblyPath}'.");
+                            this.Logger.LogException(exception);
+                            return false;
                         }
-
-                        mFirstLoading = false;
-                    }
-                    catch (Exception exception)
-                    {
-                        mErrorOnLoading = true;
-                        this.Logger.Error($"Error loading file '{assemblyPath}'.");
-                        this.Logger.LogException(exception);
-                        return false;
                     }
 
                     try
@@ -957,7 +984,8 @@ namespace UnityModManagerNet
         static void OnLoad(object sender, AssemblyLoadEventArgs args)
         {
             var name = args.LoadedAssembly.GetName().Name;
-            if (name == "Assembly-CSharp" || name == "GH.Runtime")
+            Console.WriteLine(name);
+            if (name == "Assembly-CSharp" || name == "GH.Runtime" || name == "AtomGame")
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnLoad;
                 Injector.Run(true);

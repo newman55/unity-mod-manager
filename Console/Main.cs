@@ -328,6 +328,11 @@ namespace UnityModManagerNet.ConsoleInstaller
                 SelectGameFolder();
             }
 
+            if (!string.IsNullOrEmpty(selectedGame.Comment))
+            {
+                Log.Print(selectedGame.Comment);
+            }
+
             param.Sync(config.GameInfo);
             param.Save();
 
@@ -830,7 +835,8 @@ namespace UnityModManagerNet.ConsoleInstaller
                         Log.Print($"  '{filename}'");
                         File.Copy(filename, doorstopPath, true);
                         Log.Print($"  '{doorstopConfigFilename}'");
-                        File.WriteAllText(doorstopConfigPath, "[UnityDoorstop]" + Environment.NewLine + "enabled = true" + Environment.NewLine + "targetAssembly = " + managerAssemblyPath);
+                        var relativeManagerAssemblyPath = managerAssemblyPath.Substring(gamePath.Length).Trim(Path.DirectorySeparatorChar);
+                        File.WriteAllText(doorstopConfigPath, "[General]" + Environment.NewLine + "enabled = true" + Environment.NewLine + "target_assembly = " + relativeManagerAssemblyPath);
 
                         DoactionLibraries(Actions.Install);
                         DoactionGameConfig(Actions.Install);

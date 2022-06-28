@@ -453,6 +453,9 @@ namespace UnityModManagerNet
 
             private static List<int> collapsibleStates = new List<int>();
 
+            /// <summary>
+            /// # is a feature of [0.24.2]
+            /// </summary>
             private static bool DependsOn(string str, object container, Type type, ModEntry mod)
             {
                 var param = str.Split('|');
