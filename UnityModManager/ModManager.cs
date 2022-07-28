@@ -984,7 +984,7 @@ namespace UnityModManagerNet
         static void OnLoad(object sender, AssemblyLoadEventArgs args)
         {
             var name = args.LoadedAssembly.GetName().Name;
-            Console.WriteLine(name);
+            //Console.WriteLine(name);
             if (name == "Assembly-CSharp" || name == "GH.Runtime" || name == "AtomGame")
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnLoad;

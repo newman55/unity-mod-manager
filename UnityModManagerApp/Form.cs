@@ -66,7 +66,7 @@ namespace UnityModManagerNet.Installer
         }
 
         [Flags]
-        enum LibIncParam { Normal = 0, Minimal_lt_0_22 = 1 }
+        enum LibIncParam { Normal = 0, Skip = 1, Minimal_lt_0_22 = 2 }
 
         static readonly Dictionary<string, LibIncParam> libraryFiles = new Dictionary<string, LibIncParam>
         {
@@ -399,11 +399,16 @@ namespace UnityModManagerNet.Installer
             doorstopPath = Path.Combine(gamePath, doorstopFilename);
             doorstopConfigPath = Path.Combine(gamePath, doorstopConfigFilename);
 
+            if (File.Exists(Path.Combine(managedPath, "System.Xml.dll")))
+            {
+                libraryFiles["System.Xml.dll"] = LibIncParam.Skip;
+            }
+
             var gameSupportVersion = !string.IsNullOrEmpty(selectedGame.MinimalManagerVersion) ? Utils.ParseVersion(selectedGame.MinimalManagerVersion) : VER_0_22;
             libraryPaths = new List<string>();
             foreach (var item in libraryFiles)
             {
-                if ((item.Value & LibIncParam.Minimal_lt_0_22) > 0 && gameSupportVersion >= VER_0_22)
+                if ((item.Value & LibIncParam.Minimal_lt_0_22) > 0 && gameSupportVersion >= VER_0_22 || (item.Value & LibIncParam.Skip) > 0)
                 {
                     continue;
                 }
@@ -1364,6 +1369,15 @@ namespace UnityModManagerNet.Installer
                         Log.Print($"  {filename}");
                         File.Delete(destpath);
                     }
+                }
+            }
+            if (action == Actions.Remove)
+            {
+                foreach(var file in Directory.GetFiles(managerPath, "*.dll"))
+                {
+                    var filename = Path.GetFileName(file);
+                    Log.Print($"  {filename}");
+                    File.Delete(file);
                 }
             }
         }
