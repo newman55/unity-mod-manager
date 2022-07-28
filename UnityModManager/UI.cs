@@ -865,7 +865,8 @@ namespace UnityModManagerNet
 
             private static string[] mHotkeyNames = { "CTRL+F10", "ScrollLock", "Num *", "~" };
 
-            internal bool GameCursorLocked { get; set; }
+            internal bool GameCursorVisible { get; set; }
+            internal CursorLockMode GameCursorLockMode { get; set; }
 
             public void FirstLaunch()
             {
@@ -907,20 +908,16 @@ namespace UnityModManagerNet
                     //    SaveSettingsAndParams();
                     if (open)
                     {
-                        GameCursorLocked = Cursor.lockState == CursorLockMode.Locked || !Cursor.visible;
-                        if (GameCursorLocked)
-                        {
-                            Cursor.visible = true;
-                            Cursor.lockState = CursorLockMode.None;
-                        }
+                        GameCursorLockMode = Cursor.lockState;
+                        GameCursorVisible = Cursor.visible;
+                        
+                        Cursor.visible = true;
+                        Cursor.lockState = CursorLockMode.None;
                     }
                     else
                     {
-                        if (GameCursorLocked)
-                        {
-                            Cursor.visible = false;
-                            Cursor.lockState = CursorLockMode.Locked;
-                        }
+                        Cursor.visible = GameCursorVisible;
+                        Cursor.lockState = GameCursorLockMode;
                     }
                     GameScripts.OnToggleWindow(open);
                 }
@@ -982,7 +979,16 @@ namespace UnityModManagerNet
             {
                 if (UI.Instance != null && UI.Instance.Opened)
                 {
-                    UI.Instance.GameCursorLocked = value;
+                    if (value)
+                    {
+                        UI.Instance.GameCursorVisible = false;
+                        UI.Instance.GameCursorLockMode = CursorLockMode.Locked;
+                    }
+                    else
+                    {
+                        UI.Instance.GameCursorLockMode = CursorLockMode.None;
+                        UI.Instance.GameCursorVisible = true;
+                    }
                     Cursor.visible = true;
                     Cursor.lockState = CursorLockMode.None;
                     return false;
