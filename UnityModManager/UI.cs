@@ -455,7 +455,7 @@ namespace UnityModManagerNet
                 return (int)(value * Instance.mUIScale);
             }
 
-            private float Scale(float value)
+            public static float Scale(float value)
             {
                 if (!Instance)
                     return value;
