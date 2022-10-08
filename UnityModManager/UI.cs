@@ -482,7 +482,7 @@ namespace UnityModManagerNet
             {
                 if (!Instance)
                     return value;
-                return value * mUIScale;
+                return value * Instance.mUIScale;
             }
 
             private void CalculateWindowPos()
