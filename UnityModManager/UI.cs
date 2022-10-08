@@ -48,6 +48,9 @@ namespace UnityModManagerNet
             private static GUIStyle status = null;
             private static GUIStyle www = null;
             private static GUIStyle updates = null;
+            private static GUIStyle question = null;
+
+            private static GUIStyle tooltipBox = null;
 
             private bool mFirstLaunched = false;
             private bool mInit = false;
@@ -59,6 +62,8 @@ namespace UnityModManagerNet
             private Vector2 mWindowSize = Vector2.zero;
             private Vector2 mExpectedWindowSize = Vector2.zero;
             private Resolution mCurrentResolution;
+
+            private GUIContent mTooltip = null;
 
             private float mUIScale = 1f;
             private float mExpectedUIScale = 1f;
@@ -249,6 +254,21 @@ namespace UnityModManagerNet
                 updates = new GUIStyle();
                 updates.alignment = TextAnchor.MiddleCenter;
                 updates.stretchHeight = true;
+
+                question = new GUIStyle();
+
+                tooltipBox = new GUIStyle();
+                tooltipBox.alignment = TextAnchor.MiddleCenter;
+                tooltipBox.normal.textColor = Color.white;
+                tooltipBox.normal.background = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                tooltipBox.normal.background.SetPixels32(new Color32[4].Select(x => x = new Color32(30, 30, 30, 255)).ToArray());
+                tooltipBox.normal.background.Apply();
+                tooltipBox.hover = tooltipBox.normal;
+                tooltipBox.border.left = 2;
+                tooltipBox.border.right = 2;
+                tooltipBox.border.top = 2;
+                tooltipBox.border.bottom = 2;
+                tooltipBox.richText = true;
             }
 
             private void ScaleGUI()
@@ -272,9 +292,9 @@ namespace UnityModManagerNet
 
                 window.padding = RectOffset(Scale(5));
                 h1.fontSize = Scale(16);
-                h1.margin = RectOffset(Scale(0), Scale(5));
+                h1.margin = RectOffset(0, Scale(5));
                 h2.fontSize = Scale(13);
-                h2.margin = RectOffset(Scale(0), Scale(3));
+                h2.margin = RectOffset(0, Scale(3));
                 button.fontSize = Scale(13);
                 button.padding = RectOffset(Scale(30), Scale(5));
 
@@ -287,6 +307,9 @@ namespace UnityModManagerNet
                 www.fixedHeight = Scale(iconHeight);
                 updates.fixedWidth = Scale(26);
                 updates.fixedHeight = Scale(iconHeight);
+                question.fixedWidth = Scale(10);
+                question.fixedHeight = Scale(11);
+                question.margin = RectOffset(0, 9);
 
                 mColumns.Clear();
                 foreach (var column in mOriginColumns)
@@ -475,6 +498,9 @@ namespace UnityModManagerNet
 
             private void WindowFunction(int windowId)
             {
+                if (Event.current.type == EventType.Repaint)
+                    mTooltip = null;
+
                 if (KeyBinding.Ctrl())
                     GUI.DragWindow(new Rect(0, 0, 10000, 10000));
                 GUI.DragWindow(new Rect(0, 0, 10000, 20));
@@ -513,6 +539,24 @@ namespace UnityModManagerNet
 
                 buttons();
                 GUILayout.EndHorizontal();
+
+                if (mTooltip != null && Event.current.type == EventType.Repaint)
+                {
+                    var size =  tooltipBox.CalcSize(mTooltip) + Vector2.one * 10;
+                    var pos = Event.current.mousePosition;
+                    if (size.x + pos.x < mWindowRect.width)
+                    {
+                        GUI.Box(new Rect(pos.x, pos.y + 10, size.x, size.y), mTooltip.text, tooltipBox);
+                    }
+                    else
+                    {
+                        GUI.Box(new Rect(pos.x - size.x, pos.y + 10, size.x, size.y), mTooltip.text, tooltipBox);
+                    }
+                }
+                else
+                {
+                    GUI.Box(new Rect(-9999, 0, 0, 0), "");
+                }
             }
 
             static List<string> mJoinList = new List<string>();
@@ -969,6 +1013,15 @@ namespace UnityModManagerNet
             public static int GetNextWindowId()
             {
                 return ++mLastWindowId;
+            }
+
+            /// <summary>
+            /// Renders question mark with a tooltip [0.25.0]
+            /// </summary>
+            public static void RenderTooltip(string str, GUIStyle style = null, params GUILayoutOption[] options)
+            {
+                BeginTooltip(str);
+                EndTooltip(str, style, options);
             }
         }
 
