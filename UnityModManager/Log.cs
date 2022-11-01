@@ -76,7 +76,7 @@ namespace UnityModManagerNet
             const string PrefixError = "[Manager] [Error] ";
             const string PrefixException = "[Manager] [Exception] ";
 
-            public static readonly string filepath = Path.Combine(Path.Combine(Application.dataPath, Path.Combine("Managed", nameof(UnityModManager))), "Log.txt");
+            public static readonly string filepath = Path.Combine(Path.GetDirectoryName(typeof(GameInfo).Assembly.Location), "Log.txt");
 
             public static void NativeLog(string str)
             {
