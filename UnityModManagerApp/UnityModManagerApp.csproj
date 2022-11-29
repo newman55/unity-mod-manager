@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>latest</LangVersion>
@@ -16,6 +16,9 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <NeutralLanguage>en-001</NeutralLanguage>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Console\Console.csproj" />
     <ProjectReference Include="..\UnityModManager\UnityModManager.csproj" />
+    <ProjectReference Include="..\Updater\Updater.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,7 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <CopyFiles Include="$(SolutionDir)lib\winhttp_x86.dll;$(SolutionDir)lib\winhttp_x64.dll;$(SolutionDir)lib\System.Xml.dll" />
+    <CopyFiles Include="$(SolutionDir)lib\winhttp_x86.dll;$(SolutionDir)lib\winhttp_x64.dll;$(SolutionDir)lib\System.Xml.dll;$(SolutionDir)lib\0Harmony-1.2.dll;$(SolutionDir)lib\0Harmony12.dll" />
   </ItemGroup>
 
   <Target Name="PostBuild" BeforeTargets="AfterBuild">

@@ -27,7 +27,7 @@ namespace UnityModManagerNet.Downloader
             {
                 using (var ping = new Ping())
                 {
-                    return ping.Send("www.google.com.mx", 2000).Status == IPStatus.Success;
+                    return ping.Send("8.8.8.8", 2000).Status == IPStatus.Success;
                 }
             }
             catch (Exception)

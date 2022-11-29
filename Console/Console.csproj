@@ -3,18 +3,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework>net452</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
     <LangVersion>latest</LangVersion>
 
     <ProductName>UnityModManager</ProductName>
-    <AssemblyName>UnityModManagerConsole</AssemblyName>
+    <AssemblyName>Console</AssemblyName>
     <RootNamespace>UnityModManagerNet</RootNamespace>
     <Copyright>Copyright ©  2021-$([System.DateTime]::Now.ToString('yyyy'))</Copyright>
   </PropertyGroup>
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NeutralLanguage>en-001</NeutralLanguage>
+    <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
   <ItemGroup>
