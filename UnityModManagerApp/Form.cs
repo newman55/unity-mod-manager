@@ -10,6 +10,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityModManagerNet.ConsoleInstaller;
+using UnityModManagerNet.Installer.Tools;
 
 namespace UnityModManagerNet.Installer
 {
@@ -748,14 +749,28 @@ namespace UnityModManagerNet.Installer
             extraFilesTextBox.Text = "";
             extraFilesGroupBox.Visible = false;
 
-            var selected = (GameInfo)((ComboBox)sender).SelectedItem;
-            if (selected != null)
+            if (((ComboBox)sender).SelectedItem is GameInfo selected)
             {
                 Log.Print($"Game changed to '{selected.Name}'.");
                 param.LastSelectedGame = selected.Name;
                 selectedGameParams = param.GetGameParam(selected);
-                if (!string.IsNullOrEmpty(selectedGameParams.Path))
+
+                // Find path in Registry Windows.
+                if (string.IsNullOrEmpty(selectedGameParams.Path))
+                {
+                    if (Utils.IsWindowsPlatform())
+                    {
+                        selectedGameParams.Path = SteamHelper.GetGameDirectory(selected.Folder);
+                        if (!string.IsNullOrEmpty(selectedGameParams.Path))
+                        {
+                            Log.Print($"Game path found in Registry: '{selectedGameParams.Path}'.");
+                        }
+                    }
+                }
+                else
+                {
                     Log.Print($"Game path '{selectedGameParams.Path}'.");
+                }
 
                 if (!string.IsNullOrEmpty(selected.Comment))
                 {
