@@ -8,6 +8,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
 
     <AssemblyName>UnityModManagerApp</AssemblyName>
     <RootNamespace>UnityModManagerNet.Installer</RootNamespace>

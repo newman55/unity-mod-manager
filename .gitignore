@@ -1,5 +1,5 @@
 */UnityEngine*
 */obj
 */bin
-/.vs
 .vs
+*/*.csproj.user

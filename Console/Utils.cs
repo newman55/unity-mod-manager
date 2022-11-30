@@ -10,7 +10,7 @@ using dnlib.DotNet;
 
 namespace UnityModManagerNet.ConsoleInstaller
 {
-    public  class Utils
+    public class Utils
     {
         static Utils()
         {
@@ -223,6 +223,16 @@ namespace UnityModManagerNet.ConsoleInstaller
             string output = p.StandardOutput.ReadToEnd();
             p.WaitForExit();
             return output.TrimEnd();
+        }
+
+        public static bool IsPlatform(OSPlatform platform)
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        }
+
+        public static bool IsWindowsPlatform()
+        {
+            return IsPlatform(OSPlatform.Windows);
         }
 
         public static bool IsUnixPlatform()
