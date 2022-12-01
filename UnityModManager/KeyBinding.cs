@@ -248,12 +248,17 @@ namespace UnityModManagerNet
             m_KeyControl = null;
         }
 
+        private bool CheckModifierKeys()
+        {
+            return ((modifiers & 1) == 0 && !Ctrl() || (modifiers & 1) == 1 && Ctrl()) && ((modifiers & 2) == 0 && !Shift() || (modifiers & 2) == 2 && Shift()) && ((modifiers & 4) == 0 && !Alt() || (modifiers & 4) == 4 && Alt());
+        }
+
         /// <summary>
         /// Use to poll key status.
         /// </summary>
         public bool Pressed()
         {
-            var b = keyCode != KeyCode.None && ((modifiers & 1) == 0 || Ctrl()) && ((modifiers & 2) == 0 || Shift()) && ((modifiers & 4) == 0 || Alt());
+            var b = keyCode != KeyCode.None && CheckModifierKeys();
             if (LegacyInputDisabled)
             {
                 return !hasErrors && b && KeyControl != KeyControlZero && (bool)isPressedPI.GetValue(KeyControl, null);
@@ -269,7 +274,7 @@ namespace UnityModManagerNet
         /// </summary>
         public bool Down()
         {
-            var b = keyCode != KeyCode.None && ((modifiers & 1) == 0 || Ctrl()) && ((modifiers & 2) == 0 || Shift()) && ((modifiers & 4) == 0 || Alt());
+            var b = keyCode != KeyCode.None && CheckModifierKeys();
             if (LegacyInputDisabled)
             {
                 return !hasErrors && b && KeyControl != KeyControlZero && (bool)wasPressedThisFramePI.GetValue(KeyControl, null);
@@ -285,7 +290,7 @@ namespace UnityModManagerNet
         /// </summary>
         public bool Up()
         {
-            var b = keyCode != KeyCode.None && ((modifiers & 1) == 0 || Ctrl()) && ((modifiers & 2) == 0 || Shift()) && ((modifiers & 4) == 0 || Alt());
+            var b = keyCode != KeyCode.None && CheckModifierKeys();
             if (LegacyInputDisabled)
             {
                 return !hasErrors && b && KeyControl != KeyControlZero && (bool)wasReleasedThisFramePI.GetValue(KeyControl, null);
