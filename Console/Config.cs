@@ -226,6 +226,7 @@ namespace UnityModManagerNet.ConsoleInstaller
         }
 
         public string LastSelectedGame;
+        public int WindowHeight;
         public List<GameParam> GameParams = new List<GameParam>();
 
         public const string filename = "Params.xml";
@@ -264,7 +265,7 @@ namespace UnityModManagerNet.ConsoleInstaller
 
         public void Save()
         {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), filename);
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UnityModManagerNet", filename);
             try
             {
                 using (var writer = new StreamWriter(path))
@@ -281,7 +282,7 @@ namespace UnityModManagerNet.ConsoleInstaller
 
         public static Param Load()
         {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), filename);
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UnityModManagerNet", filename);
             if (File.Exists(path))
             {
                 try

@@ -127,8 +127,6 @@ namespace UnityModManagerNet.Installer
             btnDownloadUpdate.Click += btnDownloadUpdate_Click;
 
             Log.Init<Log>();
-            
-            Height = Properties.Settings.Default.WindowHeight;
 
 #if NET35
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls| (SecurityProtocolType)768 | (SecurityProtocolType)3072;
@@ -178,6 +176,8 @@ namespace UnityModManagerNet.Installer
             config = Config.Load();
             param = Param.Load();
 
+            Height = param.WindowHeight;
+
             if (config != null && config.GameInfo != null && config.GameInfo.Length > 0)
             {
                 config.GameInfo = config.GameInfo.OrderBy(x => x.Name).ToArray();
@@ -218,8 +218,7 @@ namespace UnityModManagerNet.Installer
             if (config == null)
                 return;
 
-            Properties.Settings.Default.WindowHeight = Height;
-            Properties.Settings.Default.Save();
+            param.WindowHeight = Height;
             param.Sync(config.GameInfo);
             param.Save();
         }
@@ -416,19 +415,23 @@ namespace UnityModManagerNet.Installer
                 libraryPaths.Add(Path.Combine(managerPath, item.Key));
             }
 
-            var parent = new DirectoryInfo(Application.StartupPath).Parent;
-            for(int i = 0; i < 3; i++)
+            var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            if (dir.Name == "UnityModManager")
             {
-                if (parent == null)
-                    break;
-
-                if (parent.FullName == gamePath)
+                var parent = dir.Parent;
+                for (int i = 0; i < 3; i++)
                 {
-                    InactiveForm();
-                    Log.Print("UMM Installer should not be located in the game folder.");
-                    return;
+                    if (parent == null)
+                        break;
+
+                    if (parent.FullName == gamePath)
+                    {
+                        InactiveForm();
+                        Log.Print("UMM Installer should not be located in the game folder.");
+                        return;
+                    }
+                    parent = parent.Parent;
                 }
-                parent = parent.Parent;
             }
 
             //machineConfigPath = string.Empty;

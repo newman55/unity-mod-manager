@@ -52,7 +52,7 @@ namespace UnityModManagerNet.Installer
                     catch (Exception e)
                     {
                         Log.Print(e.Message);
-                        Log.Print($"Error checking updates on '{url}'.");
+                        Log.Print($"Error checking mod updates on '{url}' for [{string.Join(",", mods.Where(x => x.Repository == url).Select(x => x.DisplayName).ToArray())}].");
                     }
                 }
             }
@@ -87,7 +87,7 @@ namespace UnityModManagerNet.Installer
                 catch (Exception ex)
                 {
                     Log.Print(ex.Message);
-                    Log.Print($"Error checking updates on '{url}'.");
+                    Log.Print($"Error checking mod updates on '{url}' for [{string.Join(",", mods.Where(x => x.Repository == url).Select(x => x.DisplayName).ToArray())}].");
                 }
             }
         }

@@ -57,6 +57,21 @@
     <CopyFiles Include="$(SolutionDir)lib\winhttp_x86.dll;$(SolutionDir)lib\winhttp_x64.dll;$(SolutionDir)lib\System.Xml.dll;$(SolutionDir)lib\0Harmony-1.2.dll;$(SolutionDir)lib\0Harmony12.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
   <Target Name="PostBuild" BeforeTargets="AfterBuild">
     <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(TargetDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(TargetDir)UnityModManager.exe" Condition=" '$(ConfigurationName)' == 'Release' " />

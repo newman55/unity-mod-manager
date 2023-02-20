@@ -389,19 +389,23 @@ namespace UnityModManagerNet.ConsoleInstaller
                 libraryPaths.Add(Path.Combine(managerPath, item.Key));
             }
 
-            var parent = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).Parent;
-            for (int i = 0; i < 3; i++)
+            var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            if (dir.Name == "UnityModManager")
             {
-                if (parent == null)
-                    break;
-
-                if (parent.FullName == gamePath)
+                var parent = dir.Parent;
+                for (int i = 0; i < 3; i++)
                 {
-                    Log.Print("UMM Installer should not be located in the game folder.");
-                    Close();
-                    return;
+                    if (parent == null)
+                        break;
+
+                    if (parent.FullName == gamePath)
+                    {
+                        Log.Print("UMM Installer should not be located in the game folder.");
+                        Close();
+                        return;
+                    }
+                    parent = parent.Parent;
                 }
-                parent = parent.Parent;
             }
 
             Refresh:
