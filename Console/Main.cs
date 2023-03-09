@@ -794,20 +794,26 @@ namespace UnityModManagerNet.ConsoleInstaller
 
         static bool TestCompatibility()
         {
-            foreach (var f in new DirectoryInfo(gamePath).GetFiles("0Harmony.dll", SearchOption.AllDirectories))
+            try
             {
-                if (!f.FullName.EndsWith(Path.Combine("UnityModManager", "0Harmony.dll")))
+                foreach (var f in new DirectoryInfo(gamePath).GetFiles("0Harmony.dll", SearchOption.AllDirectories))
                 {
-                    //var asm = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(f.FullName));
-                    //if (asm.GetName().Version < HARMONY_VER)
-                    var asm = ModuleDefMD.Load(File.ReadAllBytes(f.FullName));
-                    if (asm.Assembly.Version < HARMONY_VER)
+                    if (!f.FullName.EndsWith(Path.Combine("UnityModManager", "0Harmony.dll")))
                     {
-                        Log.Print($"Game has extra library 0Harmony.dll in path {f.FullName}, which may not be compatible with UMM. Recommended to delete it.");
-                        return false;
+                        //var asm = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(f.FullName));
+                        //if (asm.GetName().Version < HARMONY_VER)
+                        var asm = ModuleDefMD.Load(File.ReadAllBytes(f.FullName));
+                        if (asm.Assembly.Version < HARMONY_VER)
+                        {
+                            Log.Print($"Game has extra library 0Harmony.dll in path {f.FullName}, which may not be compatible with UMM. Recommended to delete it.");
+                            return false;
+                        }
+                        Log.Print($"Game has extra library 0Harmony.dll in path {f.FullName}.");
                     }
-                    Log.Print($"Game has extra library 0Harmony.dll in path {f.FullName}.");
                 }
+            }
+            catch (Exception e)
+            {
             }
 
             return true;
@@ -842,7 +848,7 @@ namespace UnityModManagerNet.ConsoleInstaller
                         var arch = Utils.UnmanagedDllIs64Bit(gameExePath);
                         var filename = arch == true ? "winhttp_x64.dll" : "winhttp_x86.dll";
                         Log.Print($"  '{filename}'");
-                        File.Copy(filename, doorstopPath, true);
+                        File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename), doorstopPath, true);
                         Log.Print($"  '{doorstopConfigFilename}'");
                         var relativeManagerAssemblyPath = managerAssemblyPath.Substring(gamePath.Length).Trim(Path.DirectorySeparatorChar);
                         File.WriteAllText(doorstopConfigPath, "[General]" + Environment.NewLine + "enabled = true" + Environment.NewLine + "target_assembly = " + relativeManagerAssemblyPath);

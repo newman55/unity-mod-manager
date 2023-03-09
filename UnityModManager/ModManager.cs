@@ -1018,7 +1018,7 @@ namespace UnityModManagerNet
 
             if (!Assembly.GetExecutingAssembly().Location.Contains($"Managed{Path.DirectorySeparatorChar}UnityModManager"))
             {
-                Logger.Error(@"The UnityModManager folder must be located only in \Game\*Data\Managed\ directory. This folder is created automatically after installation via UnityModManager.exe.");
+                Logger.Error($"Duplicate files found {Assembly.GetExecutingAssembly().Location}. The UnityModManager folder must be located only in \\Game\\*Data\\Managed\\ directory. This folder is created automatically after installation via UnityModManager.exe.");
             }
 
             Config = GameInfo.Load();
