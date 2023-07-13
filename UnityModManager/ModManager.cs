@@ -15,6 +15,7 @@ namespace UnityModManagerNet
     {
         private static readonly Version VER_0 = new Version();
         private static readonly Version VER_0_13 = new Version(0, 13);
+        private static readonly Version VER_2018_2 = new Version(2018, 2);
 
         /// <summary>
         /// Contains version of UnityEngine
@@ -182,6 +183,8 @@ namespace UnityModManagerNet
 
             public string Repository;
 
+            public string ContentType;
+
             /// <summary>
             /// Used for RoR2 game [0.17.0]
             /// </summary>
@@ -224,6 +227,11 @@ namespace UnityModManagerNet
 
             Assembly mAssembly = null;
             public Assembly Assembly => mAssembly;
+
+            /// <summary>
+            /// Does the mod use a dll [0.26.0]
+            /// </summary>
+            public bool HasAssembly => !string.IsNullOrEmpty(Info.AssemblyName) || !string.IsNullOrEmpty(Info.EntryMethod);
 
             /// <summary>
             /// Version of a mod
@@ -326,7 +334,16 @@ namespace UnityModManagerNet
 
             Dictionary<long, MethodInfo> mCache = new Dictionary<long, MethodInfo>();
 
+            /// <summary>
+            /// [0.27.0]
+            /// </summary>
+            internal readonly List<TextureReplacer.Skin> Skins = new List<TextureReplacer.Skin>();
+
             bool mStarted = false;
+
+            /// <summary>
+            /// Has been launched at least once
+            /// </summary>
             public bool Started => mStarted;
 
             bool mErrorOnLoading = false;
@@ -336,25 +353,30 @@ namespace UnityModManagerNet
             /// UI checkbox
             /// </summary>
             public bool Enabled = true;
-            //public bool Enabled => Enabled;
 
             /// <summary>
-            /// If OnToggle exists
+            /// Return TRUE if OnToggle exists
             /// </summary>
-            public bool Toggleable => OnToggle != null;
+            public bool Toggleable => OnToggle != null || !HasAssembly;
 
             /// <summary>
-            /// If Assembly is loaded [0.13.1]
+            /// Return TRUE if Assembly is loaded [0.13.1]
             /// </summary>
-            public bool Loaded => Assembly != null;
+            public bool Loaded => Assembly != null || !HasAssembly && mStarted;
 
             bool mFirstLoading = true;
             int mReloaderCount = 0;
-
+            
             bool mActive = false;
-            public bool Active {
+
+            /// <summary>
+            /// Activates or deactivates the mod by calling OnToggle if present
+            /// </summary>
+            public bool Active 
+            {
                 get => mActive;
-                set {
+                set 
+                {
                     if (value && !Loaded)
                     {
                         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -378,6 +400,7 @@ namespace UnityModManagerNet
                                 mActive = true;
                                 this.Logger.Log($"Active.");
                                 GameScripts.OnModToggle(this, true);
+                                if (toggleModsListen != null) toggleModsListen(this, true);
                             }
                             else
                             {
@@ -390,11 +413,12 @@ namespace UnityModManagerNet
                             if (!mActive)
                                 return;
 
-                            if (OnToggle != null && OnToggle(this, false))
+                            if (OnToggle != null && OnToggle(this, false) || !HasAssembly)
                             {
                                 mActive = false;
                                 this.Logger.Log($"Inactive.");
                                 GameScripts.OnModToggle(this, false);
+                                if (toggleModsListen != null) toggleModsListen(this, false);
                             }
                             else if (OnToggle != null)
                             {
@@ -448,13 +472,13 @@ namespace UnityModManagerNet
                 mErrorOnLoading = false;
 
                 this.Logger.Log($"Version '{Info.Version}'. Loading.");
-                if (string.IsNullOrEmpty(Info.AssemblyName))
+                if (string.IsNullOrEmpty(Info.AssemblyName) && !string.IsNullOrEmpty(Info.EntryMethod))
                 {
                     mErrorOnLoading = true;
                     this.Logger.Error($"{nameof(Info.AssemblyName)} is null.");
                 }
 
-                if (string.IsNullOrEmpty(Info.EntryMethod))
+                if (!string.IsNullOrEmpty(Info.AssemblyName) && string.IsNullOrEmpty(Info.EntryMethod))
                 {
                     mErrorOnLoading = true;
                     this.Logger.Error($"{nameof(Info.EntryMethod)} is null.");
@@ -529,6 +553,15 @@ namespace UnityModManagerNet
 
                 if (mErrorOnLoading)
                     return false;
+
+                //LoadSkins();
+
+                if (!HasAssembly)
+                {
+                    mStarted = true;
+                    Active = true;
+                    return true;
+                }
 
                 string assemblyPath = System.IO.Path.Combine(Path, Info.AssemblyName);
                 string pdbPath = assemblyPath.Replace(".dll", ".pdb");
@@ -754,6 +787,21 @@ namespace UnityModManagerNet
                 return false;
             }
 
+            internal void LoadSkins()
+            {
+                foreach(var skin in Skins)
+                {
+                    if (!allSkins.Contains(skin))
+                        allSkins.Add(skin);
+
+                    foreach(var kv in skin.textures)
+                    {
+                        var tex = Utils.LoadTexture(kv.Value.Path);
+                        kv.Value.Texture = tex;
+                    }
+                }
+            }
+
             internal void Reload()
             {
                 if (!mStarted || !CanReload)
@@ -962,10 +1010,45 @@ namespace UnityModManagerNet
 
                 return methodInfo;
             }
+
+            /// <summary>
+            /// Looks for a word match within boundaries and ignores case [0.26.0]
+            /// </summary>
+            public bool HasContentType(string str)
+            {
+                if (!string.IsNullOrEmpty(Info.ContentType))
+                {
+                    return new Regex($@"\b{str}\b", RegexOptions.IgnoreCase).IsMatch(Info.ContentType);
+                }
+
+                return false;
+            }
         }
 
+        /// <summary>
+        /// List of all mods
+        /// </summary>
         public static readonly List<ModEntry> modEntries = new List<ModEntry>();
+
+        /// <summary>
+        /// Path to Mods folder
+        /// </summary>
         public static string modsPath { get; private set; }
+
+        /// <summary>
+        /// [0.27.0]
+        /// </summary>
+        internal static readonly List<TextureReplacer.Skin> allSkins = new List<TextureReplacer.Skin>();
+
+        /// <summary>
+        /// [0.26.0]
+        /// </summary>
+        public delegate void ToggleModsListen(ModEntry modEntry, bool result);
+
+        /// <summary>
+        /// [0.26.0]
+        /// </summary>
+        public static event ToggleModsListen toggleModsListen;
 
         [Obsolete("Please use modsPath!!!!This is compatible with mod of ver before 0.13")]
         public static string OldModsPath = "";
@@ -985,7 +1068,7 @@ namespace UnityModManagerNet
         {
             var name = args.LoadedAssembly.GetName().Name;
             //Console.WriteLine(name);
-            if (name == "Assembly-CSharp" || name == "GH.Runtime" || name == "AtomGame")
+            if (name == "Assembly-CSharp" || name == "GH.Runtime" || name == "AtomGame" || name == "Game" /*Cloud Meadow*/)
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnLoad;
                 Injector.Run(true);
@@ -1141,10 +1224,11 @@ namespace UnityModManagerNet
                 foreach (string dir in Directory.GetDirectories(modsPath))
                 {
                     string jsonPath = Path.Combine(dir, Config.ModInfo);
-                    if (!File.Exists(Path.Combine(dir, Config.ModInfo)))
+                    if (!File.Exists(jsonPath))
                     {
                         jsonPath = Path.Combine(dir, Config.ModInfo.ToLower());
                     }
+                    ModEntry modEntry;
                     if (File.Exists(jsonPath))
                     {
                         countMods++;
@@ -1164,15 +1248,65 @@ namespace UnityModManagerNet
                                 continue;
                             }
                             if (string.IsNullOrEmpty(modInfo.AssemblyName))
-                                modInfo.AssemblyName = modInfo.Id + ".dll";
+                            {
+                                if (File.Exists(Path.Combine(dir, modInfo.Id + ".dll")))
+                                {
+                                    modInfo.AssemblyName = modInfo.Id + ".dll";
+                                }
+                            }
 
-                            ModEntry modEntry = new ModEntry(modInfo, dir + Path.DirectorySeparatorChar);
+                            modEntry = new ModEntry(modInfo, dir + Path.DirectorySeparatorChar);
                             mods.Add(modInfo.Id, modEntry);
                         }
                         catch (Exception exception)
                         {
                             Logger.Error($"Error parsing file '{jsonPath}'.");
                             Debug.LogException(exception);
+                            continue;
+                        }
+
+                        var trFolder = Path.Combine(dir, "TextureReplacer");
+                        if (Directory.Exists(trFolder))
+                        {
+                            foreach (string skinDir in Directory.GetDirectories(trFolder))
+                            {
+                                try
+                                {
+                                    string trJsonPath = Path.Combine(skinDir, "skin.json");
+                                    TextureReplacer.Skin skin;
+                                    if (File.Exists(trJsonPath))
+                                    {
+                                        skin = TinyJson.JSONParser.FromJson<TextureReplacer.Skin>(File.ReadAllText(trJsonPath));
+                                    }
+                                    else
+                                    {
+                                        skin = new TextureReplacer.Skin() { Name = new DirectoryInfo(skinDir).Name };
+                                    }
+                                    skin.modEntry = modEntry;
+                                    skin.textures = new Dictionary<string, TextureReplacer.Skin.texture>();
+                                    modEntry.Skins.Add(skin);
+
+                                    foreach (string file in Directory.GetFiles(skinDir))
+                                    {
+                                        if (file.EndsWith("skin.json"))
+                                        {
+                                        }
+                                        else if (file.EndsWith(".png") || file.EndsWith(".jpg"))
+                                        {
+                                            skin.textures[Path.GetFileNameWithoutExtension(file)] = new TextureReplacer.Skin.texture { Path = file };
+                                        }
+                                        else
+                                        {
+                                            Logger.Log($"Unsupported file format for '{file}'.");
+                                        }
+                                    }
+                                }
+                                catch (Exception exception)
+                                {
+                                    Logger.Error($"Error");
+                                    Debug.LogException(exception);
+                                }
+                            }
                         }
                     }
                     else
@@ -1202,6 +1336,8 @@ namespace UnityModManagerNet
                     }
                 }
 
+                //ApplySkins();
+
                 Logger.Log($"Finish. Successful loaded {modEntries.Count(x => !x.ErrorOnLoading)}/{countMods} mods.".ToUpper());
                 Console.WriteLine();
 
@@ -1227,6 +1363,50 @@ namespace UnityModManagerNet
             if (!UI.Load())
             {
                 Logger.Error($"Can't load UI.");
+            }
+        }
+
+        static MethodInfo GetTexturePropertyNames = typeof(Material).GetMethod("GetTexturePropertyNames", new Type[] { typeof(List<string>) });
+        static List<string> texturePropertyNames = new List<string>();
+
+        internal static void ApplySkins()
+        {
+            if (unityVersion < VER_2018_2)
+                return;
+
+            Logger.Log($"Replacing textures.");
+
+            var materials = Resources.FindObjectsOfTypeAll<Material>();
+
+            foreach (var skin in allSkins)
+            {
+                if (skin.Conditions.IsEmpty)
+                {
+                    foreach(var mat in materials)
+                    {
+                        texturePropertyNames.Clear();
+                        GetTexturePropertyNames.Invoke(mat, new object[] { texturePropertyNames });
+
+                        foreach(var p in texturePropertyNames)
+                        {
+                            var tex = mat.GetTexture(p);
+                            if (tex && !string.IsNullOrEmpty(tex.name) && tex is Texture2D tex2d)
+                            {
+                                foreach(var kv in skin.textures)
+                                {
+                                    if (tex.name == kv.Key)
+                                    {
+                                        mat.SetTexture(p, kv.Value.Texture);
+                                        Logger.Log($"Replaced texture '{tex.name}' in material '{mat.name}'.");
+                                        if (!kv.Value.Previous)
+                                            kv.Value.Previous = tex2d;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

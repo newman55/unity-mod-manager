@@ -316,7 +316,8 @@ namespace TinyJson
             {
                 T member = members[i];
                 string name = member.Name;
-                nameToMember.Add(name, member);
+                if (member.GetCustomAttributes(typeof(IgnoreJsonAttribute), false).Length == 0)
+                    nameToMember.Add(name, member);
             }
 
             return nameToMember;
@@ -475,6 +476,9 @@ namespace TinyJson
                 FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
                 for (int i = 0; i < fieldInfos.Length; i++)
                 {
+                    if (fieldInfos[i].GetCustomAttributes(typeof(IgnoreJsonAttribute), false).Length > 0)
+                        continue;
+
                     object value = fieldInfos[i].GetValue(item);
                     if (value != null)
                     {
@@ -491,6 +495,9 @@ namespace TinyJson
                 PropertyInfo[] propertyInfo = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
                 for (int i = 0; i < propertyInfo.Length; i++)
                 {
+                    if (propertyInfo[i].GetCustomAttributes(typeof(IgnoreJsonAttribute), false).Length > 0)
+                        continue;
+
                     object value = propertyInfo[i].GetValue(item, null);
                     if (value != null)
                     {
@@ -514,4 +521,9 @@ namespace TinyJson
             return member.Name;
         }
     }
+
+    /// <summary>
+    /// [0.26.0]
+    /// </summary>
+    public class IgnoreJsonAttribute : Attribute { }
 }

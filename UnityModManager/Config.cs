@@ -102,6 +102,7 @@ namespace UnityModManagerNet
             public string EntryPoint;
             public string StartingPoint;
             public string UIStartingPoint;
+            public string TextureReplacingPoint;
             public string GameExe;
             public string GameVersionPoint;
             public string MinimalManagerVersion;

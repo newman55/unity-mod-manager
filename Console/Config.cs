@@ -61,6 +61,7 @@ namespace UnityModManagerNet.ConsoleInstaller
         public string EntryPoint;
         public string StartingPoint;
         public string UIStartingPoint;
+        public string TextureReplacingPoint;
         public string GameVersionPoint;
         public string MinimalManagerVersion;
         public string OldPatchTarget;

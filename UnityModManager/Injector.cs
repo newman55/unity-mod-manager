@@ -129,6 +129,23 @@ namespace UnityModManagerNet
             {
                 UnityModManager.UI.Instance.FirstLaunch();
             }
+
+            if (!string.IsNullOrEmpty(UnityModManager.Config.TextureReplacingPoint))
+            {
+                if (TryGetEntryPoint(UnityModManager.Config.TextureReplacingPoint, out var @class, out var method, out var place))
+                {
+                    var usePrefix = (place == "before");
+                    var harmony = new HarmonyLib.Harmony(nameof(UnityModManager));
+                    var prefix = typeof(Injector).GetMethod(nameof(Prefix_TextureReplacing), BindingFlags.Static | BindingFlags.NonPublic);
+                    var postfix = typeof(Injector).GetMethod(nameof(Postfix_TextureReplacing), BindingFlags.Static | BindingFlags.NonPublic);
+                    harmony.Patch(method, usePrefix ? new HarmonyMethod(prefix) : null, !usePrefix ? new HarmonyMethod(postfix) : null);
+                }
+                else
+                {
+                    UnityModManager.OpenUnityFileLog();
+                    return;
+                }
+            }
         }
 
         static void Prefix_Start()
@@ -159,6 +176,16 @@ namespace UnityModManagerNet
                 return;
             }
             UnityModManager.UI.Instance.FirstLaunch();
+        }
+
+        static void Prefix_TextureReplacing()
+        {
+            //UnityModManager.ApplySkins();
+        }
+
+        static void Postfix_TextureReplacing()
+        {
+            //UnityModManager.ApplySkins();
         }
 
         internal static bool TryGetEntryPoint(string str, out Type foundClass, out MethodInfo foundMethod, out string insertionPlace)
