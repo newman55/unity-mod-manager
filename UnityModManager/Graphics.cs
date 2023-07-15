@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
-using static System.Net.WebRequestMethods;
 
 namespace UnityModManagerNet
 {
@@ -102,7 +101,7 @@ namespace UnityModManagerNet
     public static partial class Utils
     {
         /// <summary>
-        /// [0.27.0]
+        /// [0.28.0]
         /// </summary>
         public static bool LoadImage(Texture2D tex, byte[] data)
         {
@@ -129,7 +128,7 @@ namespace UnityModManagerNet
         }
 
         /// <summary>
-        /// [0.27.0]
+        /// [0.28.0]
         /// </summary>
         public static Texture2D LoadTexture(string filepath)
         {

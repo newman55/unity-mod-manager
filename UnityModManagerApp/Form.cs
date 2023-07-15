@@ -254,6 +254,8 @@ namespace UnityModManagerNet.Installer
                 nameof(GameInfo.StartingPoint),
                 nameof(GameInfo.UIStartingPoint),
                 nameof(GameInfo.TextureReplacingPoint),
+                nameof(GameInfo.SessionStartPoint),
+                nameof(GameInfo.SessionStopPoint),
                 nameof(GameInfo.OldPatchTarget),
                 nameof(GameInfo.GameVersionPoint),
                 nameof(GameInfo.Comment),
@@ -301,6 +303,19 @@ namespace UnityModManagerNet.Installer
 
             if (!string.IsNullOrEmpty(gameInfo.TextureReplacingPoint))
                 if (!Utils.TryParseEntryPoint(gameInfo.TextureReplacingPoint, out _))
+                {
+                    return false;
+                }
+
+
+            if (!string.IsNullOrEmpty(gameInfo.SessionStartPoint))
+                if (!Utils.TryParseEntryPoint(gameInfo.SessionStartPoint, out _))
+                {
+                    return false;
+                }
+
+            if (!string.IsNullOrEmpty(gameInfo.SessionStopPoint))
+                if (!Utils.TryParseEntryPoint(gameInfo.SessionStopPoint, out _))
                 {
                     return false;
                 }

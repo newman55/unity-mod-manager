@@ -15,6 +15,8 @@ namespace UnityModManagerNet
         {
             internal static bool Load()
             {
+                if (Instance) return true;
+
                 try
                 {
                     new GameObject(typeof(UI).FullName, typeof(UI));

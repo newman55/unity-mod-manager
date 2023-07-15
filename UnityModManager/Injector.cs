@@ -125,8 +125,12 @@ namespace UnityModManagerNet
                     return;
                 }
             }
-            else if (UnityModManager.UI.Instance)
+            else
             {
+                if (!UnityModManager.UI.Load())
+                {
+                    UnityModManager.Logger.Error($"Can't load UI.");
+                }
                 UnityModManager.UI.Instance.FirstLaunch();
             }
 
@@ -143,7 +147,40 @@ namespace UnityModManagerNet
                 else
                 {
                     UnityModManager.OpenUnityFileLog();
-                    return;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(UnityModManager.Config.SessionStartPoint))
+            {
+                if (TryGetEntryPoint(UnityModManager.Config.SessionStartPoint, out var @class, out var method, out var place))
+                {
+                    var usePrefix = (place == "before");
+                    var harmony = new HarmonyLib.Harmony(nameof(UnityModManager));
+                    var prefix = typeof(Injector).GetMethod(nameof(Prefix_SessionStart), BindingFlags.Static | BindingFlags.NonPublic);
+                    var postfix = typeof(Injector).GetMethod(nameof(Postfix_SessionStart), BindingFlags.Static | BindingFlags.NonPublic);
+                    harmony.Patch(method, usePrefix ? new HarmonyMethod(prefix) : null, !usePrefix ? new HarmonyMethod(postfix) : null);
+                }
+                else
+                {
+                    UnityModManager.Config.SessionStartPoint = null;
+                    UnityModManager.OpenUnityFileLog();
+                }
+            }
+
+            if (!string.IsNullOrEmpty(UnityModManager.Config.SessionStopPoint))
+            {
+                if (TryGetEntryPoint(UnityModManager.Config.SessionStopPoint, out var @class, out var method, out var place))
+                {
+                    var usePrefix = (place == "before");
+                    var harmony = new HarmonyLib.Harmony(nameof(UnityModManager));
+                    var prefix = typeof(Injector).GetMethod(nameof(Prefix_SessionStop), BindingFlags.Static | BindingFlags.NonPublic);
+                    var postfix = typeof(Injector).GetMethod(nameof(Postfix_SessionStop), BindingFlags.Static | BindingFlags.NonPublic);
+                    harmony.Patch(method, usePrefix ? new HarmonyMethod(prefix) : null, !usePrefix ? new HarmonyMethod(postfix) : null);
+                }
+                else
+                {
+                    UnityModManager.Config.SessionStopPoint = null;
+                    UnityModManager.OpenUnityFileLog();
                 }
             }
         }
@@ -160,6 +197,10 @@ namespace UnityModManagerNet
 
         static void Prefix_Show()
         {
+            if (!UnityModManager.UI.Load())
+            {
+                UnityModManager.Logger.Error($"Can't load UI.");
+            }
             if (!UnityModManager.UI.Instance)
             {
                 UnityModManager.Logger.Error("UnityModManager.UI does not exist.");
@@ -170,6 +211,10 @@ namespace UnityModManagerNet
 
         static void Postfix_Show()
         {
+            if (!UnityModManager.UI.Load())
+            {
+                UnityModManager.Logger.Error($"Can't load UI.");
+            }
             if (!UnityModManager.UI.Instance)
             {
                 UnityModManager.Logger.Error("UnityModManager.UI does not exist.");
@@ -186,6 +231,52 @@ namespace UnityModManagerNet
         static void Postfix_TextureReplacing()
         {
             //UnityModManager.ApplySkins();
+        }
+
+        static void Prefix_SessionStart()
+        {
+            foreach (var mod in UnityModManager.modEntries)
+            {
+                if (mod.Active && mod.OnSessionStart != null)
+                {
+                    try
+                    {
+                        mod.OnSessionStart.Invoke(mod);
+                    }
+                    catch (Exception e)
+                    {
+                        mod.Logger.LogException("OnSessionStart", e);
+                    }
+                }
+            }
+        }
+
+        static void Postfix_SessionStart()
+        {
+            Prefix_SessionStart();
+        }
+
+        static void Prefix_SessionStop()
+        {
+            foreach (var mod in UnityModManager.modEntries)
+            {
+                if (mod.Active && mod.OnSessionStop != null)
+                {
+                    try
+                    {
+                        mod.OnSessionStop.Invoke(mod);
+                    }
+                    catch (Exception e)
+                    {
+                        mod.Logger.LogException("OnSessionStop", e);
+                    }
+                }
+            }
+        }
+
+        static void Postfix_SessionStop()
+        {
+            Prefix_SessionStop();
         }
 
         internal static bool TryGetEntryPoint(string str, out Type foundClass, out MethodInfo foundMethod, out string insertionPlace)

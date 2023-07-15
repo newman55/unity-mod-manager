@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using UnityEngine;
 using dnlib.DotNet;
-//using UnityEngine.SceneManagement;
 
 namespace UnityModManagerNet
 {
@@ -332,10 +331,26 @@ namespace UnityModManagerNet
             /// </summary>
             public Action<ModEntry, float> OnFixedUpdate = null;
 
+            /// <summary>
+            /// Called by SessionStartPoint usually after all loaded data
+            /// Must be preconfigured
+            /// Check UnityModManager.IsSupportOnSessionStart before 
+            /// [0.27.0]
+            /// </summary>
+            public Action<ModEntry> OnSessionStart = null;
+
+            /// <summary>
+            /// Called by SessionStopPoint
+            /// Must be preconfigured
+            /// Check UnityModManager.IsSupportOnSessionStop before 
+            /// [0.27.0]
+            /// </summary>
+            public Action<ModEntry> OnSessionStop = null;
+
             Dictionary<long, MethodInfo> mCache = new Dictionary<long, MethodInfo>();
 
             /// <summary>
-            /// [0.27.0]
+            /// [0.28.0]
             /// </summary>
             internal readonly List<TextureReplacer.Skin> Skins = new List<TextureReplacer.Skin>();
 
@@ -1036,7 +1051,7 @@ namespace UnityModManagerNet
         public static string modsPath { get; private set; }
 
         /// <summary>
-        /// [0.27.0]
+        /// [0.28.0]
         /// </summary>
         internal static readonly List<TextureReplacer.Skin> allSkins = new List<TextureReplacer.Skin>();
 
@@ -1049,6 +1064,16 @@ namespace UnityModManagerNet
         /// [0.26.0]
         /// </summary>
         public static event ToggleModsListen toggleModsListen;
+
+        /// <summary>
+        /// Does the OnSessionStart support [0.27.0]
+        /// </summary>
+        public static bool IsSupportOnSessionStart => !string.IsNullOrEmpty(Config.SessionStartPoint);
+
+        /// <summary>
+        /// Does the OnSessionStop support [0.27.0]
+        /// </summary>
+        public static bool IsSupportOnSessionStop => !string.IsNullOrEmpty(Config.SessionStopPoint);
 
         [Obsolete("Please use modsPath!!!!This is compatible with mod of ver before 0.13")]
         public static string OldModsPath = "";
@@ -1111,6 +1136,8 @@ namespace UnityModManagerNet
             }
 
             Logger.Log($"Game: {Config.Name}.");
+            Logger.NativeLog($"IsSupportOnSessionStart: {IsSupportOnSessionStart}.");
+            Logger.NativeLog($"IsSupportOnSessionStop: {IsSupportOnSessionStop}.");
 
             Params = Param.Load();
 
@@ -1360,10 +1387,10 @@ namespace UnityModManagerNet
 
             GameScripts.OnAfterLoadMods();
 
-            if (!UI.Load())
-            {
-                Logger.Error($"Can't load UI.");
-            }
+            //if (!UI.Load())
+            //{
+            //    Logger.Error($"Can't load UI.");
+            //}
         }
 
         static MethodInfo GetTexturePropertyNames = typeof(Material).GetMethod("GetTexturePropertyNames", new Type[] { typeof(List<string>) });
