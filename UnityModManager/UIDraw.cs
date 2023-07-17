@@ -117,10 +117,10 @@ namespace UnityModManagerNet
         public partial class UI : MonoBehaviour
         {
             static Type[] fieldTypes = new[] { typeof(int), typeof(long), typeof(float), typeof(double), typeof(int[]), typeof(long[]), typeof(float[]), typeof(double[]),
-                typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(string)};
+                typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(string), typeof(string[])};
             static Type[] sliderTypes = new[] { typeof(int), typeof(long), typeof(float), typeof(double) };
             static Type[] toggleTypes = new[] { typeof(bool) };
-            static Type[] specialTypes = new[] { typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(KeyBinding) };
+            static Type[] specialTypes = new[] { typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(KeyBinding), typeof(string) };
             static float drawHeight = 22;
 
             [Obsolete("Use new version with title.")]
@@ -965,8 +965,6 @@ namespace UnityModManagerNet
                                 if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
                                 {
                                     Array.Resize(ref values, Math.Max(values.Length - 1, 0));
-                                    if (values.Length > 0)
-                                        values[values.Length - 1] = Convert.ChangeType("0", elementType);
                                     _changed = true;
                                     changed = true;
                                 }
@@ -983,7 +981,7 @@ namespace UnityModManagerNet
 
                             if (values.Length > 0)
                             {
-                                var isFloat = f.FieldType == typeof(float) || f.FieldType == typeof(double) || f.FieldType == typeof(float[]) || f.FieldType == typeof(double[]);
+                                var isFloat = elementType == typeof(float) || elementType == typeof(double);
                                 for (int i = 0; i < values.Length; i++)
                                 {
                                     var val = values[i].ToString();
@@ -999,17 +997,19 @@ namespace UnityModManagerNet
                                         GUILayout.BeginHorizontal();
                                         GUILayout.Label($"  [{i}] ", GUILayout.ExpandWidth(false));
                                     }
-                                    var result = f.FieldType == typeof(string) ? GUILayout.TextField(val, a.MaxLength, options.ToArray()) : GUILayout.TextField(val, options.ToArray());
+                                    var result = elementType == typeof(string) ? GUILayout.TextField(val, a.MaxLength, options.ToArray()) : GUILayout.TextField(val, options.ToArray());
                                     if (f.FieldType.IsArray)
                                     {
                                         GUILayout.EndHorizontal();
                                     }
                                     if (result != val)
                                     {
-                                        if (string.IsNullOrEmpty(result))
+                                        if (elementType == typeof(string))
                                         {
-                                            if (f.FieldType != typeof(string))
-                                                result = "0";
+                                        }
+                                        else if (string.IsNullOrEmpty(result))
+                                        {
+                                            result = "0";
                                         }
                                         else
                                         {
@@ -1042,6 +1042,8 @@ namespace UnityModManagerNet
                                         f.SetValue(container, Array.ConvertAll(values, x => (long)x));
                                     else if (elementType == typeof(double))
                                         f.SetValue(container, Array.ConvertAll(values, x => (double)x));
+                                    else if (elementType == typeof(string))
+                                        f.SetValue(container, Array.ConvertAll(values, x => (string)x));
                                 }
                                 else
                                 {
