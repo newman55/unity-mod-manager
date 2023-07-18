@@ -64,6 +64,8 @@ namespace UnityModManagerNet
             }
         }
 
+        private static bool startUiWithManager;
+
         private static void _Run(bool doorstop)
         {
             Console.WriteLine();
@@ -79,11 +81,36 @@ namespace UnityModManagerNet
 
             Fixes.Apply();
 
+            if (!string.IsNullOrEmpty(UnityModManager.Config.UIStartingPoint) && UnityModManager.Config.UIStartingPoint != UnityModManager.Config.StartingPoint)
+            {
+                if (TryGetEntryPoint(UnityModManager.Config.UIStartingPoint, out var @class, out var method, out var place))
+                {
+                    var usePrefix = (place == "before");
+                    var harmony = new HarmonyLib.Harmony(nameof(UnityModManager));
+                    var prefix = typeof(Injector).GetMethod(nameof(Prefix_Show), BindingFlags.Static | BindingFlags.NonPublic);
+                    var postfix = typeof(Injector).GetMethod(nameof(Postfix_Show), BindingFlags.Static | BindingFlags.NonPublic);
+                    harmony.Patch(method, usePrefix ? new HarmonyMethod(prefix) : null, !usePrefix ? new HarmonyMethod(postfix) : null);
+                }
+                else
+                {
+                    UnityModManager.OpenUnityFileLog();
+                    return;
+                }
+            }
+            else
+            {
+                startUiWithManager = true;
+            }
+
             if (!string.IsNullOrEmpty(UnityModManager.Config.StartingPoint))
             {
                 if (!doorstop && UnityModManager.Config.StartingPoint == UnityModManager.Config.EntryPoint)
                 {
                     UnityModManager.Start();
+                    if (startUiWithManager)
+                    {
+                        RunUI();
+                    }
                 }
                 else
                 {
@@ -106,32 +133,13 @@ namespace UnityModManagerNet
             }
             else
             {
-                UnityModManager.Start();
-            }
-
-            if (!string.IsNullOrEmpty(UnityModManager.Config.UIStartingPoint))
-            {
-                if (TryGetEntryPoint(UnityModManager.Config.UIStartingPoint, out var @class, out var method, out var place))
+                if (startUiWithManager)
                 {
-                    var usePrefix = (place == "before");
-                    var harmony = new HarmonyLib.Harmony(nameof(UnityModManager));
-                    var prefix = typeof(Injector).GetMethod(nameof(Prefix_Show), BindingFlags.Static | BindingFlags.NonPublic);
-                    var postfix = typeof(Injector).GetMethod(nameof(Postfix_Show), BindingFlags.Static | BindingFlags.NonPublic);
-                    harmony.Patch(method, usePrefix ? new HarmonyMethod(prefix) : null, !usePrefix ? new HarmonyMethod(postfix) : null);
-                }
-                else
-                {
+                    UnityModManager.Logger.Error($"Can't start UI. UIStartingPoint is not defined.");
                     UnityModManager.OpenUnityFileLog();
                     return;
                 }
-            }
-            else
-            {
-                if (!UnityModManager.UI.Load())
-                {
-                    UnityModManager.Logger.Error($"Can't load UI.");
-                }
-                UnityModManager.UI.Instance.FirstLaunch();
+                UnityModManager.Start();
             }
 
             if (!string.IsNullOrEmpty(UnityModManager.Config.TextureReplacingPoint))
@@ -185,14 +193,31 @@ namespace UnityModManagerNet
             }
         }
 
+        static void RunUI()
+        {
+            if (!UnityModManager.UI.Load())
+            {
+                UnityModManager.Logger.Error($"Can't load UI.");
+            }
+            UnityModManager.UI.Instance.FirstLaunch();
+        }
+
         static void Prefix_Start()
         {
             UnityModManager.Start();
+            if (startUiWithManager)
+            {
+                RunUI();
+            }
         }
 
         static void Postfix_Start()
         {
             UnityModManager.Start();
+            if (startUiWithManager)
+            {
+                RunUI();
+            }
         }
 
         static void Prefix_Show()

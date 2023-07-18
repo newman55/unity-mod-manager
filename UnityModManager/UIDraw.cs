@@ -82,6 +82,10 @@ namespace UnityModManagerNet
         /// (RichText) [0.25.0]
         /// </summary>
         public string Tooltip;
+        /// <summary>
+        /// Only for string field [0.27.2]
+        /// </summary>
+        public bool TextArea;
 
         public DrawAttribute()
         {
@@ -801,7 +805,7 @@ namespace UnityModManagerNet
                         }
 
                         options.Add(a.Width != 0 ? GUILayout.Width(a.Width) : GUILayout.Width(Scale(100)));
-                        options.Add(a.Height != 0 ? GUILayout.Height(a.Height) : GUILayout.Height(Scale((int)drawHeight)));
+                        options.Add(a.Height != 0 ? GUILayout.Height(a.Height) : GUILayout.Height(Scale(a.TextArea ? (int)drawHeight * 3 : (int)drawHeight)));
                         if (f.FieldType == typeof(Vector2))
                         {
                             if (a.Vertical)
@@ -997,7 +1001,26 @@ namespace UnityModManagerNet
                                         GUILayout.BeginHorizontal();
                                         GUILayout.Label($"  [{i}] ", GUILayout.ExpandWidth(false));
                                     }
-                                    var result = elementType == typeof(string) ? GUILayout.TextField(val, a.MaxLength, options.ToArray()) : GUILayout.TextField(val, options.ToArray());
+                                    if (elementType == typeof(string))
+                                    {
+                                        options.Add(GUILayout.ExpandWidth(true));
+                                    }
+                                    string result;
+                                    if (elementType == typeof(string))
+                                    {
+                                        if (a.TextArea)
+                                        {
+                                            result = GUILayout.TextArea(val, a.MaxLength, options.ToArray());
+                                        }
+                                        else
+                                        {
+                                            result = GUILayout.TextField(val, a.MaxLength, options.ToArray());
+                                        }
+                                    }
+                                    else
+                                    {
+                                        result = GUILayout.TextField(val, options.ToArray());
+                                    }
                                     if (f.FieldType.IsArray)
                                     {
                                         GUILayout.EndHorizontal();
