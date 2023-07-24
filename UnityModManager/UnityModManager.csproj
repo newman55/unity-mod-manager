@@ -17,8 +17,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <OutputPath>$(SolutionDir)\UnityModManager\bin\$(Configuration)\</OutputPath>
     <NeutralLanguage>en-001</NeutralLanguage>
-    <AssemblyVersion>0.27.3</AssemblyVersion>
-    <FileVersion>0.27.3</FileVersion>
+    <AssemblyVersion>0.27.4</AssemblyVersion>
+    <FileVersion>0.27.4</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>UnityModManager</Title>
     <Authors>newman55</Authors>

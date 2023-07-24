@@ -329,25 +329,39 @@ namespace UnityModManagerNet
                     ScaleGUI();
                 }
 
-                var toRemove = new List<PopupToggleGroup_GUI>(0);
-                bool anyRendered = false;
-                foreach (var item in PopupToggleGroup_GUI.mList)
+                if (PopupToggleGroup_GUI.mList.Count > 0)
                 {
-                    item.mDestroyCounter.Add(Time.frameCount);
-                    if (item.mDestroyCounter.Count > 1)
+                    var toRemove = new List<PopupToggleGroup_GUI>(0);
+                    bool anyRendered = false;
+                    foreach (var item in PopupToggleGroup_GUI.mList)
                     {
-                        toRemove.Add(item);
-                        continue;
+                        item.mDestroyCounter.Add(Time.frameCount);
+                        if (item.mDestroyCounter.Count > 1)
+                        {
+                            toRemove.Add(item);
+                            continue;
+                        }
+                        if (item.Opened && !anyRendered)
+                        {
+                            item.Render();
+                            anyRendered = true;
+                        }
                     }
-                    if (item.Opened && !anyRendered)
+                    foreach (var item in toRemove)
                     {
-                        item.Render();
-                        anyRendered = true;
+                        PopupToggleGroup_GUI.mList.Remove(item);
                     }
                 }
-                foreach (var item in toRemove)
+
+                if (Window_GUI.mList.Count > 0)
                 {
-                    PopupToggleGroup_GUI.mList.Remove(item);
+                    foreach (var item in Window_GUI.mList)
+                    {
+                        if (item.Opened)
+                        {
+                            item.Render();
+                        }
+                    }
                 }
 
                 if (mOpened)
@@ -833,7 +847,7 @@ namespace UnityModManagerNet
 
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Hotkey (default Ctrl+F10)", GUILayout.ExpandWidth(false));
-                            DrawKeybinding(ref Params.Hotkey, "UMMHotkey", null, GUILayout.ExpandWidth(false));
+                            DrawKeybinding(ref Params.Hotkey, "UMM Hotkey", null, GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
 
                             GUILayout.Space(5);
