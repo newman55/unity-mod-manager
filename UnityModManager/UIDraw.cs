@@ -1271,11 +1271,13 @@ namespace UnityModManagerNet
 
                         if (!a.Vertical)
                             GUILayout.Space(Scale(5));
-                        var values = Enum.GetNames(f.FieldType);
+                        var names = Enum.GetNames(f.FieldType);
+                        var values = Enum.GetValues(f.FieldType);
                         var val = (int)f.GetValue(container);
-                        if (PopupToggleGroup(ref val, values, fieldName, unique, null, options.ToArray()))
+                        var index = Array.IndexOf(values, val);
+                        if (PopupToggleGroup(ref index, names, fieldName, unique, null, options.ToArray()))
                         {
-                            var v = Enum.Parse(f.FieldType, values[val]);
+                            var v = Enum.Parse(f.FieldType, names[index]);
                             f.SetValue(container, v);
                             changed = true;
                         }
