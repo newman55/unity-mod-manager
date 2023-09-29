@@ -1305,10 +1305,6 @@ namespace UnityModManagerNet
                         {
                             throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.ToggleGroup}");
                         }
-                        if (f.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
-                        {
-                            throw new Exception($"Type {f.FieldType}/{DrawType.ToggleGroup} incompatible with Flag attribute.");
-                        }
 
                         options.Add(GUILayout.ExpandWidth(false));
                         options.Add(a.Height != 0 ? GUILayout.Height(a.Height) : GUILayout.Height(Scale((int)drawHeight)));
@@ -1323,12 +1319,13 @@ namespace UnityModManagerNet
 
                         if (!a.Vertical)
                             GUILayout.Space(Scale(5));
-                        var values = Enum.GetNames(f.FieldType);
-                        var val = (int)f.GetValue(container);
-
-                        if (ToggleGroup(ref val, values, null, options.ToArray()))
+                        var names = Enum.GetNames(f.FieldType);
+                        var values = Enum.GetValues(f.FieldType);
+                        var val = f.GetValue(container);
+                        var index = Array.IndexOf(values, val);
+                        if (ToggleGroup(ref index, names, null, options.ToArray()))
                         {
-                            var v = Enum.Parse(f.FieldType, values[val]);
+                            var v = Enum.Parse(f.FieldType, names[index]);
                             f.SetValue(container, v);
                             changed = true;
                         }
@@ -1342,10 +1339,6 @@ namespace UnityModManagerNet
                         if (!f.FieldType.IsEnum)
                         {
                             throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.PopupList}");
-                        }
-                        if (f.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
-                        {
-                            throw new Exception($"Type {f.FieldType}/{DrawType.ToggleGroup} incompatible with Flag attribute.");
                         }
 
                         options.Add(GUILayout.ExpandWidth(false));
