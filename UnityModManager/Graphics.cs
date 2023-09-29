@@ -101,7 +101,7 @@ namespace UnityModManagerNet
     public static partial class Utils
     {
         /// <summary>
-        /// [0.28.0]
+        /// [0.27.8]
         /// </summary>
         public static bool LoadImage(Texture2D tex, byte[] data)
         {
@@ -128,7 +128,7 @@ namespace UnityModManagerNet
         }
 
         /// <summary>
-        /// [0.28.0]
+        /// [0.27.8] png|jpg
         /// </summary>
         public static Texture2D LoadTexture(string filepath)
         {

@@ -8,51 +8,13 @@ using HarmonyLib;
 
 namespace UnityModManagerNet
 {
-    //[ComVisible(true)]
-    //public class RngWrapper : RandomNumberGenerator
-    //{
-    //    readonly RNGCryptoServiceProvider _wrapped;
-
-    //    static RngWrapper()
-    //    {
-    //        Injector.Run();
-    //    }
-
-    //    public RngWrapper()
-    //    {
-    //        this._wrapped = new RNGCryptoServiceProvider();
-    //    }
-
-    //    public RngWrapper(string str)
-    //    {
-    //        this._wrapped = new RNGCryptoServiceProvider(str);
-    //    }
-
-    //    public RngWrapper(byte[] rgb)
-    //    {
-    //        this._wrapped = new RNGCryptoServiceProvider(rgb);
-    //    }
-
-    //    public RngWrapper(CspParameters cspParams)
-    //    {
-    //        this._wrapped = new RNGCryptoServiceProvider(cspParams);
-    //    }
-
-    //    public override void GetBytes(byte[] data)
-    //    {
-    //        this._wrapped.GetBytes(data);
-    //    }
-
-    //    public override void GetNonZeroBytes(byte[] data)
-    //    {
-    //        this._wrapped.GetNonZeroBytes(data);
-    //    }
-    //}
-
     public class Injector
     {
         public static void Run(bool doorstop = false)
         {
+            if (UnityModManager.initialized)
+                return;
+
             try
             {
                 _Run(doorstop);

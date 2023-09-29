@@ -847,7 +847,7 @@ namespace UnityModManagerNet
 
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Hotkey (default Ctrl+F10)", GUILayout.ExpandWidth(false));
-                            DrawKeybinding(ref Params.Hotkey, "UMM Hotkey", null, GUILayout.ExpandWidth(false));
+                            DrawKeybindingSmart(Params.Hotkey, "UMM Hotkey", null, GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
 
                             GUILayout.Space(5);

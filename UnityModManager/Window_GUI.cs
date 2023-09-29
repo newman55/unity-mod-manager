@@ -61,9 +61,9 @@ namespace UnityModManagerNet
                     mId = GetNextWindowId();
                     mList.Add(this);
                     this.onGui = onGui;
-                    this.title = title;
-                    this.unique = unique;
                     this.onClose = onClose;
+                    this.unique = unique;
+                    this.title = title;
                     Params = @params ?? new WindowParams();
                 }
 
@@ -111,6 +111,8 @@ namespace UnityModManagerNet
                 /// </summary>
                 public void Close()
                 {
+                    if (!Opened) return;
+
                     Opened = false;
 
                     if (onClose != null)
@@ -129,7 +131,7 @@ namespace UnityModManagerNet
             }
 
             /// <summary>
-            /// []
+            /// Creates and displays window. Caches by title or unique. (deferred) []
             /// </summary>
             internal static void ShowWindow(Action<Window_GUI> onGui, string title, int unique, WindowParams windowParams = null)
             {
@@ -137,7 +139,7 @@ namespace UnityModManagerNet
             }
 
             /// <summary>
-            /// []
+            /// Creates and displays window. Caches by title or unique saving window parameters. (deferred) []
             /// </summary>
             internal static void ShowWindow(Action<Window_GUI> onGui, Action onClose, string title, int unique, WindowParams windowParams = null)
             {
@@ -149,9 +151,13 @@ namespace UnityModManagerNet
                 Window_GUI obj = null;
                 foreach (var item in Window_GUI.mList)
                 {
-                    if (unique == 0 && item.onGui == onGui || unique != 0 && item.unique == unique)
+                    if (unique == 0 && item.title == title || unique != 0 && item.unique == unique)
                     {
+                        item.Close();
                         obj = item;
+                        obj.title = title;
+                        obj.onGui = onGui;
+                        obj.onClose = onClose;
                         break;
                     }
                 }

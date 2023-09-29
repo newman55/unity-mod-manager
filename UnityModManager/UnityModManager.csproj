@@ -10,15 +10,15 @@
     <AssemblyName>UnityModManager</AssemblyName>
     <RootNamespace>UnityModManagerNet</RootNamespace>
     <Copyright>Copyright © 2019-$([System.DateTime]::Now.ToString('yyyy'))</Copyright>
-    <Version>0.27.2</Version>
+    <Version>0.27.8</Version>
   </PropertyGroup>
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <OutputPath>$(SolutionDir)\UnityModManager\bin\$(Configuration)\</OutputPath>
     <NeutralLanguage>en-001</NeutralLanguage>
-    <AssemblyVersion>0.27.4</AssemblyVersion>
-    <FileVersion>0.27.4</FileVersion>
+    <AssemblyVersion>0.27.8</AssemblyVersion>
+    <FileVersion>0.27.8</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>UnityModManager</Title>
     <Authors>newman55</Authors>
@@ -33,6 +33,10 @@
   <ItemGroup>
     <PackageReference Include="dnlib" Version="3.1.0" />
     <PackageReference Include="Lib.Harmony" Version="2.2.2" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

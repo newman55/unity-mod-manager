@@ -10,7 +10,12 @@ namespace UnityModManagerNet
     /// <summary>
     /// [0.18.0]
     /// </summary>
-    public enum DrawType { Auto, Ignore, Field, Slider, Toggle, ToggleGroup, /*MultiToggle, */PopupList, KeyBinding };
+    public enum DrawType { Auto, Ignore, Field, Slider, Toggle, ToggleGroup, /*MultiToggle, */PopupList, KeyBinding,
+        /// <summary>
+        /// Disabled modifiers. [0.27.5]
+        /// </summary>
+        KeyBindingNoMod
+    };
 
     /// <summary>
     /// [0.18.0]
@@ -139,6 +144,7 @@ namespace UnityModManagerNet
             /// <returns>
             /// Returns true if the value has changed.
             /// </returns>
+            [Obsolete("Use DrawKeybindingSmart.")]
             public static bool DrawKeybinding(ref KeyBinding key, string title, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 return DrawKeybinding(ref key, title, 0, style, option);
@@ -150,18 +156,82 @@ namespace UnityModManagerNet
             /// <returns>
             /// Returns true if the value has changed.
             /// </returns>
+            [Obsolete("Use DrawKeybindingSmart.")]
             public static bool DrawKeybinding(ref KeyBinding key, string title, int unique, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 var changed = false;
                 if (key == null)
                     key = new KeyBinding();
+                GUILayout.BeginHorizontal();
+                var modifiersValue = new byte[] { 1, 2, 4 };
+                var modifiersStr = new string[] { "Ctrl", "Shift", "Alt" };
+                var modifiers = key.modifiers;
+                for (int i = 0; i < modifiersValue.Length; i++)
+                {
+                    if (GUILayout.Toggle((modifiers & modifiersValue[i]) != 0, modifiersStr[i], GUILayout.ExpandWidth(false)))
+                    {
+                        modifiers |= modifiersValue[i];
+                    }
+                    else if ((modifiers & modifiersValue[i]) != 0)
+                    {
+                        modifiers ^= modifiersValue[i];
+                    }
+                }
+                GUILayout.Label(" + ", GUILayout.ExpandWidth(false));
+                var val = key.Index;
+                if (PopupToggleGroup(ref val, KeyBinding.KeysName, title, unique, style, option))
+                {
+                    key.Change((KeyCode)Enum.Parse(typeof(KeyCode), KeyBinding.KeysCode[val]), modifiers);
+                    changed = true;
+                }
 
-                var refKey = key;
+                if (key.modifiers != modifiers)
+                {
+                    key.modifiers = modifiers;
+                    changed = true;
+                }
+                GUILayout.EndHorizontal();
 
-                if (GUILayout.Button(refKey.ToString(), style ?? GUI.skin.button, option))
+                return changed;
+            }
+
+            /// <summary>
+            /// (deferred) [0.27.5]
+            /// </summary>
+            public static void DrawKeybindingSmart(KeyBinding key, string title, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                DrawKeybindingSmart(key, title, null, false, style, option);
+            }
+
+            /// <summary>
+            /// (deferred) [0.27.5]
+            /// </summary>
+            public static void DrawKeybindingSmart(KeyBinding key, string title, Action<KeyBinding> onChange, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                DrawKeybindingSmart(key, title, onChange, false, style, option);
+            }
+
+            /// <summary>
+            /// (deferred) [0.27.5]
+            /// </summary>
+            public static void DrawKeybindingSmart(KeyBinding key, string title, Action<KeyBinding> onChange, bool disableModifiers, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                if (key == null)
+                {
+                    if (onChange == null)
+                    {
+                        throw new ArgumentNullException("key");
+                    }
+                    else
+                    {
+                        key = new KeyBinding();
+                    }
+                }
+
+                if (GUILayout.Button(key.ToString(), style ?? GUI.skin.button, option))
                 {
                     var newKey = new KeyBinding();
-                    newKey.Change(refKey.keyCode, refKey.modifiers);
+                    newKey.Change(key.keyCode, key.modifiers);
                     var changing = false;
 
                     ShowWindow((window) =>
@@ -215,20 +285,24 @@ namespace UnityModManagerNet
                                     changing = false;
                                 }
                             }
+                            if (!changing && disableModifiers)
+                            {
+                                newKey.modifiers = 0;
+                            }
                         }
-                        GUILayout.Label($"{(changing ? "Enter key..." : newKey)}", GUI.skin.box, GUILayout.ExpandWidth(true));
+                        GUILayout.Label($"{(changing ? "Press key..." : newKey)}", GUI.skin.box, GUILayout.ExpandWidth(true));
                         GUILayout.BeginHorizontal();
-                        if (GUILayout.Button("Set", button))
+                        if (GUILayout.Button("Assign", button))
                         {
                             newKey.Change(KeyCode.None, 0);
                             changing = true;
                         }
                         if (GUILayout.Button("Save", button))
                         {
-                            if (refKey.keyCode != newKey.keyCode || refKey.modifiers != newKey.modifiers)
+                            if (key.keyCode != newKey.keyCode || key.modifiers != newKey.modifiers)
                             {
-                                changed = true;
-                                refKey.Change(newKey.keyCode, newKey.modifiers);
+                                key.Change(newKey.keyCode, newKey.modifiers);
+                                onChange?.Invoke(key);
                             }
                             window.Close();
                         }
@@ -238,10 +312,8 @@ namespace UnityModManagerNet
                         }
 
                         GUILayout.EndHorizontal();
-                    }, title, unique);
+                    }, title, 6334331);
                 }
-
-                return changed;
             }
 
             /// <summary>
@@ -265,6 +337,9 @@ namespace UnityModManagerNet
             /// <summary>
             /// [0.18.0]
             /// </summary>
+            /// <returns>
+            /// Returns result via onChange.
+            /// </returns>
             public static void DrawVector(Vector2 vec, Action<Vector2> onChange, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 if (onChange == null)
@@ -298,6 +373,9 @@ namespace UnityModManagerNet
             /// <summary>
             /// [0.18.0]
             /// </summary>
+            /// <returns>
+            /// Returns result via onChange.
+            /// </returns>
             public static void DrawVector(Vector3 vec, Action<Vector3> onChange, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 if (onChange == null)
@@ -331,6 +409,9 @@ namespace UnityModManagerNet
             /// <summary>
             /// [0.18.0]
             /// </summary>
+            /// <returns>
+            /// Returns result via onChange.
+            /// </returns>
             public static void DrawVector(Vector4 vec, Action<Vector4> onChange, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 if (onChange == null)
@@ -364,6 +445,9 @@ namespace UnityModManagerNet
             /// <summary>
             /// [0.18.0]
             /// </summary>
+            /// <returns>
+            /// Returns result via onChange.
+            /// </returns>
             public static void DrawColor(Color vec, Action<Color> onChange, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 if (onChange == null)
@@ -457,6 +541,9 @@ namespace UnityModManagerNet
             /// <summary>
             /// [0.19.0]
             /// </summary>
+            /// <returns>
+            /// Returns result via onChange.
+            /// </returns>
             public static void DrawFloatField(float value, string label, Action<float> onChange, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 if (onChange == null)
@@ -501,6 +588,9 @@ namespace UnityModManagerNet
             /// <summary>
             /// [0.19.0]
             /// </summary>
+            /// <returns>
+            /// Returns result via onChange.
+            /// </returns>
             public static void DrawIntField(int value, string label, Action<int> onChange, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 if (onChange == null)
@@ -1273,7 +1363,7 @@ namespace UnityModManagerNet
                             GUILayout.Space(Scale(5));
                         var names = Enum.GetNames(f.FieldType);
                         var values = Enum.GetValues(f.FieldType);
-                        var val = (int)f.GetValue(container);
+                        var val = f.GetValue(container);
                         var index = Array.IndexOf(values, val);
                         if (PopupToggleGroup(ref index, names, fieldName, unique, null, options.ToArray()))
                         {
@@ -1286,7 +1376,7 @@ namespace UnityModManagerNet
                         else
                             GUILayout.EndHorizontal();
                     }
-                    else if (a.Type == DrawType.KeyBinding)
+                    else if (a.Type == DrawType.KeyBinding || a.Type == DrawType.KeyBindingNoMod)
                     {
                         if (f.FieldType != typeof(KeyBinding))
                         {
@@ -1305,11 +1395,15 @@ namespace UnityModManagerNet
                         if (!a.Vertical)
                             GUILayout.Space(Scale(5));
                         var key = (KeyBinding)f.GetValue(container);
-                        if (DrawKeybinding(ref key, fieldName, unique, null, options.ToArray()))
+                        if (key == null)
+                            key = new KeyBinding();
+
+                        DrawKeybindingSmart(key, fieldName, (k) => 
                         {
-                            f.SetValue(container, key);
+                            f.SetValue(container, k);
                             changed = true;
-                        }
+                        }, a.Type == DrawType.KeyBindingNoMod, null, options.ToArray());
+
                         if (a.Vertical)
                         {
                             GUILayout.EndVertical();
