@@ -338,6 +338,11 @@ namespace UnityModManagerNet.ConsoleInstaller
                 }
             }
 
+            if (!Utils.IsDirectoryWritable(selectedGameParams.Path))
+            {
+                SelectGameFolder();
+            }
+
             if (!Utils.IsUnixPlatform() && !Directory.GetFiles(selectedGameParams.Path, "*.exe", SearchOption.TopDirectoryOnly).Any())
             {
                 Log.Print("Select the game folder where an exe file is located.");
