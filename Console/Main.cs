@@ -24,7 +24,7 @@ namespace UnityModManagerNet.ConsoleInstaller
         private static extern bool SetForegroundWindow(IntPtr hwnd);
 
         [Flags]
-        enum Actions { Install = 1, Update = 2, Delete = 4, Restore = 8 }
+        enum Actions { Install = 1, Update = 2, Delete = 4, Restore = 8, Path = 16 }
 
         static void Main(string[] args)
         {
@@ -317,6 +317,7 @@ namespace UnityModManagerNet.ConsoleInstaller
 
         static void ReadGameAssets()
         {
+            ToBeginning:
             gamePath = "";
             if (string.IsNullOrEmpty(selectedGameParams.Path) || !Directory.Exists(selectedGameParams.Path))
             {
@@ -338,10 +339,7 @@ namespace UnityModManagerNet.ConsoleInstaller
                 }
             }
 
-            if (!Utils.IsDirectoryWritable(selectedGameParams.Path))
-            {
-                SelectGameFolder();
-            }
+            
 
             if (!Utils.IsUnixPlatform() && !Directory.GetFiles(selectedGameParams.Path, "*.exe", SearchOption.TopDirectoryOnly).Any())
             {
@@ -589,6 +587,7 @@ namespace UnityModManagerNet.ConsoleInstaller
                     Log.Print($"{((Actions)i).ToString().First().ToString().ToUpper()}. {(Actions)i}");
                 }
             }
+            Log.Print("P. Path");
 
             ReadAgain:
             Log.Print("Key: ");
@@ -739,6 +738,12 @@ namespace UnityModManagerNet.ConsoleInstaller
 
                 goto Refresh;
             }
+            else if (c == "p")
+            {
+                selectedGameParams.Path = null;
+
+                goto ToBeginning;
+            }
             else
             {
                 goto ReadAgain;
@@ -762,6 +767,10 @@ namespace UnityModManagerNet.ConsoleInstaller
             if (!Directory.Exists(l))
             {
                 Log.Print($"Path '{l}' does not exist.");
+                goto ReadAgain;
+            }
+            if (!Utils.IsDirectoryWritable(l))
+            {
                 goto ReadAgain;
             }
 

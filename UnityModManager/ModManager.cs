@@ -165,7 +165,9 @@ namespace UnityModManagerNet
         {
             var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == args.Name);
             if (assembly != null)
+            {
                 return assembly;
+            }
 
             string filename = null;
             if (args.Name.StartsWith("0Harmony12"))
