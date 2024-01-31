@@ -10,15 +10,15 @@
     <AssemblyName>UnityModManager</AssemblyName>
     <RootNamespace>UnityModManagerNet</RootNamespace>
     <Copyright>Copyright © 2019-$([System.DateTime]::Now.ToString('yyyy'))</Copyright>
-    <Version>0.27.9</Version>
+    <Version>0.27.10</Version>
   </PropertyGroup>
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <OutputPath>$(SolutionDir)\UnityModManager\bin\$(Configuration)\</OutputPath>
     <NeutralLanguage>en-001</NeutralLanguage>
-    <AssemblyVersion>0.27.9</AssemblyVersion>
-    <FileVersion>0.27.9</FileVersion>
+    <AssemblyVersion>0.27.10</AssemblyVersion>
+    <FileVersion>0.27.10</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>UnityModManager</Title>
     <Authors>newman55</Authors>
