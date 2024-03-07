@@ -28,8 +28,8 @@
 
   <ItemGroup>
     <PackageReference Include="dnlib" Version="3.1.0" ExcludeAssets="All" GeneratePathProperty="true" />
-    <PackageReference Include="Lib.Harmony" Version="2.2.2" ExcludeAssets="All" GeneratePathProperty="true" />
     <PackageReference Include="Ionic.Zip-1.9.1.8" Version="1.9.1.8" />
+    <PackageReference Include="Lib.Harmony" Version="2.3.1.1" ExcludeAssets="All" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
