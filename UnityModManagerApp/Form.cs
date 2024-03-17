@@ -22,7 +22,8 @@ namespace UnityModManagerNet.Installer
         private static readonly Version VER_0_13 = new Version(0, 13);
         private static readonly Version VER_0_22 = new Version(0, 22);
 
-        private static readonly Version HARMONY_VER = new Version(2, 0);
+        private static readonly Version HARMONY_VER_2 = new Version(2, 0);
+        internal static readonly Version HARMONY_VER_2_2 = new Version(2, 2);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetForegroundWindow(IntPtr hwnd);
@@ -67,20 +68,22 @@ namespace UnityModManagerNet.Installer
         }
 
         [Flags]
-        enum LibIncParam { Normal = 0, Skip = 1, Minimal_lt_0_22 = 2 }
+        enum LibIncParam { Normal = 0, Skip = 1, Minimal_lt_0_22 = 2, Harmony_2_2 = 4 }
 
         static readonly Dictionary<string, LibIncParam> libraryFiles = new Dictionary<string, LibIncParam>
         {
             { "0Harmony.dll", LibIncParam.Normal },
-            { "0Harmony12.dll", LibIncParam.Minimal_lt_0_22 },
-            { "0Harmony-1.2.dll", LibIncParam.Minimal_lt_0_22 },
+            { "Harmony\\2.2\\0Harmony.dll", LibIncParam.Harmony_2_2 },
+            { "Harmony\\1.2\\0Harmony12.dll", LibIncParam.Minimal_lt_0_22 },
+            { "Harmony\\1.2\\0Harmony-1.2.dll", LibIncParam.Minimal_lt_0_22 },
             { "dnlib.dll", LibIncParam.Normal },
             { "System.Xml.dll", LibIncParam.Normal },
             { nameof(UnityModManager) + ".dll", LibIncParam.Normal },
             { nameof(UnityModManager) + ".xml", LibIncParam.Normal },
         };
 
-        static List<string> libraryPaths;
+        static List<string> libraryDestPaths;
+        static List<string> librarySourcePaths;
 
         public static UnityModManagerForm instance = null;
 
@@ -260,7 +263,8 @@ namespace UnityModManagerNet.Installer
                 nameof(GameInfo.GameVersionPoint),
                 nameof(GameInfo.Comment),
                 nameof(GameInfo.MinimalManagerVersion),
-                nameof(GameInfo.ExtraFilesUrl)
+                nameof(GameInfo.ExtraFilesUrl),
+                nameof(GameInfo.HarmonyVersion)
             };
 
             var prefix = (!string.IsNullOrEmpty(gameInfo.Name) ? $"[{gameInfo.Name}]" : "[?]");
@@ -427,14 +431,21 @@ namespace UnityModManagerNet.Installer
             }
 
             var gameSupportVersion = !string.IsNullOrEmpty(selectedGame.MinimalManagerVersion) ? Utils.ParseVersion(selectedGame.MinimalManagerVersion) : VER_0_22;
-            libraryPaths = new List<string>();
+            libraryDestPaths = new List<string>();
+            librarySourcePaths = new List<string>();
             foreach (var item in libraryFiles)
             {
                 if ((item.Value & LibIncParam.Minimal_lt_0_22) > 0 && gameSupportVersion >= VER_0_22 || (item.Value & LibIncParam.Skip) > 0)
                 {
                     continue;
                 }
-                libraryPaths.Add(Path.Combine(managerPath, item.Key));
+                if (item.Value.HasFlag(LibIncParam.Harmony_2_2) && (string.IsNullOrEmpty(selectedGame.HarmonyVersion) || new Version(selectedGame.HarmonyVersion) != HARMONY_VER_2_2))
+                {
+                    continue;
+                }
+
+                libraryDestPaths.Add(Path.Combine(managerPath, Path.GetFileName(item.Key)));
+                librarySourcePaths.Add(Path.Combine(Application.StartupPath, item.Key));
             }
 
             var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
@@ -836,7 +847,7 @@ namespace UnityModManagerNet.Installer
 
                         Utils.MakeBackup(doorstopPath);
                         Utils.MakeBackup(doorstopConfigPath);
-                        Utils.MakeBackup(libraryPaths);
+                        Utils.MakeBackup(libraryDestPaths);
 
                         if (!InstallDoorstop(Actions.Remove, false))
                         {
@@ -866,7 +877,7 @@ namespace UnityModManagerNet.Installer
                         Log.Print(e.ToString());
                         Utils.RestoreBackup(doorstopPath);
                         Utils.RestoreBackup(doorstopConfigPath);
-                        Utils.RestoreBackup(libraryPaths);
+                        Utils.RestoreBackup(libraryDestPaths);
                         Utils.RestoreBackup(gameConfigPath);
                         Log.Print("Installation failed.");
                     }
@@ -886,7 +897,7 @@ namespace UnityModManagerNet.Installer
                             
                             Utils.MakeBackup(doorstopPath);
                             Utils.MakeBackup(doorstopConfigPath);
-                            Utils.MakeBackup(libraryPaths);
+                            Utils.MakeBackup(libraryDestPaths);
                         }
 
                         Log.Print($"Deleting files from game...");
@@ -911,7 +922,7 @@ namespace UnityModManagerNet.Installer
                         {
                             Utils.RestoreBackup(doorstopPath);
                             Utils.RestoreBackup(doorstopConfigPath);
-                            Utils.RestoreBackup(libraryPaths);
+                            Utils.RestoreBackup(libraryDestPaths);
                             Utils.RestoreBackup(gameConfigPath);
                             Log.Print("Removal failed.");
                         }
@@ -927,7 +938,7 @@ namespace UnityModManagerNet.Installer
                 {
                     Utils.DeleteBackup(doorstopPath);
                     Utils.DeleteBackup(doorstopConfigPath);
-                    Utils.DeleteBackup(libraryPaths);
+                    Utils.DeleteBackup(libraryDestPaths);
                     Utils.DeleteBackup(gameConfigPath);
                 }
                 catch (Exception)
@@ -1107,7 +1118,7 @@ namespace UnityModManagerNet.Installer
                                 Directory.CreateDirectory(managerPath);
 
                             Utils.MakeBackup(assemblyPath);
-                            Utils.MakeBackup(libraryPaths);
+                            Utils.MakeBackup(libraryDestPaths);
 
                             if (!Utils.IsDirty(assemblyDef))
                             {
@@ -1155,7 +1166,7 @@ namespace UnityModManagerNet.Installer
                         {
                             Log.Print(e.ToString());
                             Utils.RestoreBackup(assemblyPath);
-                            Utils.RestoreBackup(libraryPaths);
+                            Utils.RestoreBackup(libraryDestPaths);
                             Utils.RestoreBackup(gameConfigPath);
                             Log.Print("Installation failed.");
                         }
@@ -1181,7 +1192,7 @@ namespace UnityModManagerNet.Installer
                                 if (write)
                                 {
                                     Utils.MakeBackup(assemblyPath);
-                                    Utils.MakeBackup(libraryPaths);
+                                    Utils.MakeBackup(libraryDestPaths);
                                 }
 
                                 Log.Print("Removing patch...");
@@ -1241,7 +1252,7 @@ namespace UnityModManagerNet.Installer
                             if (write)
                             {
                                 Utils.RestoreBackup(assemblyPath);
-                                Utils.RestoreBackup(libraryPaths);
+                                Utils.RestoreBackup(libraryDestPaths);
                                 Utils.RestoreBackup(gameConfigPath);
                                 Log.Print("Removal failed.");
                             }
@@ -1257,7 +1268,7 @@ namespace UnityModManagerNet.Installer
                 try
                 {
                     Utils.DeleteBackup(assemblyPath);
-                    Utils.DeleteBackup(libraryPaths);
+                    Utils.DeleteBackup(libraryDestPaths);
                     Utils.DeleteBackup(gameConfigPath);
                 }
                 catch (Exception)
@@ -1310,7 +1321,7 @@ namespace UnityModManagerNet.Installer
             success &= Utils.IsFileWritable(managerAssemblyPath);
             success &= Utils.IsFileWritable(GameInfo.filepathInGame);
 
-            foreach (var file in libraryPaths)
+            foreach (var file in libraryDestPaths)
             {
                 success &= Utils.IsFileWritable(file);
             }
@@ -1345,7 +1356,7 @@ namespace UnityModManagerNet.Installer
                         //var asm = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(f.FullName));
                         //if (asm.GetName().Version < HARMONY_VER)
                         var asm = ModuleDefMD.Load(File.ReadAllBytes(f.FullName));
-                        if (asm.Assembly.Version < HARMONY_VER)
+                        if (asm.Assembly.Version < HARMONY_VER_2)
                         {
                             Log.Print($"Game has extra library 0Harmony.dll in path {f.FullName}, which may not be compatible with UMM. Recommended to delete it.");
                             return false;
@@ -1389,12 +1400,13 @@ namespace UnityModManagerNet.Installer
                 Log.Print($"Deleting files from game...");
             }
 
-            foreach(var destpath in libraryPaths)
+            int i = 0;
+            foreach(var destpath in libraryDestPaths)
             {
                 var filename = Path.GetFileName(destpath);
                 if (action == Actions.Install)
                 {
-                    var sourcepath = Path.Combine(Application.StartupPath, filename);
+                    var sourcepath = librarySourcePaths[i++];
                     if (File.Exists(destpath))
                     {
                         var source = new FileInfo(sourcepath);

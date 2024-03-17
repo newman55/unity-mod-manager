@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <LangVersion>latest</LangVersion>
 
     <ProductName>UnityModManager</ProductName>
@@ -30,8 +30,8 @@
     <Reference Include="dnlib net35">
         <HintPath>$(Pkgdnlib)\lib\net35\dnlib.dll</HintPath>
     </Reference>
-    <Reference Include="Harmony net35">
-        <HintPath>$(PkgLib_Harmony)\lib\net35\0Harmony.dll</HintPath>
+    <Reference Include="Harmony net48">
+        <HintPath>$(PkgLib_Harmony)\lib\net48\0Harmony.dll</HintPath>
     </Reference>
   </ItemGroup>
 

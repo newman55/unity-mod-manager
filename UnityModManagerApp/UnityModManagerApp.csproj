@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>latest</LangVersion>
@@ -48,13 +48,14 @@
     <Reference Include="dnlib net35">
         <HintPath>$(Pkgdnlib)\lib\net35\dnlib.dll</HintPath>
     </Reference>
-    <Reference Include="Harmony net35">
-        <HintPath>$(PkgLib_Harmony)\lib\net35\0Harmony.dll</HintPath>
+    <Reference Include="Harmony net48">
+        <HintPath>$(PkgLib_Harmony)\lib\net48\0Harmony.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
-    <CopyFiles Include="$(SolutionDir)lib\winhttp_x86.dll;$(SolutionDir)lib\winhttp_x64.dll;$(SolutionDir)lib\System.Xml.dll;$(SolutionDir)lib\0Harmony-1.2.dll;$(SolutionDir)lib\0Harmony12.dll" />
+    <CopyFiles Include="$(SolutionDir)lib\winhttp_x86.dll;$(SolutionDir)lib\winhttp_x64.dll;$(SolutionDir)lib\System.Xml.dll" />
+    <CopyHarmony Include="$(SolutionDir)lib\Harmony\**\*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -75,6 +76,7 @@
   <Target Name="PostBuild" BeforeTargets="AfterBuild">
     <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(TargetDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(TargetDir)UnityModManager.exe" Condition=" '$(ConfigurationName)' == 'Release' " />
+    <Copy SourceFiles="@(CopyHarmony)" DestinationFolder="$(TargetDir)Harmony\%(RecursiveDir)" />
   </Target>
 
 </Project>

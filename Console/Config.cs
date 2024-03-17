@@ -73,6 +73,7 @@ namespace UnityModManagerNet.ConsoleInstaller
         public string Comment;
         //public string MachineConfig;
         public string ExtraFilesUrl;
+        public string HarmonyVersion;
 
         public override string ToString()
         {
