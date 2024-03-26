@@ -67,9 +67,9 @@ namespace UnityModManagerNet.ConsoleInstaller
         static readonly Dictionary<string, LibIncParam> libraryFiles = new Dictionary<string, LibIncParam>
         {
             { "0Harmony.dll", LibIncParam.Normal },
-            { "Harmony\\2.2\\0Harmony.dll", LibIncParam.Harmony_2_2 },
-            { "Harmony\\1.2\\0Harmony12.dll", LibIncParam.Minimal_lt_0_22 },
-            { "Harmony\\1.2\\0Harmony-1.2.dll", LibIncParam.Minimal_lt_0_22 },
+            { Path.Combine("Harmony", "2.2", "0Harmony.dll"), LibIncParam.Harmony_2_2 },
+            { Path.Combine("Harmony", "1.2", "0Harmony12.dll"), LibIncParam.Minimal_lt_0_22 },
+            { Path.Combine("Harmony", "1.2", "0Harmony-1.2.dll"), LibIncParam.Minimal_lt_0_22 },
             { "dnlib.dll", LibIncParam.Normal },
             { "System.Xml.dll", LibIncParam.Normal },
             { nameof(UnityModManager) + ".dll", LibIncParam.Normal },

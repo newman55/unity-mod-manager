@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using System.Reflection;
 
 namespace UnityModManagerNet.Injection
 {
@@ -9,7 +8,21 @@ namespace UnityModManagerNet.Injection
     {
         public static void Start()
         {
-            Injector.Run();
+            //Injector.Run();
+
+            try
+            {
+                var file = Path.Combine(Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath), "UnityModManager", "UnityModManager.dll");
+                Console.WriteLine("[Assembly] Loading UnityModManager by " + file);
+
+                var assembly = Assembly.LoadFrom(file);
+                var injector = assembly.GetType("UnityModManagerNet.Injector");
+                injector.GetMethod("Run", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] { false });
+            }
+            catch (Exception e) 
+            { 
+                Console.WriteLine(e.ToString());
+            }
         }
     }
 }

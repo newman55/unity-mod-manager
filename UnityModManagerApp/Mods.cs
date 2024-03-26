@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using Ionic.Zip;
 using UnityModManagerNet.ConsoleInstaller;
+using HarmonyLib;
 
 namespace UnityModManagerNet.Installer
 {
@@ -421,7 +422,7 @@ namespace UnityModManagerNet.Installer
             {
                 foreach (ZipEntry e in zip)
                 {
-                    if (e.FileName.EndsWith(selectedGame.ModInfo, StringComparison.InvariantCultureIgnoreCase))
+                    if (Path.GetFileName(e.FileName).Equals(selectedGame.ModInfo, StringComparison.InvariantCultureIgnoreCase))
                     {
                         using (var s = new StreamReader(e.OpenReader()))
                         {

@@ -391,7 +391,7 @@ namespace UnityModManagerNet
                     {
                         try
                         {
-                            mAssembly = Assembly.LoadFile(assemblyPath);
+                            mAssembly = Assembly.LoadFrom(assemblyPath);
                             mFirstLoading = false;
                         }
                         catch (Exception exception)
@@ -463,7 +463,7 @@ namespace UnityModManagerNet
                                         }
                                     }
 
-                                    mAssembly = Assembly.LoadFile(assemblyCachePath);
+                                    mAssembly = Assembly.LoadFrom(assemblyCachePath);
 
                                     foreach (var type in mAssembly.GetTypes())
                                     {
