@@ -12,7 +12,7 @@ namespace UnityModManagerNet.Injection
 
             try
             {
-                var file = Path.Combine(Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath), "UnityModManager", "UnityModManager.dll");
+                var file = Path.Combine(Path.Combine(Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath), "UnityModManager"), "UnityModManager.dll");
                 Console.WriteLine("[Assembly] Loading UnityModManager by " + file);
 
                 var assembly = Assembly.LoadFrom(file);
