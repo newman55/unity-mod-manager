@@ -34,7 +34,12 @@ namespace UnityModManagerNet
         public static Version ParseVersion(string str)
         {
             var array = str.Split('.');
-            if (array.Length >= 3)
+            if (array.Length >= 4)
+            {
+                var regex = new Regex(@"\D");
+                return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")), int.Parse(regex.Replace(array[2], "")), int.Parse(regex.Replace(array[3], "")));
+            }
+            else if (array.Length >= 3)
             {
                 var regex = new Regex(@"\D");
                 return new Version(int.Parse(regex.Replace(array[0], "")), int.Parse(regex.Replace(array[1], "")), int.Parse(regex.Replace(array[2], "")));

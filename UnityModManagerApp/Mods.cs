@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 using Ionic.Zip;
 using UnityModManagerNet.ConsoleInstaller;
 using HarmonyLib;
+using System.Net;
+using System.Security.Policy;
 
 namespace UnityModManagerNet.Installer
 {
@@ -357,6 +359,10 @@ namespace UnityModManagerNet.Installer
                     {
                         status = string.IsNullOrEmpty(release.DownloadUrl) ? $"Available {web}" : $"Download {web}";
                     }
+                    else if (nexusUpdates.TryGetValue(modInfo, out var nexusVersion) && nexusVersion > modInfo.ParsedVersion)
+                    {
+                        status = $"Available {nexusVersion}";
+                    }
                     else
                     {
                         status = "OK";
@@ -454,6 +460,7 @@ namespace UnityModManagerNet.Installer
             revertToolStripMenuItem.Visible = false;
             wwwToolStripMenuItem1.Visible = false;
             openFolderToolStripMenuItem.Visible = false;
+            checkToolStripMenuItem.Visible = false;
 
             var modInfo = selectedMod;
             if (!modInfo)
@@ -466,6 +473,11 @@ namespace UnityModManagerNet.Installer
             {
                 uninstallToolStripMenuItem.Visible = true;
                 openFolderToolStripMenuItem.Visible = true;
+
+                if (!string.IsNullOrEmpty(param.APIkey) && !string.IsNullOrEmpty(modInfo.HomePage) && Utils.ParseNexusUrl(modInfo.HomePage, out _, out _))
+                {
+                    checkToolStripMenuItem.Visible = true;
+                }
 
                 Version inRepository = new Version();
                 if (repositories.ContainsKey(selectedGame))
@@ -584,6 +596,12 @@ namespace UnityModManagerNet.Installer
             {
                 System.Diagnostics.Process.Start(modInfo.Path);
             }
+        }
+
+        private void checkToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckNexus(selectedMod);
+            RefreshModList();
         }
     }
 }

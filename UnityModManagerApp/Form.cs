@@ -180,6 +180,7 @@ namespace UnityModManagerNet.Installer
             param = Param.Load();
 
             Height = param.WindowHeight;
+            textBoxApiKey.Text = param.APIkey;
 
             if (config != null && config.GameInfo != null && config.GameInfo.Length > 0)
             {
@@ -1500,6 +1501,16 @@ namespace UnityModManagerNet.Installer
             {
                 Process.Start(selectedGame.ExtraFilesUrl);
             }
+        }
+
+        private void textBoxApiKey_TextChanged(object sender, EventArgs e)
+        {
+            param.APIkey = textBoxApiKey.Text;
+        }
+
+        private void btnGetApiKey_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://www.nexusmods.com/users/myaccount?tab=api");
         }
     }
 }

@@ -65,16 +65,22 @@
             this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.revertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.wwwToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainerModsInstall = new System.Windows.Forms.SplitContainer();
             this.btnModInstall = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.inputLog = new System.Windows.Forms.TextBox();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.btnGetApiKey = new System.Windows.Forms.Button();
+            this.textBoxApiKey = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.modInstallFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.label4 = new System.Windows.Forms.Label();
             this.panelMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
             this.splitContainerMain.Panel1.SuspendLayout();
@@ -95,6 +101,7 @@
             this.splitContainerModsInstall.Panel1.SuspendLayout();
             this.splitContainerModsInstall.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -135,8 +142,10 @@
             this.tabControl.Controls.Add(this.tabPage1);
             this.tabControl.Controls.Add(this.tabPage2);
             this.tabControl.Controls.Add(this.tabPage3);
+            this.tabControl.Controls.Add(this.tabPage4);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.tabControl.ItemSize = new System.Drawing.Size(80, 24);
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Margin = new System.Windows.Forms.Padding(0);
             this.tabControl.Name = "tabControl";
@@ -502,51 +511,59 @@
             this.updateToolStripMenuItem,
             this.revertToolStripMenuItem,
             this.uninstallToolStripMenuItem,
+            this.checkToolStripMenuItem,
             this.wwwToolStripMenuItem1,
             this.openFolderToolStripMenuItem});
             this.ModcontextMenuStrip1.Name = "ModcontextMenuStrip1";
-            this.ModcontextMenuStrip1.Size = new System.Drawing.Size(140, 136);
+            this.ModcontextMenuStrip1.Size = new System.Drawing.Size(149, 158);
             this.ModcontextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.ModcontextMenuStrip1_Opening);
             // 
             // installToolStripMenuItem
             // 
             this.installToolStripMenuItem.Name = "installToolStripMenuItem";
-            this.installToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.installToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.installToolStripMenuItem.Text = "Install";
             this.installToolStripMenuItem.Click += new System.EventHandler(this.installToolStripMenuItem_Click);
             // 
             // updateToolStripMenuItem
             // 
             this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
-            this.updateToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.updateToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.updateToolStripMenuItem.Text = "Update";
             this.updateToolStripMenuItem.Click += new System.EventHandler(this.updateToolStripMenuItem_Click);
             // 
             // revertToolStripMenuItem
             // 
             this.revertToolStripMenuItem.Name = "revertToolStripMenuItem";
-            this.revertToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.revertToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.revertToolStripMenuItem.Text = "Revert";
             this.revertToolStripMenuItem.Click += new System.EventHandler(this.revertToolStripMenuItem_Click);
             // 
             // uninstallToolStripMenuItem
             // 
             this.uninstallToolStripMenuItem.Name = "uninstallToolStripMenuItem";
-            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.uninstallToolStripMenuItem.Text = "Uninstall";
             this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
+            // 
+            // checkToolStripMenuItem
+            // 
+            this.checkToolStripMenuItem.Name = "checkToolStripMenuItem";
+            this.checkToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.checkToolStripMenuItem.Text = "Check Update";
+            this.checkToolStripMenuItem.Click += new System.EventHandler(this.checkToolStripMenuItem_Click);
             // 
             // wwwToolStripMenuItem1
             // 
             this.wwwToolStripMenuItem1.Name = "wwwToolStripMenuItem1";
-            this.wwwToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
+            this.wwwToolStripMenuItem1.Size = new System.Drawing.Size(148, 22);
             this.wwwToolStripMenuItem1.Text = "Home Page";
             this.wwwToolStripMenuItem1.Click += new System.EventHandler(this.wwwToolStripMenuItem1_Click);
             // 
             // openFolderToolStripMenuItem
             // 
             this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
-            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.openFolderToolStripMenuItem.Text = "Open Folder";
             this.openFolderToolStripMenuItem.Click += new System.EventHandler(this.openFolderToolStripMenuItem_Click);
             // 
@@ -603,6 +620,48 @@
             this.inputLog.Size = new System.Drawing.Size(344, 402);
             this.inputLog.TabIndex = 10;
             // 
+            // tabPage4
+            // 
+            this.tabPage4.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage4.Controls.Add(this.label4);
+            this.tabPage4.Controls.Add(this.btnGetApiKey);
+            this.tabPage4.Controls.Add(this.textBoxApiKey);
+            this.tabPage4.Controls.Add(this.label1);
+            this.tabPage4.Location = new System.Drawing.Point(4, 28);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(350, 408);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Settings";
+            // 
+            // btnGetApiKey
+            // 
+            this.btnGetApiKey.Location = new System.Drawing.Point(63, 37);
+            this.btnGetApiKey.Name = "btnGetApiKey";
+            this.btnGetApiKey.Size = new System.Drawing.Size(101, 30);
+            this.btnGetApiKey.TabIndex = 2;
+            this.btnGetApiKey.Text = "Get API key";
+            this.btnGetApiKey.UseVisualStyleBackColor = true;
+            this.btnGetApiKey.Click += new System.EventHandler(this.btnGetApiKey_Click);
+            // 
+            // textBoxApiKey
+            // 
+            this.textBoxApiKey.Location = new System.Drawing.Point(64, 5);
+            this.textBoxApiKey.Name = "textBoxApiKey";
+            this.textBoxApiKey.Size = new System.Drawing.Size(270, 23);
+            this.textBoxApiKey.TabIndex = 1;
+            this.textBoxApiKey.TextChanged += new System.EventHandler(this.textBoxApiKey_TextChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(6, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(53, 16);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "API key";
+            // 
             // statusStrip1
             // 
             this.statusStrip1.AutoSize = false;
@@ -638,6 +697,15 @@
             // 
             this.modInstallFileDialog.Filter = "ZIP|*.zip";
             this.modInstallFileDialog.Multiselect = true;
+            // 
+            // label4
+            // 
+            this.label4.Location = new System.Drawing.Point(60, 72);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(278, 58);
+            this.label4.TabIndex = 3;
+            this.label4.Text = "Get API key on nexusmods, this will allow you to receive notifications about new " +
+    "versions of mods.";
             // 
             // UnityModManagerForm
             // 
@@ -676,6 +744,8 @@
             this.splitContainerModsInstall.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -729,6 +799,12 @@
         private System.Windows.Forms.Button extraFilesAutoButton;
         private System.Windows.Forms.Button extraFilesManualButton;
         private System.Windows.Forms.ToolStripMenuItem openFolderToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBoxApiKey;
+        private System.Windows.Forms.ToolStripMenuItem checkToolStripMenuItem;
+        private System.Windows.Forms.Button btnGetApiKey;
+        private System.Windows.Forms.Label label4;
     }
 }
 

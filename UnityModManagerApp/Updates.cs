@@ -12,7 +12,16 @@ namespace UnityModManagerNet.Installer
 {
     public partial class UnityModManagerForm : Form
     {
+        public class NexusModInfo
+        {
+            public string name;
+            public int mod_id;
+            public string domain_name;
+            public string version;
+        }
+
         readonly Dictionary<GameInfo, HashSet<UnityModManager.Repository.Release>> repositories = new Dictionary<GameInfo, HashSet<UnityModManager.Repository.Release>>();
+        readonly Dictionary<ModInfo, Version> nexusUpdates = new Dictionary<ModInfo, Version>();
 
         private void CheckModUpdates()
         {
@@ -33,6 +42,11 @@ namespace UnityModManagerNet.Installer
                 if (!string.IsNullOrEmpty(mod.Repository))
                 {
                     urls.Add(mod.Repository);
+                }
+
+                if (!string.IsNullOrEmpty(param.APIkey) && !string.IsNullOrEmpty(mod.HomePage))
+                {
+                    CheckNexus(mod);
                 }
             }
 
@@ -88,6 +102,37 @@ namespace UnityModManagerNet.Installer
                 {
                     Log.Print(ex.Message);
                     Log.Print($"Error checking mod updates on '{url}' for [{string.Join(",", mods.Where(x => x.Repository == url).Select(x => x.DisplayName).ToArray())}].");
+                }
+            }
+        }
+
+        private void CheckNexus(ModInfo modInfo)
+        {
+            if (modInfo && Utils.ParseNexusUrl(modInfo.HomePage, out string nexusGame, out string nexusModId))
+            {
+                try
+                {
+                    var request = WebRequest.Create($"https://api.nexusmods.com/v1/games/{nexusGame}/mods/{nexusModId}.json");
+                    request.ContentType = "application/json";
+                    request.Headers.Add("apikey", param.APIkey);
+                    request.Headers.Add("Application-Version", version.ToString());
+                    request.Headers.Add("Application-Name", "UnityModManager");
+                    var response = request.GetResponse();
+                    var reader = new StreamReader(response.GetResponseStream());
+                    string result = reader.ReadToEnd();
+
+                    NexusModInfo nexusModInfo = JsonConvert.DeserializeObject<NexusModInfo>(result);
+                    if (nexusModInfo != null)
+                    {
+                        nexusUpdates[modInfo] = Utils.ParseVersion(nexusModInfo.version);
+                    }
+
+                    reader.Close();
+                    response.Close();
+                }
+                catch (Exception ex)
+                {
+                    Log.Print(ex.Message);
                 }
             }
         }

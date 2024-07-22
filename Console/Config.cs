@@ -229,6 +229,7 @@ namespace UnityModManagerNet.ConsoleInstaller
             public InstallType InstallType = InstallType.DoorstopProxy;
         }
 
+        public string APIkey;
         public string LastSelectedGame;
         public int WindowHeight;
         public List<GameParam> GameParams = new List<GameParam>();
