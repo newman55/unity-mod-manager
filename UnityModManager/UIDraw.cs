@@ -557,6 +557,55 @@ namespace UnityModManagerNet
             }
 
             /// <summary>
+            /// [0.28.1]
+            /// </summary>
+            /// <returns>
+            /// Returns true if the value has changed.
+            /// </returns>
+            public static bool DrawIntMultiField(ref int[] values, string[] labels, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                if (values == null || values.Length == 0)
+                    throw new ArgumentNullException(nameof(values));
+                if (labels == null || labels.Length == 0)
+                    throw new ArgumentNullException(nameof(labels));
+                if (values.Length != labels.Length)
+                    throw new ArgumentOutOfRangeException(nameof(labels));
+
+                var changed = false;
+                var result = new int[values.Length];
+
+                for (int i = 0; i < values.Length; i++)
+                {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label(labels[i], GUILayout.ExpandWidth(false));
+                    var str = GUILayout.TextField(values[i].ToString(), style ?? GUI.skin.textField, option);
+                    GUILayout.EndHorizontal();
+                    if (string.IsNullOrEmpty(str))
+                    {
+                        result[i] = 0;
+                    }
+                    else
+                    {
+                        if (int.TryParse(str, System.Globalization.NumberStyles.Integer, System.Globalization.NumberFormatInfo.CurrentInfo, out var num))
+                        {
+                            result[i] = num;
+                        }
+                        else
+                        {
+                            result[i] = 0;
+                        }
+                    }
+                    if (result[i] != values[i])
+                    {
+                        changed = true;
+                    }
+                }
+
+                values = result;
+                return changed;
+            }
+
+            /// <summary>
             /// [0.19.0]
             /// </summary>
             /// <returns>
