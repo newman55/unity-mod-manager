@@ -74,6 +74,7 @@ namespace UnityModManagerNet
             private string[] mOSfonts = null;
             private string mDefaultFont = "Arial";
             private int mSelectedFont;
+            private string mModFilter = "";
 
             public int globalFontSize = 13;
 
@@ -173,6 +174,30 @@ namespace UnityModManagerNet
                 {
                     ToggleWindow();
                 }
+
+                foreach (var mod in modEntries)
+                {
+                    if (mod.Active && mod.Hotkey.Up())
+                    {
+                        if (tabId == 0 && mOpened == true && mModFilter == mod.Info.DisplayName)
+                        {
+                            ToggleWindow(false);
+                        }
+                        else
+                        {
+                            tabId = 0;
+                            mModFilter = mod.Info.DisplayName;
+                            ToggleWindow(true);
+                            var index = modEntries.FindIndex(x => x.Info.Id == mod.Info.Id);
+                            if (index >= 0 && ShowModSettings != index)
+                            {
+                                ShowModSettings = index;
+                            }
+                        }
+                        
+                        break;
+                    }
+                }
             }
 
             private void FixedUpdate()
@@ -227,19 +252,23 @@ namespace UnityModManagerNet
                 h1.normal.textColor = Color.white;
                 h1.fontStyle = FontStyle.Bold;
                 h1.alignment = TextAnchor.MiddleCenter;
+                h1.clipping = TextClipping.Overflow;
 
                 h2 = new GUIStyle();
                 h2.name = "umm h2";
                 h2.normal.textColor = new Color(0.6f, 0.91f, 1f);
                 h2.fontStyle = FontStyle.Bold;
+                h2.clipping = TextClipping.Overflow;
 
                 bold = new GUIStyle(GUI.skin.label);
                 bold.name = "umm bold";
                 bold.normal.textColor = Color.white;
                 bold.fontStyle = FontStyle.Bold;
+                bold.clipping = TextClipping.Overflow;
 
                 button = new GUIStyle(GUI.skin.button);
                 button.name = "umm button";
+                button.clipping = TextClipping.Overflow;
 
                 settings = new GUIStyle();
                 settings.alignment = TextAnchor.MiddleCenter;
@@ -381,6 +410,8 @@ namespace UnityModManagerNet
                     GUI.backgroundColor = Color.white;
                     GUI.color = Color.white;
                     mWindowRect = GUILayout.Window(0, mWindowRect, WindowFunction, "", window, GUILayout.Height(mWindowSize.y));
+                    mWindowRect.x = (int)mWindowRect.x;
+                    mWindowRect.y = (int)mWindowRect.y;
                     GUI.backgroundColor = backgroundColor;
                     GUI.color = color;
                 }
@@ -504,12 +535,12 @@ namespace UnityModManagerNet
             private void CalculateWindowPos()
             {
                 mWindowSize = ClampWindowSize(mWindowSize);
-                mWindowRect = new Rect((Screen.width - mWindowSize.x) / 2f, (Screen.height - mWindowSize.y) / 2f, 0, 0);
+                mWindowRect = new Rect((Screen.width - (int)mWindowSize.x) / 2, (Screen.height - (int)mWindowSize.y) / 2f, 0, 0);
             }
 
             private Vector2 ClampWindowSize(Vector2 orig)
             {
-                return new Vector2(Mathf.Clamp(orig.x, Mathf.Min(960, Screen.width), Screen.width), Mathf.Clamp(orig.y, Mathf.Min(720, Screen.height), Screen.height));
+                return new Vector2(Mathf.Clamp((int)orig.x, Mathf.Min(960, Screen.width), Screen.width), Mathf.Clamp((int)orig.y, Mathf.Min(720, Screen.height), Screen.height));
             }
 
             private void WindowFunction(int windowId)
@@ -526,12 +557,24 @@ namespace UnityModManagerNet
                 GUILayout.Label("Mod Manager " + version, h1);
 
                 GUILayout.Space(3);
+                GUILayout.BeginHorizontal();
                 int tab = tabId;
                 tab = GUILayout.Toolbar(tab, tabs, button, GUILayout.ExpandWidth(false));
                 if (tab != tabId)
                 {
                     tabId = tab;
                 }
+                GUILayout.FlexibleSpace();
+                if (tabId == 0)
+                {
+                    GUILayout.Label("Filter:");
+                    mModFilter = GUILayout.TextField(mModFilter, GUILayout.Width(Scale(150)), GUILayout.Height(Scale(20)));
+                    if (GUILayout.Button("X", button, GUILayout.Width(Scale(20)), GUILayout.Height(Scale(20))))
+                    {
+                        mModFilter = "";
+                    }
+                }
+                GUILayout.EndHorizontal();
 
                 GUILayout.Space(5);
 
@@ -562,11 +605,11 @@ namespace UnityModManagerNet
                     var pos = Event.current.mousePosition;
                     if (size.x + pos.x < mWindowRect.width)
                     {
-                        GUI.Box(new Rect(pos.x, pos.y + 10, size.x, size.y), mTooltip.text, tooltipBox);
+                        GUI.Box(new Rect(pos.x + 20, pos.y - 25, size.x, size.y), mTooltip.text, tooltipBox);
                     }
                     else
                     {
-                        GUI.Box(new Rect(pos.x - size.x, pos.y + 10, size.x, size.y), mTooltip.text, tooltipBox);
+                        GUI.Box(new Rect(pos.x - size.x, pos.y - 25, size.x, size.y), mTooltip.text, tooltipBox);
                     }
                 }
                 else
@@ -610,6 +653,13 @@ namespace UnityModManagerNet
 
                             for (int i = 0, c = mods.Count; i < c; i++)
                             {
+                                if (!string.IsNullOrEmpty(mModFilter))
+                                {
+                                    if (!mods[i].Info.DisplayName.ToLower().Contains(mModFilter.ToLower()))
+                                    {
+                                        continue;
+                                    }
+                                }
                                 int col = -1;
                                 GUILayout.BeginVertical("box");
                                 GUILayout.BeginHorizontal();
@@ -880,8 +930,8 @@ namespace UnityModManagerNet
                             GUILayout.EndHorizontal();
                             if (GUILayout.Button("Apply", button, GUILayout.ExpandWidth(false)))
                             {
-                                mWindowSize.x = Mathf.Floor(mExpectedWindowSize.x) % 2 > 0 ? Mathf.Ceil(mExpectedWindowSize.x) : Mathf.Floor(mExpectedWindowSize.x);
-                                mWindowSize.y = Mathf.Floor(mExpectedWindowSize.y) % 2 > 0 ? Mathf.Ceil(mExpectedWindowSize.y) : Mathf.Floor(mExpectedWindowSize.y);
+                                mWindowSize.x = (int)mExpectedWindowSize.x;
+                                mWindowSize.y = (int)mExpectedWindowSize.y;
                                 CalculateWindowPos();
                                 Params.WindowWidth = mWindowSize.x;
                                 Params.WindowHeight = mWindowSize.y;
@@ -892,10 +942,10 @@ namespace UnityModManagerNet
 
                             GUILayout.BeginVertical("box");
                             GUILayout.Label("UI", bold, GUILayout.ExpandWidth(false));
-                            GUILayout.Label("Font", GUILayout.ExpandWidth(false), GUILayout.ExpandWidth(false));
+                            GUILayout.Label("Font", GUILayout.ExpandWidth(false));
                             PopupToggleGroup(ref mSelectedFont, mOSfonts, null, GUI.skin.button, GUILayout.Width(200));
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Scale", GUILayout.ExpandWidth(false), GUILayout.ExpandWidth(false));
+                            GUILayout.Label("Scale", GUILayout.ExpandWidth(false));
                             mExpectedUIScale = GUILayout.HorizontalSlider(mExpectedUIScale, 0.5f, 5f, GUILayout.Width(200));
                             GUILayout.Label(" " + mExpectedUIScale.ToString("f2"), GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
@@ -911,6 +961,20 @@ namespace UnityModManagerNet
                             }
                             GUILayout.EndVertical();
 
+                            GUILayout.Space(5);
+
+                            GUILayout.BeginVertical("box");
+                            GUILayout.Label("Mods Hotkeys", bold, GUILayout.ExpandWidth(false));
+                            var mods = modEntries;
+                            for (int i = 0, c = mods.Count; i < c; i++)
+                            {
+                                GUILayout.BeginHorizontal();
+                                GUILayout.Label($"{mods[i].Info.DisplayName}", GUILayout.Width(200));
+                                DrawKeybindingSmart(mods[i].Hotkey, "Hotkey", null, GUILayout.ExpandWidth(false));
+                                GUILayout.EndHorizontal();
+                                GUILayout.Space(5);
+                            }
+                            GUILayout.EndVertical();
                             GUILayout.EndVertical();
                             GUILayout.EndScrollView();
 
@@ -923,6 +987,7 @@ namespace UnityModManagerNet
             
             private static string[] mShowOnStartStrings = { "No", "Yes" };
 
+            [Obsolete]
             private static string[] mHotkeyNames = { "CTRL+F10", "ScrollLock", "Num *", "~" };
 
             internal bool GameCursorVisible { get; set; }
@@ -1038,6 +1103,17 @@ namespace UnityModManagerNet
             {
                 BeginTooltip(str);
                 EndTooltip(str, style, options);
+            }
+
+            /// <summary>
+            /// Call after any GUILayout [0.28.2]
+            /// </summary>
+            public static void Tooltip(string str)
+            {
+                if (Event.current.type == EventType.Repaint && GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition))
+                {
+                    ShowTooltip(str);
+                }
             }
         }
 

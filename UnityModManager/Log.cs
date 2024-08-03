@@ -157,7 +157,7 @@ namespace UnityModManagerNet
 
                 if (history.Count >= historyCapacity * 2)
                 {
-                    var result = history.Skip(historyCapacity);
+                    var result = history.Skip(historyCapacity).ToArray();
                     history.Clear();
                     history.AddRange(result);
                 }

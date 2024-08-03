@@ -17,6 +17,7 @@ namespace UnityModManagerNet
                 public string Id;
                 [XmlAttribute]
                 public bool Enabled = true;
+                public KeyBinding Hotkey = new KeyBinding();
             }
 
             public static KeyBinding DefaultHotkey = new KeyBinding { keyCode = KeyCode.F10, modifiers = 1 };
@@ -40,7 +41,7 @@ namespace UnityModManagerNet
                     ModParams.Clear();
                     foreach (var mod in modEntries)
                     {
-                        ModParams.Add(new Mod { Id = mod.Info.Id, Enabled = mod.Enabled });
+                        ModParams.Add(new Mod { Id = mod.Info.Id, Enabled = mod.Enabled, Hotkey = mod.Hotkey });
                     }
                     using (var writer = new StreamWriter(filepath))
                     {
@@ -86,6 +87,7 @@ namespace UnityModManagerNet
                     if (mod != null)
                     {
                         mod.Enabled = item.Enabled;
+                        mod.Hotkey = item.Hotkey != null ? item.Hotkey : new KeyBinding();
                     }
                 }
             }

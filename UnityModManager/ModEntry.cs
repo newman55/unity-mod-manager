@@ -66,6 +66,11 @@ namespace UnityModManagerNet
             public readonly ModLogger Logger = null;
 
             /// <summary>
+            /// Hotkey for opening quick access to mod content [0.28.2]
+            /// </summary>
+            public KeyBinding Hotkey = new KeyBinding();
+
+            /// <summary>
             /// Not used
             /// </summary>
             public bool HasUpdate = false;
