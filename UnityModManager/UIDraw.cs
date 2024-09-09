@@ -10,11 +10,48 @@ namespace UnityModManagerNet
     /// <summary>
     /// [0.18.0]
     /// </summary>
-    public enum DrawType { Auto, Ignore, Field, Slider, Toggle, ToggleGroup, /*MultiToggle, */PopupList, KeyBinding,
+    public enum DrawType 
+    {
         /// <summary>
-        /// Disabled modifiers. [0.27.5]
+        /// Automatically detects which GUI to render.
         /// </summary>
-        KeyBindingNoMod
+        Auto,
+        /// <summary>
+        /// Do not render.
+        /// </summary>
+        Ignore,
+        /// <summary>
+        /// Text field or area text field. Supports parameter TextArea.
+        /// </summary>
+        Field,
+        /// <summary>
+        /// Integer and float number slider. Supports parameters Min, Max and Precision.
+        /// </summary>
+        Slider,
+        /// <summary>
+        /// Boolean checkbox.
+        /// </summary>
+        Toggle,
+        /// <summary>
+        /// Enum group checkbox.
+        /// </summary>
+        ToggleGroup,
+        /// <summary>
+        /// Enum pop-up group checklist.
+        /// </summary>
+        PopupList,
+        /// <summary>
+        /// GUI for creating key bindings.
+        /// </summary>
+        KeyBinding,
+        /// <summary>
+        /// GUI for creating key bindings without modifiers. [0.27.5]
+        /// </summary>
+        KeyBindingNoMod,
+        /// <summary>
+        /// Action delegate with or without argument to declaring class. Use it for a customized GUI [0.29.0]
+        /// </summary>
+        CustomGUI
     };
 
     /// <summary>
@@ -35,7 +72,7 @@ namespace UnityModManagerNet
     }
 
     /// <summary>
-    /// Specifies which fields to render. [0.18.0]
+    /// Specifies which fields to render. By default only with attribute Draw. [0.18.0]
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field, AllowMultiple = false)]
     public class DrawFieldsAttribute : Attribute
@@ -54,11 +91,29 @@ namespace UnityModManagerNet
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class DrawAttribute : Attribute
     {
+        /// <summary>
+        /// Specifies which GUI element to render with. By default Auto.
+        /// </summary>
         public DrawType Type = DrawType.Auto;
+        /// <summary>
+        /// Either this or the field name is displayed.
+        /// </summary>
         public string Label;
+        /// <summary>
+        /// Applies to elements such as sliders, text fields, etc.
+        /// </summary>
         public int Width = 0;
+        /// <summary>
+        /// Applies to elements such as sliders, text fields, etc.
+        /// </summary>
         public int Height = 0;
+        /// <summary>
+        /// Minimum allowed number for sliders and fields.
+        /// </summary>
         public double Min = double.MinValue;
+        /// <summary>
+        /// Maximum allowed number for sliders and fields.
+        /// </summary>
         public double Max = double.MaxValue;
         /// <summary>
         /// Rounds a double-precision floating-point value to a specified number of fractional digits, and rounds midpoint values to the nearest even number. 
@@ -70,18 +125,24 @@ namespace UnityModManagerNet
         /// </summary>
         public int MaxLength = int.MaxValue;
         /// <summary>
-        /// Becomes visible if a field value matches. Use format "FieldName|Value". Supports only string, primitive and enum types.
+        /// Becomes visible if the field value matches. Use format "FieldName|Value". Supports only string, primitive and enum types.
         /// </summary>
         public string VisibleOn;
         /// <summary>
-        /// Becomes invisible if a field value matches. Use format "FieldName|Value". Supports only string, primitive and enum types.
+        /// Becomes invisible if the field value matches. Use format "FieldName|Value". Supports only string, primitive and enum types.
         /// </summary>
         public string InvisibleOn;
         /// <summary>
-        /// Applies box style.
+        /// Applies vertical box style to the container.
         /// </summary>
         public bool Box;
+        /// <summary>
+        /// Applies spoiler style to the container.
+        /// </summary>
         public bool Collapsible;
+        /// <summary>
+        /// Applies vertical or horizontal style to the field.
+        /// </summary>
         public bool Vertical;
         /// <summary>
         /// (RichText) [0.25.0]
@@ -91,6 +152,10 @@ namespace UnityModManagerNet
         /// Only for string field [0.27.2]
         /// </summary>
         public bool TextArea;
+        /// <summary>
+        /// Some elements use FlexibleSpace for alignment. This option will disable it. [0.29.0]
+        /// </summary>
+        public bool NoFlexibleSpace;
 
         public DrawAttribute()
         {
@@ -114,11 +179,220 @@ namespace UnityModManagerNet
     }
 
     /// <summary>
-    /// [0.22.14]
+    /// Wraps container in GUILayout.BeginHorizontal() and GUILayout.EndHorizontal(). [0.22.14]
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field, AllowMultiple = false)]
     public class HorizontalAttribute : Attribute
     {
+    }
+
+    /// <summary>
+    /// [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    public abstract class DrawPropertyAttribute : PropertyAttribute
+    {
+        public virtual void Draw()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    public abstract class OpenningDrawPropertyAttribute : DrawPropertyAttribute
+    {
+    }
+
+    /// <summary>
+    /// [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    public abstract class ClosingDrawPropertyAttribute : DrawPropertyAttribute
+    {
+    }
+
+    /// <summary>
+    /// Inserts GUILayout.Space(). [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class DrawSpaceAttribute : DrawPropertyAttribute
+    {
+        public float Height;
+
+        public DrawSpaceAttribute(float height)
+        {
+            Height = height;
+        }
+
+        public override void Draw()
+        {
+            GUILayout.Space(UnityModManager.UI.Scale((int)Height));
+        }
+    }
+
+    /// <summary>
+    /// Inserts GUILayout.FlexibleSpace(). [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class DrawFlexibleSpaceAttribute : DrawPropertyAttribute
+    {
+        public override void Draw()
+        {
+            GUILayout.FlexibleSpace();
+        }
+    }
+
+    /// <summary>
+    /// Inserts GUILayout.Label(). [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class DrawHeaderAttribute : DrawPropertyAttribute
+    {
+        public string Header;
+        public int Size;
+        /// <summary>
+        /// Hex format
+        /// </summary>
+        public string Color;
+        public bool Bold;
+        public bool Italics;
+
+        public DrawHeaderAttribute(string header)
+        {
+            Header = header;
+        }
+
+        public override void Draw()
+        {
+            var header = Header;
+            if (Size > 0)
+            {
+                header = $"<size={Size}>{header}</size>";
+            }
+            if (Bold)
+            {
+                header = $"<b>{header}</b>";
+            }
+            if (Italics)
+            {
+                header = $"<i>{header}</i>";
+            }
+            if (!string.IsNullOrEmpty(Color))
+            {
+                var col = Color;
+                if (!Color.StartsWith("#"))
+                {
+                    col = "#" + Color;
+                }
+                header = $"<color={col}>{header}</color>";
+            }
+            GUILayout.Label(header, GUI.skin.label, GUILayout.ExpandWidth(false));
+        }
+    }
+
+    /// <summary>
+    /// Inserts GUILayout.BeginHorizontal() and spaces before any GUI keeping order. [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class DrawBeginHorizontalAttribute : OpenningDrawPropertyAttribute
+    {
+        public string Style;
+        public bool FlexibleSpace;
+        public int Space;
+
+        public DrawBeginHorizontalAttribute()
+        {
+        }
+
+        public DrawBeginHorizontalAttribute(string style)
+        {
+            Style = style;
+        }
+
+        public override void Draw()
+        {
+            if (!string.IsNullOrEmpty(Style))
+                GUILayout.BeginHorizontal(Style);
+            else
+                GUILayout.BeginHorizontal();
+            if (FlexibleSpace)
+                GUILayout.FlexibleSpace();
+            else if (Space != 0)
+                GUILayout.Space(Space);
+        }
+    }
+
+    /// <summary>
+    /// Inserts spaces and GUILayout.EndHorizontal() after any GUI keeping order. [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field, AllowMultiple = false)]
+    public class DrawEndHorizontalAttribute : ClosingDrawPropertyAttribute
+    {
+        public bool FlexibleSpace;
+        public int Space;
+
+        public override void Draw()
+        {
+            if (FlexibleSpace)
+                GUILayout.FlexibleSpace();
+            else if (Space != 0)
+                GUILayout.Space(Space);
+            GUILayout.EndHorizontal();
+        }
+    }
+
+    /// <summary>
+    /// Inserts GUILayout.BeginVertical() and spaces before any GUI keeping order. [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field, AllowMultiple = false)]
+    public class DrawBeginVerticalAttribute : OpenningDrawPropertyAttribute
+    {
+        public string Style;
+        public bool FlexibleSpace;
+        public int Space;
+
+        public DrawBeginVerticalAttribute()
+        {
+        }
+
+        public DrawBeginVerticalAttribute(string style)
+        {
+            Style = style;
+        }
+
+        public override void Draw()
+        {
+            if (!string.IsNullOrEmpty(Style))
+                GUILayout.BeginVertical(Style);
+            else
+                GUILayout.BeginVertical();
+            if (FlexibleSpace)
+                GUILayout.FlexibleSpace();
+            else if (Space != 0)
+                GUILayout.Space(Space);
+        }
+    }
+
+    /// <summary>
+    /// Inserts spaces and GUILayout.EndVertical() after any GUI keeping order. [0.29.0]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field, AllowMultiple = false)]
+    public class DrawEndVerticalAttribute : ClosingDrawPropertyAttribute
+    {
+        public bool FlexibleSpace;
+        public int Space;
+
+        public override void Draw()
+        {
+            if (FlexibleSpace)
+                GUILayout.FlexibleSpace();
+            else if (Space != 0)
+                GUILayout.Space(Space);
+            GUILayout.EndVertical();
+        }
     }
 
     public partial class UnityModManager
@@ -126,13 +400,13 @@ namespace UnityModManagerNet
         public partial class UI : MonoBehaviour
         {
             static Type[] fieldTypes = new[] { typeof(int), typeof(long), typeof(float), typeof(double), typeof(int[]), typeof(long[]), typeof(float[]), typeof(double[]),
-                typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(string), typeof(string[])};
+                typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(string), typeof(string[]), typeof(Vector2i), typeof(Vector3i)};
             static Type[] sliderTypes = new[] { typeof(int), typeof(long), typeof(float), typeof(double) };
             static Type[] toggleTypes = new[] { typeof(bool) };
-            static Type[] specialTypes = new[] { typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(KeyBinding), typeof(string) };
+            static Type[] specialTypes = new[] { typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Color), typeof(KeyBinding), typeof(string), typeof(Vector2i), typeof(Vector3i) };
             static float drawHeight = 22;
 
-            [Obsolete("Use new version with title.")]
+            [Obsolete("Use DrawKeybindingSmart.")]
             public static bool DrawKeybinding(ref KeyBinding key, GUIStyle style = null, params GUILayoutOption[] option)
             {
                 return DrawKeybinding(ref key, null, style, option);
@@ -196,7 +470,7 @@ namespace UnityModManagerNet
             }
 
             /// <summary>
-            /// (deferred) [0.27.5]
+            /// [0.27.5]
             /// </summary>
             public static void DrawKeybindingSmart(KeyBinding key, string title, GUIStyle style = null, params GUILayoutOption[] option)
             {
@@ -204,7 +478,7 @@ namespace UnityModManagerNet
             }
 
             /// <summary>
-            /// (deferred) [0.27.5]
+            /// [0.27.5]
             /// </summary>
             public static void DrawKeybindingSmart(KeyBinding key, string title, Action<KeyBinding> onChange, GUIStyle style = null, params GUILayoutOption[] option)
             {
@@ -212,7 +486,7 @@ namespace UnityModManagerNet
             }
 
             /// <summary>
-            /// (deferred) [0.27.5]
+            /// [0.27.5]
             /// </summary>
             public static void DrawKeybindingSmart(KeyBinding key, string title, Action<KeyBinding> onChange, bool disableModifiers, GUIStyle style = null, params GUILayoutOption[] option)
             {
@@ -455,6 +729,78 @@ namespace UnityModManagerNet
                     throw new ArgumentNullException("onChange");
                 }
                 if (DrawColor(ref vec, style, option))
+                {
+                    onChange(vec);
+                }
+            }
+
+            /// <summary>
+            /// [0.29.0]
+            /// </summary>
+            /// <returns>
+            /// Returns true if the value has changed.
+            /// </returns>
+            public static bool DrawVector(ref Vector2i vec, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                var values = new int[2] { vec.x, vec.y };
+                var labels = new string[2] { "x", "y" };
+                if (DrawIntMultiField(ref values, labels, style, option))
+                {
+                    vec = new Vector2i(values[0], values[1]);
+                    return true;
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// [0.29.0]
+            /// </summary>
+            /// <returns>
+            /// Returns result via onChange.
+            /// </returns>
+            public static void DrawVector(Vector2i vec, Action<Vector2i> onChange, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                if (onChange == null)
+                {
+                    throw new ArgumentNullException("onChange");
+                }
+                if (DrawVector(ref vec, style, option))
+                {
+                    onChange(vec);
+                }
+            }
+
+            /// <summary>
+            /// [0.29.0]
+            /// </summary>
+            /// <returns>
+            /// Returns true if the value has changed.
+            /// </returns>
+            public static bool DrawVector(ref Vector3i vec, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                var values = new int[3] { vec.x, vec.y, vec.z };
+                var labels = new string[3] { "x", "y", "z" };
+                if (DrawIntMultiField(ref values, labels, style, option))
+                {
+                    vec = new Vector3i(values[0], values[1], values[2]);
+                    return true;
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// [0.29.0]
+            /// </summary>
+            /// <returns>
+            /// Returns result via onChange.
+            /// </returns>
+            public static void DrawVector(Vector3i vec, Action<Vector3i> onChange, GUIStyle style = null, params GUILayoutOption[] option)
+            {
+                if (onChange == null)
+                {
+                    throw new ArgumentNullException("onChange");
+                }
+                if (DrawVector(ref vec, style, option))
                 {
                     onChange(vec);
                 }
@@ -883,27 +1229,49 @@ namespace UnityModManagerNet
                             continue;
                         }
                     }
-                    
-                    foreach (SpaceAttribute a_ in f.GetCustomAttributes(typeof(SpaceAttribute), false))
-                    {
-                        GUILayout.Space(Scale((int)a_.height));
-                    }
 
-                    foreach (HeaderAttribute a_ in f.GetCustomAttributes(typeof(HeaderAttribute), false))
+                    var openning = new List<DrawPropertyAttribute>();
+                    var closing = new List<DrawPropertyAttribute>();
+
+                    foreach (var a_ in f.GetCustomAttributes(false).Where(x => x is PropertyAttribute).Cast<PropertyAttribute>().OrderBy(x => x.order))
                     {
-                        GUILayout.Label(a_.header, bold, GUILayout.ExpandWidth(false));
+                        if (a_ is SpaceAttribute sa)
+                        {
+                            openning.Add(new DrawSpaceAttribute(sa.height));
+                        }
+                        else if (a_ is HeaderAttribute ha)
+                        {
+                            openning.Add(new DrawHeaderAttribute(ha.header) { Bold = true });
+                        }
+                        else if (a_ is OpenningDrawPropertyAttribute open)
+                        {
+                            openning.Add(open);
+                        }
+                        else if (a_ is ClosingDrawPropertyAttribute close)
+                        {
+                            closing.Add(close);
+                        }
+                        else if (a_ is DrawPropertyAttribute dattr)
+                        {
+                            openning.Add(dattr);
+                        }
                     }
 
                     var fieldName = a.Label == null ? f.Name : a.Label;
 
-                    if ((f.FieldType.IsClass && !f.FieldType.IsArray || f.FieldType.IsValueType && !f.FieldType.IsPrimitive && !f.FieldType.IsEnum) && !Array.Exists(specialTypes, x => x == f.FieldType))
+                    if ((f.FieldType.IsClass && !f.FieldType.IsArray && !typeof(Delegate).IsAssignableFrom(f.FieldType) || f.FieldType.IsValueType && !f.FieldType.IsPrimitive && !f.FieldType.IsEnum) && !Array.Exists(specialTypes, x => x == f.FieldType))
                     {
                         defaultMask = mask;
                         foreach (DrawFieldsAttribute attr in f.GetCustomAttributes(typeof(DrawFieldsAttribute), false))
                         {
                             defaultMask = attr.Mask;
                         }
-                            
+
+                        foreach(var drawProperty in openning)
+                        {
+                            drawProperty.Draw();
+                        }
+
                         var box = a.Box || a.Collapsible && collapsibleStates.Exists(x => x == f.MetadataToken);
                         var horizontal = f.GetCustomAttributes(typeof(HorizontalAttribute), false).Length > 0 || f.FieldType.GetCustomAttributes(typeof(HorizontalAttribute), false).Length > 0;
                         if (horizontal)
@@ -965,6 +1333,12 @@ namespace UnityModManagerNet
                         
                         if (horizontal)
                             GUILayout.EndHorizontal();
+
+                        foreach (var drawProperty in closing)
+                        {
+                            drawProperty.Draw();
+                        }
+
                         continue;
                     }
 
@@ -988,6 +1362,15 @@ namespace UnityModManagerNet
                         {
                             a.Type = DrawType.KeyBinding;
                         }
+                        else if (typeof(Delegate).IsAssignableFrom(f.FieldType) && f.FieldType.IsGenericType && f.FieldType.GetGenericArguments()[0] == type && f.FieldType.GetGenericArguments().Count() == 1)
+                        {
+                            a.Type = DrawType.CustomGUI;
+                        }
+                    }
+
+                    foreach (var drawProperty in openning)
+                    {
+                        drawProperty.Draw();
                     }
 
                     if (a.Type == DrawType.Field)
@@ -1024,7 +1407,8 @@ namespace UnityModManagerNet
                             }
                             else
                             {
-                                GUILayout.FlexibleSpace();
+                                if (!a.NoFlexibleSpace)
+                                    GUILayout.FlexibleSpace();
                                 GUILayout.EndHorizontal();
                             }
                         }
@@ -1053,7 +1437,8 @@ namespace UnityModManagerNet
                             }
                             else
                             {
-                                GUILayout.FlexibleSpace();
+                                if (!a.NoFlexibleSpace)
+                                    GUILayout.FlexibleSpace();
                                 GUILayout.EndHorizontal();
                             }
                         }
@@ -1082,7 +1467,8 @@ namespace UnityModManagerNet
                             }
                             else
                             {
-                                GUILayout.FlexibleSpace();
+                                if (!a.NoFlexibleSpace)
+                                    GUILayout.FlexibleSpace();
                                 GUILayout.EndHorizontal();
                             }
                         }
@@ -1111,7 +1497,68 @@ namespace UnityModManagerNet
                             }
                             else
                             {
-                                GUILayout.FlexibleSpace();
+                                if (!a.NoFlexibleSpace)
+                                    GUILayout.FlexibleSpace();
+                                GUILayout.EndHorizontal();
+                            }
+                        }
+                        else if (f.FieldType == typeof(Vector2i))
+                        {
+                            if (a.Vertical)
+                                GUILayout.BeginVertical();
+                            else
+                                GUILayout.BeginHorizontal();
+
+                            BeginHorizontalTooltip(a);
+                            GUILayout.Label(fieldName, GUILayout.ExpandWidth(false));
+                            EndHorizontalTooltip(a);
+
+                            if (!a.Vertical)
+                                GUILayout.Space(Scale(5));
+                            var vec = (Vector2i)f.GetValue(container);
+                            if (DrawVector(ref vec, null, options.ToArray()))
+                            {
+                                f.SetValue(container, vec);
+                                changed = true;
+                            }
+                            if (a.Vertical)
+                            {
+                                GUILayout.EndVertical();
+                            }
+                            else
+                            {
+                                if (!a.NoFlexibleSpace)
+                                    GUILayout.FlexibleSpace();
+                                GUILayout.EndHorizontal();
+                            }
+                        }
+                        else if (f.FieldType == typeof(Vector3i))
+                        {
+                            if (a.Vertical)
+                                GUILayout.BeginVertical();
+                            else
+                                GUILayout.BeginHorizontal();
+
+                            BeginHorizontalTooltip(a);
+                            GUILayout.Label(fieldName, GUILayout.ExpandWidth(false));
+                            EndHorizontalTooltip(a);
+
+                            if (!a.Vertical)
+                                GUILayout.Space(Scale(5));
+                            var vec = (Vector3i)f.GetValue(container);
+                            if (DrawVector(ref vec, null, options.ToArray()))
+                            {
+                                f.SetValue(container, vec);
+                                changed = true;
+                            }
+                            if (a.Vertical)
+                            {
+                                GUILayout.EndVertical();
+                            }
+                            else
+                            {
+                                if (!a.NoFlexibleSpace)
+                                    GUILayout.FlexibleSpace();
                                 GUILayout.EndHorizontal();
                             }
                         }
@@ -1452,11 +1899,38 @@ namespace UnityModManagerNet
                         }
                         else
                         {
-                            GUILayout.FlexibleSpace();
+                            if (!a.NoFlexibleSpace)
+                                GUILayout.FlexibleSpace();
                             GUILayout.EndHorizontal();
                         }
                     }
+                    else if (a.Type == DrawType.CustomGUI)
+                    {
+                        if (!typeof(Delegate).IsAssignableFrom(f.FieldType))
+                        {
+                            throw new Exception($"Type {f.FieldType} can't be called as {DrawType.CustomGUI}");
+                        }
+                        if (f.FieldType.IsGenericType && (f.FieldType.GetGenericArguments()[0] != type || f.FieldType.GetGenericArguments().Count() > 1))
+                        {
+                            throw new Exception($"Type {f.FieldType} must have one argument of type {type}");
+                        }
+
+                        var del = (Delegate)f.GetValue(container);
+                        if (del != null)
+                        {
+                            if (f.FieldType.IsGenericType)
+                                del.DynamicInvoke(new object[] { container });
+                            else
+                                del.DynamicInvoke();
+                        }
+                    }
+
+                    foreach (var drawProperty in closing)
+                    {
+                        drawProperty.Draw();
+                    }
                 }
+
                 return changed;
             }
 

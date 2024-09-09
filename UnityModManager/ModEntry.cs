@@ -66,7 +66,7 @@ namespace UnityModManagerNet
             public readonly ModLogger Logger = null;
 
             /// <summary>
-            /// Hotkey for opening quick access to mod content [0.28.2]
+            /// Hotkey for quick access to the mod content [0.28.2]
             /// </summary>
             public KeyBinding Hotkey = new KeyBinding();
 
@@ -133,7 +133,7 @@ namespace UnityModManagerNet
             public Action<ModEntry, float> OnFixedUpdate = null;
 
             /// <summary>
-            /// Called by SessionStartPoint usually after all loaded data
+            /// Called by SessionStartPoint usually after loading a new or saved game
             /// Must be preconfigured
             /// Check UnityModManager.IsSupportOnSessionStart before 
             /// [0.27.0]
