@@ -211,7 +211,7 @@ namespace UnityModManagerNet.Installer
                 var modInfo = ReadModInfoFromZip(zip);
                 if (modInfo == null)
                 {
-                    Log.Print($"{Path.GetFileName(zip.Name)} is not supported.");
+                    Log.Print($"{Path.GetFileName(zip.Name)} is not supported. Make sure it is created for UnityModManager.");
                     return;
                 }
                 var modInstalled = mods.Find(x => x.Id == modInfo.Id && x.Status == ModStatus.Installed);

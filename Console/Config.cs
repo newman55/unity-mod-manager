@@ -11,6 +11,8 @@ namespace UnityModManagerNet.ConsoleInstaller
     public enum ModStatus { NotInstalled, Installed }
     public enum InstallType { Assembly, DoorstopProxy, /*Config,*/ Count }
 
+    public enum UpdateCheckingMode { Manually, OnceDay, Everytime, Count }
+
     public class ModInfo : UnityModManager.ModInfo
     {
         [JsonIgnore]
@@ -227,9 +229,11 @@ namespace UnityModManagerNet.ConsoleInstaller
             public string Name;
             public string Path;
             public InstallType InstallType = InstallType.DoorstopProxy;
+            public DateTime LastUpdateCheck;
         }
 
         public string APIkey;
+        public UpdateCheckingMode UpdateCheckingMode = UpdateCheckingMode.OnceDay; 
         public string LastSelectedGame;
         public int WindowHeight;
         public List<GameParam> GameParams = new List<GameParam>();

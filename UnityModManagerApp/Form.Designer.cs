@@ -69,10 +69,16 @@
             this.wwwToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainerModsInstall = new System.Windows.Forms.SplitContainer();
+            this.btnCheckUpdates = new System.Windows.Forms.Button();
             this.btnModInstall = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.inputLog = new System.Windows.Forms.TextBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.resetFirewallGroup = new System.Windows.Forms.GroupBox();
+            this.btnRemFirewallGame = new System.Windows.Forms.Button();
+            this.btnRemFirewallInstaller = new System.Windows.Forms.Button();
+            this.updateCheckingModeGroup = new System.Windows.Forms.GroupBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.btnGetApiKey = new System.Windows.Forms.Button();
             this.textBoxApiKey = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -80,7 +86,6 @@
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.modInstallFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.label4 = new System.Windows.Forms.Label();
             this.panelMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
             this.splitContainerMain.Panel1.SuspendLayout();
@@ -102,6 +107,7 @@
             this.splitContainerModsInstall.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.resetFirewallGroup.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -576,6 +582,7 @@
             // 
             // splitContainerModsInstall.Panel1
             // 
+            this.splitContainerModsInstall.Panel1.Controls.Add(this.btnCheckUpdates);
             this.splitContainerModsInstall.Panel1.Controls.Add(this.btnModInstall);
             // 
             // splitContainerModsInstall.Panel2
@@ -586,13 +593,25 @@
             this.splitContainerModsInstall.SplitterDistance = 45;
             this.splitContainerModsInstall.TabIndex = 0;
             // 
+            // btnCheckUpdates
+            // 
+            this.btnCheckUpdates.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnCheckUpdates.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.25F);
+            this.btnCheckUpdates.Location = new System.Drawing.Point(174, 0);
+            this.btnCheckUpdates.Name = "btnCheckUpdates";
+            this.btnCheckUpdates.Size = new System.Drawing.Size(170, 45);
+            this.btnCheckUpdates.TabIndex = 1;
+            this.btnCheckUpdates.Text = "Check Updates";
+            this.btnCheckUpdates.UseVisualStyleBackColor = true;
+            this.btnCheckUpdates.Click += new System.EventHandler(this.btnCheckUpdates_Click);
+            // 
             // btnModInstall
             // 
-            this.btnModInstall.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnModInstall.Dock = System.Windows.Forms.DockStyle.Left;
             this.btnModInstall.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.25F);
             this.btnModInstall.Location = new System.Drawing.Point(0, 0);
             this.btnModInstall.Name = "btnModInstall";
-            this.btnModInstall.Size = new System.Drawing.Size(344, 45);
+            this.btnModInstall.Size = new System.Drawing.Size(174, 45);
             this.btnModInstall.TabIndex = 0;
             this.btnModInstall.Text = "Install Mod";
             this.btnModInstall.UseVisualStyleBackColor = true;
@@ -623,6 +642,8 @@
             // tabPage4
             // 
             this.tabPage4.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage4.Controls.Add(this.resetFirewallGroup);
+            this.tabPage4.Controls.Add(this.updateCheckingModeGroup);
             this.tabPage4.Controls.Add(this.label4);
             this.tabPage4.Controls.Add(this.btnGetApiKey);
             this.tabPage4.Controls.Add(this.textBoxApiKey);
@@ -633,6 +654,56 @@
             this.tabPage4.Size = new System.Drawing.Size(350, 408);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Settings";
+            // 
+            // resetFirewallGroup
+            // 
+            this.resetFirewallGroup.Controls.Add(this.btnRemFirewallGame);
+            this.resetFirewallGroup.Controls.Add(this.btnRemFirewallInstaller);
+            this.resetFirewallGroup.Location = new System.Drawing.Point(9, 201);
+            this.resetFirewallGroup.Name = "resetFirewallGroup";
+            this.resetFirewallGroup.Size = new System.Drawing.Size(329, 94);
+            this.resetFirewallGroup.TabIndex = 9;
+            this.resetFirewallGroup.TabStop = false;
+            this.resetFirewallGroup.Text = "Reset firewall rules";
+            // 
+            // btnRemFirewallGame
+            // 
+            this.btnRemFirewallGame.Location = new System.Drawing.Point(5, 57);
+            this.btnRemFirewallGame.Name = "btnRemFirewallGame";
+            this.btnRemFirewallGame.Size = new System.Drawing.Size(319, 31);
+            this.btnRemFirewallGame.TabIndex = 7;
+            this.btnRemFirewallGame.Text = "For the Game";
+            this.btnRemFirewallGame.UseVisualStyleBackColor = true;
+            this.btnRemFirewallGame.Click += new System.EventHandler(this.btnRemFirewallGame_Click);
+            // 
+            // btnRemFirewallInstaller
+            // 
+            this.btnRemFirewallInstaller.Location = new System.Drawing.Point(5, 22);
+            this.btnRemFirewallInstaller.Name = "btnRemFirewallInstaller";
+            this.btnRemFirewallInstaller.Size = new System.Drawing.Size(319, 31);
+            this.btnRemFirewallInstaller.TabIndex = 8;
+            this.btnRemFirewallInstaller.Text = "For the Installer";
+            this.btnRemFirewallInstaller.UseVisualStyleBackColor = true;
+            this.btnRemFirewallInstaller.Click += new System.EventHandler(this.btnRemFirewallInstaller_Click);
+            // 
+            // updateCheckingModeGroup
+            // 
+            this.updateCheckingModeGroup.Location = new System.Drawing.Point(9, 137);
+            this.updateCheckingModeGroup.Name = "updateCheckingModeGroup";
+            this.updateCheckingModeGroup.Padding = new System.Windows.Forms.Padding(10, 0, 3, 3);
+            this.updateCheckingModeGroup.Size = new System.Drawing.Size(329, 57);
+            this.updateCheckingModeGroup.TabIndex = 6;
+            this.updateCheckingModeGroup.TabStop = false;
+            this.updateCheckingModeGroup.Text = "Check updates";
+            // 
+            // label4
+            // 
+            this.label4.Location = new System.Drawing.Point(60, 72);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(278, 58);
+            this.label4.TabIndex = 3;
+            this.label4.Text = "Get API key on nexusmods, this will allow you to receive notifications about new " +
+    "versions of mods.";
             // 
             // btnGetApiKey
             // 
@@ -698,15 +769,6 @@
             this.modInstallFileDialog.Filter = "ZIP|*.zip";
             this.modInstallFileDialog.Multiselect = true;
             // 
-            // label4
-            // 
-            this.label4.Location = new System.Drawing.Point(60, 72);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(278, 58);
-            this.label4.TabIndex = 3;
-            this.label4.Text = "Get API key on nexusmods, this will allow you to receive notifications about new " +
-    "versions of mods.";
-            // 
             // UnityModManagerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -746,6 +808,7 @@
             this.tabPage3.PerformLayout();
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
+            this.resetFirewallGroup.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -805,6 +868,11 @@
         private System.Windows.Forms.ToolStripMenuItem checkToolStripMenuItem;
         private System.Windows.Forms.Button btnGetApiKey;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.GroupBox updateCheckingModeGroup;
+        private System.Windows.Forms.Button btnCheckUpdates;
+        private System.Windows.Forms.Button btnRemFirewallGame;
+        private System.Windows.Forms.GroupBox resetFirewallGroup;
+        private System.Windows.Forms.Button btnRemFirewallInstaller;
     }
 }
 

@@ -119,7 +119,7 @@ namespace UnityModManagerNet
                 {
                     FirstLaunch();
                 }
-                if (Params.CheckUpdates == 1)
+                if (Params.CheckUpdates == 2 || Params.CheckUpdates == 1 && Params.LastUpdateCheck.DayOfYear != DateTime.Now.DayOfYear)
                 {
                     CheckModUpdates();
                 }
@@ -454,6 +454,7 @@ namespace UnityModManagerNet
             private List<Column> mColumns = new List<Column>();
 
             private Vector2[] mScrollPosition = new Vector2[0];
+            private Vector2 mScrollPositionMax = new Vector2();
 
             private int mPreviousShowModSettings = -1;
             private int mShowModSettings = -1;
@@ -862,6 +863,12 @@ namespace UnityModManagerNet
 
                     case "Logs":
                         {
+                            var scrollToBottom = false;
+                            if (Event.current.type == EventType.repaint)
+                            {
+                                scrollToBottom = mScrollPositionMax == mScrollPosition[tabId];
+                            }
+
                             mScrollPosition[tabId] = GUILayout.BeginScrollView(mScrollPosition[tabId], minWidth);
 
                             GUILayout.BeginVertical("box");
@@ -872,7 +879,26 @@ namespace UnityModManagerNet
                             }
 
                             GUILayout.EndVertical();
+
+                            var verticalHeight = 0f;
+                            if (Event.current.type == EventType.repaint)
+                            {
+                                Rect r = GUILayoutUtility.GetLastRect();
+                                verticalHeight = r.height + r.y * 2;
+                            }
+
                             GUILayout.EndScrollView();
+
+                            if (Event.current.type == EventType.repaint)
+                            {
+                                Rect r = GUILayoutUtility.GetLastRect();
+                                mScrollPositionMax = new Vector2(0, verticalHeight - r.height);
+
+                                if (scrollToBottom)
+                                {
+                                    mScrollPosition[tabId] = mScrollPositionMax;
+                                }
+                            }
 
                             buttons += delegate
                             {
@@ -904,7 +930,7 @@ namespace UnityModManagerNet
 
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Check updates", GUILayout.ExpandWidth(false));
-                            ToggleGroup(Params.CheckUpdates, mCheckUpdateStrings, i => { Params.CheckUpdates = i; }, null, GUILayout.ExpandWidth(false));
+                            ToggleGroup(Params.CheckUpdates, mCheckUpdateStrings, i => { Params.CheckUpdates = i; }, null, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true));
                             GUILayout.EndHorizontal();
 
                             GUILayout.Space(5);
@@ -983,7 +1009,7 @@ namespace UnityModManagerNet
                 }
             }
 
-            private static string[] mCheckUpdateStrings = { "Never", "Automatic" };
+            private static string[] mCheckUpdateStrings = { "Disabled", "Once a day", "Everytime" };
             
             private static string[] mShowOnStartStrings = { "No", "Yes" };
 

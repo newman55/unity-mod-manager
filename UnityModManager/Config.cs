@@ -29,6 +29,7 @@ namespace UnityModManagerNet
             public float WindowHeight;
             public float UIScale = 1f;
             public string UIFont = null;
+            public DateTime LastUpdateCheck;
 
             public List<Mod> ModParams = new List<Mod>();
 
@@ -93,6 +94,36 @@ namespace UnityModManagerNet
             }
         }
 
+        [XmlRoot("Param")]
+        public sealed class InstallerParam
+        {
+            public string APIkey;
+
+            public static InstallerParam Load()
+            {
+                var filepath = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UnityModManagerNet"), "Params.xml");
+                if (File.Exists(filepath))
+                {
+                    try
+                    {
+                        using (var stream = File.OpenRead(filepath))
+                        {
+                            var serializer = new XmlSerializer(typeof(InstallerParam));
+                            var result = serializer.Deserialize(stream) as InstallerParam;
+
+                            return result;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error($"Can't read file '{filepath}'.");
+                        Debug.LogException(e);
+                    }
+                }
+                return new InstallerParam();
+            }
+        }
+
         [XmlRoot("Config")]
         public class GameInfo
         {
@@ -119,7 +150,21 @@ namespace UnityModManagerNet
                 {
                     using (var stream = File.OpenRead(filepath))
                     {
-                        return new XmlSerializer(typeof(GameInfo)).Deserialize(stream) as GameInfo;
+                        var obj = new XmlSerializer(typeof(GameInfo)).Deserialize(stream) as GameInfo;
+                        if (!string.IsNullOrEmpty(obj.Name)) 
+                        {
+                            obj.Name = obj.Name.Replace("&amp;", "&");
+                        }
+                        if (!string.IsNullOrEmpty(obj.Folder))
+                        {
+                            obj.Folder = obj.Folder.Replace("&amp;", "&");
+                        }
+                        if (!string.IsNullOrEmpty(obj.GameExe))
+                        {
+                            obj.GameExe = obj.GameExe.Replace("&amp;", "&");
+                        }
+
+                        return obj;
                     }
                 }
                 catch (Exception e)

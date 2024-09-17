@@ -11,6 +11,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityModManagerNet.ConsoleInstaller;
 using UnityModManagerNet.Installer.Tools;
+using System.Text;
+using System.Globalization;
 
 namespace UnityModManagerNet.Installer
 {
@@ -46,17 +48,17 @@ namespace UnityModManagerNet.Installer
                     return;
                 }
             }
-            catch (Exception _) {}
+            catch (Exception _) { }
             Init();
             InitPageMods();
         }
-        
+
         static bool CheckApplicationAlreadyRunning(out Process result)
         {
             result = null;
             var id = Process.GetCurrentProcess().Id;
             var name = Process.GetCurrentProcess().ProcessName;
-            foreach(var p in Process.GetProcessesByName(name))
+            foreach (var p in Process.GetProcessesByName(name))
             {
                 if (p.Id != id)
                 {
@@ -203,6 +205,28 @@ namespace UnityModManagerNet.Installer
                 return;
             }
 
+            if (param.UpdateCheckingMode < UpdateCheckingMode.Manually || param.UpdateCheckingMode > UpdateCheckingMode.Everytime)
+            {
+                param.UpdateCheckingMode = UpdateCheckingMode.OnceDay;
+            }
+
+            for (var i = (UpdateCheckingMode)0; i < UpdateCheckingMode.Count; i++)
+            {
+                var btn = new RadioButton();
+                btn.Name = i.ToString();
+                btn.Text = i.ToString();
+                btn.Dock = DockStyle.Left;
+                btn.AutoSize = true;
+                btn.Click += updateCheckingMode_Click;
+                btn.Checked = btn.Name == param.UpdateCheckingMode.ToString();
+                updateCheckingModeGroup.Controls.Add(btn);
+            }
+
+            if (!Utils.IsWindowsPlatform())
+            {
+                resetFirewallGroup.Visible = false;
+            }
+
             CheckLastVersion();
         }
 
@@ -234,6 +258,8 @@ namespace UnityModManagerNet.Installer
             btnRestore.Enabled = false;
             tabControl.TabPages[1].Enabled = false;
             installedVersion.Text = "-";
+            btnRemFirewallGame.Enabled = false;
+            btnRemFirewallGame.Text = "For the game";
 
             foreach (var ctrl in installTypeGroup.Controls)
             {
@@ -344,6 +370,12 @@ namespace UnityModManagerNet.Installer
 
             btnInstall.Text = "Install";
             btnRestore.Enabled = false;
+
+            if (!string.IsNullOrEmpty(selectedGame.GameExe))
+            {
+                btnRemFirewallGame.Text = "For the " + selectedGame.Name;
+                btnRemFirewallGame.Enabled = true;
+            }
 
             gamePath = "";
             if (string.IsNullOrEmpty(selectedGameParams.Path) || !Directory.Exists(selectedGameParams.Path))
@@ -502,7 +534,7 @@ namespace UnityModManagerNet.Installer
             if (File.Exists(GameInfo.filepathInGame))
             {
                 var gameConfig = GameInfo.ImportFromGame();
-                if(gameConfig == null || !Utils.TryParseEntryPoint(gameConfig.EntryPoint, out assemblyName))
+                if (gameConfig == null || !Utils.TryParseEntryPoint(gameConfig.EntryPoint, out assemblyName))
                 {
                     InactiveForm();
                     return;
@@ -588,7 +620,7 @@ namespace UnityModManagerNet.Installer
                 disabledMethods.Add(InstallType.Assembly);
                 selectedGameParams.InstallType = InstallType.DoorstopProxy;
             }
-            
+
             if (hasInjectedAssembly)
             {
                 disabledMethods.Add(InstallType.DoorstopProxy);
@@ -651,7 +683,7 @@ namespace UnityModManagerNet.Installer
                 {
                     version2 = managerDef.Assembly.Version;
                 }
-                
+
                 installedVersion.Text = version2.ToString();
                 if (version > version2 && v0_12_Installed == null)
                 {
@@ -729,7 +761,7 @@ namespace UnityModManagerNet.Installer
             //}
             //else
             //{
-                
+
             //}
 
             if (selectedGameParams.InstallType == InstallType.Assembly)
@@ -756,7 +788,7 @@ namespace UnityModManagerNet.Installer
                     Process.Start("Downloader.exe");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Print(ex.ToString());
             }
@@ -814,7 +846,7 @@ namespace UnityModManagerNet.Installer
                     notesTextBox.Text = selected.Comment;
                     additionallyGroupBox.Visible = true;
                 }
-                
+
                 if (!string.IsNullOrEmpty(selected.ExtraFilesUrl))
                 {
                     extraFilesTextBox.Text = $"Click on the Manual and unzip archive to game folder. Or click on the Auto for automatic installation. This must be done before installing mod loader to game.";
@@ -855,7 +887,7 @@ namespace UnityModManagerNet.Installer
                             Log.Print("Installation failed. Can't uninstall the previous version.");
                             goto EXIT;
                         }
-                        
+
                         Log.Print($"Copying files to game...");
                         var arch = Utils.UnmanagedDllIs64Bit(gameExePath);
                         if (arch == null && !string.IsNullOrEmpty(unityPlayerPath))
@@ -866,7 +898,7 @@ namespace UnityModManagerNet.Installer
                         Log.Print($"  '{doorstopConfigFilename}'");
                         var relativeManagerAssemblyPath = managerAssemblyPath.Substring(gamePath.Length).Trim(Path.DirectorySeparatorChar);
                         File.WriteAllText(doorstopConfigPath, "[General]" + Environment.NewLine + "enabled = true" + Environment.NewLine + "target_assembly = " + relativeManagerAssemblyPath);
-                        
+
                         DoactionLibraries(Actions.Install);
                         DoactionGameConfig(Actions.Install);
                         Log.Print("Installation was successful.");
@@ -895,7 +927,7 @@ namespace UnityModManagerNet.Installer
                         Utils.MakeBackup(gameConfigPath);
                         if (write)
                         {
-                            
+
                             Utils.MakeBackup(doorstopPath);
                             Utils.MakeBackup(doorstopConfigPath);
                             Utils.MakeBackup(libraryDestPaths);
@@ -1402,7 +1434,7 @@ namespace UnityModManagerNet.Installer
             }
 
             int i = 0;
-            foreach(var destpath in libraryDestPaths)
+            foreach (var destpath in libraryDestPaths)
             {
                 var filename = Path.GetFileName(destpath);
                 if (action == Actions.Install)
@@ -1432,7 +1464,7 @@ namespace UnityModManagerNet.Installer
             }
             if (action == Actions.Remove)
             {
-                foreach(var file in Directory.GetFiles(managerPath, "*.dll"))
+                foreach (var file in Directory.GetFiles(managerPath, "*.dll"))
                 {
                     var filename = Path.GetFileName(file);
                     Log.Print($"  {filename}");
@@ -1472,7 +1504,8 @@ namespace UnityModManagerNet.Installer
                 case 1: // Mods
                     ReloadMods();
                     RefreshModList();
-                    if (selectedGame != null && !repositories.ContainsKey(selectedGame))
+                    if (selectedGame != null && !repositories.ContainsKey(selectedGame) && (param.UpdateCheckingMode == UpdateCheckingMode.Everytime
+                        || param.UpdateCheckingMode == UpdateCheckingMode.OnceDay && selectedGameParams.LastUpdateCheck.DayOfYear != DateTime.Now.DayOfYear))
                         CheckModUpdates();
                     break;
             }
@@ -1511,6 +1544,52 @@ namespace UnityModManagerNet.Installer
         private void btnGetApiKey_Click(object sender, EventArgs e)
         {
             Process.Start("https://www.nexusmods.com/users/myaccount?tab=api");
+        }
+
+        private void updateCheckingMode_Click(object sender, EventArgs e)
+        {
+            var btn = (sender as RadioButton);
+            if (!btn.Checked)
+                return;
+
+            param.UpdateCheckingMode = (UpdateCheckingMode)Enum.Parse(typeof(UpdateCheckingMode), btn.Name);
+        }
+
+        private void btnCheckUpdates_Click(object sender, EventArgs e)
+        {
+            CheckModUpdates();
+        }
+
+        private void btnRemFirewallGame_Click(object sender, EventArgs e)
+        {
+            RunCmd($"netsh advfirewall firewall delete rule name=\"{selectedGame.GameExe}\"");
+        }
+
+        private void btnRemFirewallInstaller_Click(object sender, EventArgs e)
+        {
+            RunCmd($"netsh advfirewall firewall delete rule name=\"UnityModManager.exe\"");
+        }
+
+        private void RunCmd(string command)
+        {
+            Log.Print("cmd.exe " + command);
+
+            Process p = new Process();
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardInput = true;
+            p.StartInfo.StandardOutputEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
+            p.StartInfo.FileName = "cmd.exe";
+            p.StartInfo.Arguments = $"/c {command}";
+            p.OutputDataReceived += (a, b) => { if (!string.IsNullOrEmpty(b.Data)) Log.Print(b.Data); };
+            p.ErrorDataReceived += (a, b) => { if (!string.IsNullOrEmpty(b.Data)) Log.Print(b.Data); };
+            p.Start();
+            p.BeginErrorReadLine();
+            p.BeginOutputReadLine();
+            p.WaitForExit();
         }
     }
 }

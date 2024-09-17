@@ -28,10 +28,15 @@ namespace UnityModManagerNet.Installer
             if (selectedGame == null)
                 return;
 
+            Log.Print("Checking mod updates");
+            tabPage2.Enabled = false;
+
             if (!HasNetworkConnection())
             {
                 return;
             }
+
+            selectedGameParams.LastUpdateCheck = DateTime.Now;
 
             if (!repositories.ContainsKey(selectedGame))
                 repositories.Add(selectedGame, new HashSet<UnityModManager.Repository.Release>());
@@ -70,6 +75,9 @@ namespace UnityModManagerNet.Installer
                     }
                 }
             }
+
+            RefreshModList();
+            tabPage2.Enabled = true;
         }
 
         private void ModUpdates_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e, GameInfo game, string url)
