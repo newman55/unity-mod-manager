@@ -37,7 +37,15 @@ namespace UnityModManagerNet
         /// </summary>
         ToggleGroup,
         /// <summary>
-        /// Enum pop-up group checklist.
+        /// Enum multi checkbox. Use only with bits. [0.31.0]
+        /// </summary>
+        ToggleMulti,
+        /// <summary>
+        /// Enum multi checkbox popup. Use only with bits. [0.31.0]
+        /// </summary>
+        PopupToggleMulti,
+        /// <summary>
+        /// Enum group checklist popup.
         /// </summary>
         PopupList,
         /// <summary>
@@ -1355,8 +1363,10 @@ namespace UnityModManagerNet
                         }
                         else if (f.FieldType.IsEnum)
                         {
-                            if (f.GetCustomAttributes(typeof(FlagsAttribute), false).Length == 0)
+                            if (f.FieldType.GetCustomAttributes(typeof(FlagsAttribute), false).Length == 0)
                                 a.Type = DrawType.PopupList;
+                            else
+                                a.Type = DrawType.PopupToggleMulti;
                         }
                         else if (f.FieldType == typeof(KeyBinding))
                         {
@@ -1823,6 +1833,68 @@ namespace UnityModManagerNet
                         {
                             var v = Enum.Parse(f.FieldType, names[index]);
                             f.SetValue(container, v);
+                            changed = true;
+                        }
+                        if (a.Vertical)
+                            GUILayout.EndVertical();
+                        else
+                            GUILayout.EndHorizontal();
+                    }
+                    else if (a.Type == DrawType.ToggleMulti)
+                    {
+                        if (!f.FieldType.IsEnum)
+                        {
+                            throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.ToggleMulti}");
+                        }
+
+                        options.Add(GUILayout.ExpandWidth(false));
+                        options.Add(a.Height != 0 ? GUILayout.Height(a.Height) : GUILayout.Height(Scale((int)drawHeight)));
+                        if (a.Vertical)
+                            GUILayout.BeginVertical();
+                        else
+                            GUILayout.BeginHorizontal();
+
+                        BeginHorizontalTooltip(a);
+                        GUILayout.Label(fieldName, GUILayout.ExpandWidth(false));
+                        EndHorizontalTooltip(a);
+
+                        if (!a.Vertical)
+                            GUILayout.Space(Scale(5));
+                        var val = (int)f.GetValue(container);
+                        if (ToggleMulti(ref val, f.FieldType, null, options.ToArray()))
+                        {
+                            f.SetValue(container, val);
+                            changed = true;
+                        }
+                        if (a.Vertical)
+                            GUILayout.EndVertical();
+                        else
+                            GUILayout.EndHorizontal();
+                    }
+                    else if (a.Type == DrawType.PopupToggleMulti)
+                    {
+                        if (!f.FieldType.IsEnum)
+                        {
+                            throw new Exception($"Type {f.FieldType} can't be drawn as {DrawType.PopupToggleMulti}");
+                        }
+
+                        options.Add(GUILayout.ExpandWidth(false));
+                        options.Add(a.Height != 0 ? GUILayout.Height(a.Height) : GUILayout.Height(Scale((int)drawHeight)));
+                        if (a.Vertical)
+                            GUILayout.BeginVertical();
+                        else
+                            GUILayout.BeginHorizontal();
+
+                        BeginHorizontalTooltip(a);
+                        GUILayout.Label(fieldName, GUILayout.ExpandWidth(false));
+                        EndHorizontalTooltip(a);
+
+                        if (!a.Vertical)
+                            GUILayout.Space(Scale(5));
+                        var val = (int)f.GetValue(container);
+                        if (PopupToggleMulti(ref val, f.FieldType, fieldName, unique, null, options.ToArray()))
+                        {
+                            f.SetValue(container, val);
                             changed = true;
                         }
                         if (a.Vertical)

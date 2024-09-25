@@ -358,14 +358,14 @@ namespace UnityModManagerNet
                     ScaleGUI();
                 }
 
-                if (PopupToggleGroup_GUI.mList.Count > 0)
+                bool anyRendered = false;
+                if (mPopupList.Count > 0)
                 {
-                    var toRemove = new List<PopupToggleGroup_GUI>(0);
-                    bool anyRendered = false;
-                    foreach (var item in PopupToggleGroup_GUI.mList)
+                    var toRemove = new List<PopupWindow>(0);
+                    foreach (var item in mPopupList)
                     {
-                        item.mDestroyCounter.Add(Time.frameCount);
-                        if (item.mDestroyCounter.Count > 1)
+                        item.DestroyCounter.Add(Time.frameCount);
+                        if (item.DestroyCounter.Count > 1)
                         {
                             toRemove.Add(item);
                             continue;
@@ -378,7 +378,7 @@ namespace UnityModManagerNet
                     }
                     foreach (var item in toRemove)
                     {
-                        PopupToggleGroup_GUI.mList.Remove(item);
+                        mPopupList.Remove(item);
                     }
                 }
 
