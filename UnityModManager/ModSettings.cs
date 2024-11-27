@@ -36,7 +36,7 @@ namespace UnityModManagerNet
                 {
                     using (var writer = new StreamWriter(filepath))
                     {
-                        var serializer = new XmlSerializer(typeof(T), attributes);
+                        var serializer = new XmlSerializer(data.GetType(), attributes);
                         serializer.Serialize(writer, data);
                     }
                 }
