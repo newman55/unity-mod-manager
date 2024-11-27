@@ -19,6 +19,7 @@ namespace UnityModManagerNet.Installer
     [Serializable]
     public partial class UnityModManagerForm : Form
     {
+        const string NEXUS_ANTI_CACHE = ".";
         const string REG_PATH = @"HKEY_CURRENT_USER\Software\UnityModManager";
 
         private static readonly Version VER_0_13 = new Version(0, 13);

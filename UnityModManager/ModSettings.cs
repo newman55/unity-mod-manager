@@ -11,6 +11,12 @@ namespace UnityModManagerNet
     {
         public class ModSettings
         {
+            /// <summary>
+            /// By default, it will save the data to the Mods/%Name%/Settings.xml [0.31.1]
+            /// </summary>
+            /// <remarks>
+            /// Before version [0.31.1] it was necessary to override
+            /// </remarks>
             public virtual void Save(ModEntry modEntry)
             {
                 Save(this, modEntry);
