@@ -65,6 +65,7 @@
             this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.revertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.wwwToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -86,6 +87,7 @@
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.modInstallFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.btnSetFolder = new System.Windows.Forms.Button();
             this.panelMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
             this.splitContainerMain.Panel1.SuspendLayout();
@@ -165,6 +167,7 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.Controls.Add(this.btnSetFolder);
             this.tabPage1.Controls.Add(this.panel1);
             this.tabPage1.Controls.Add(this.labelFolder);
             this.tabPage1.Controls.Add(this.labelGame);
@@ -362,7 +365,7 @@
             this.btnOpenFolder.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnOpenFolder.Location = new System.Drawing.Point(40, 178);
             this.btnOpenFolder.Name = "btnOpenFolder";
-            this.btnOpenFolder.Size = new System.Drawing.Size(171, 26);
+            this.btnOpenFolder.Size = new System.Drawing.Size(142, 26);
             this.btnOpenFolder.TabIndex = 9;
             this.btnOpenFolder.Text = "Select";
             this.btnOpenFolder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -517,11 +520,12 @@
             this.updateToolStripMenuItem,
             this.revertToolStripMenuItem,
             this.uninstallToolStripMenuItem,
+            this.deleteToolStripMenuItem,
             this.checkToolStripMenuItem,
             this.wwwToolStripMenuItem1,
             this.openFolderToolStripMenuItem});
             this.ModcontextMenuStrip1.Name = "ModcontextMenuStrip1";
-            this.ModcontextMenuStrip1.Size = new System.Drawing.Size(149, 158);
+            this.ModcontextMenuStrip1.Size = new System.Drawing.Size(149, 180);
             this.ModcontextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.ModcontextMenuStrip1_Opening);
             // 
             // installToolStripMenuItem
@@ -551,6 +555,13 @@
             this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.uninstallToolStripMenuItem.Text = "Uninstall";
             this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
+            // 
+            // deleteToolStripMenuItem
+            // 
+            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.deleteToolStripMenuItem.Text = "Remove";
+            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
             // checkToolStripMenuItem
             // 
@@ -769,6 +780,16 @@
             this.modInstallFileDialog.Filter = "ZIP|*.zip";
             this.modInstallFileDialog.Multiselect = true;
             // 
+            // btnSetFolder
+            // 
+            this.btnSetFolder.Location = new System.Drawing.Point(185, 178);
+            this.btnSetFolder.Name = "btnSetFolder";
+            this.btnSetFolder.Size = new System.Drawing.Size(26, 26);
+            this.btnSetFolder.TabIndex = 24;
+            this.btnSetFolder.Text = "...";
+            this.btnSetFolder.UseVisualStyleBackColor = true;
+            this.btnSetFolder.Click += new System.EventHandler(this.btnSetFolder_Click);
+            // 
             // UnityModManagerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -873,6 +894,8 @@
         private System.Windows.Forms.Button btnRemFirewallGame;
         private System.Windows.Forms.GroupBox resetFirewallGroup;
         private System.Windows.Forms.Button btnRemFirewallInstaller;
+        private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
+        private System.Windows.Forms.Button btnSetFolder;
     }
 }
 

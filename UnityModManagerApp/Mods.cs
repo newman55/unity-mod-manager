@@ -461,6 +461,7 @@ namespace UnityModManagerNet.Installer
             wwwToolStripMenuItem1.Visible = false;
             openFolderToolStripMenuItem.Visible = false;
             checkToolStripMenuItem.Visible = false;
+            deleteToolStripMenuItem.Visible = false;
 
             var modInfo = selectedMod;
             if (!modInfo)
@@ -511,6 +512,10 @@ namespace UnityModManagerNet.Installer
             else if (modInfo.Status == ModStatus.NotInstalled)
             {
                 installToolStripMenuItem.Visible = true;
+                if (modInfo.AvailableVersions.Count > 0)
+                {
+                    deleteToolStripMenuItem.Visible = true;
+                }
             }
 
             if (!string.IsNullOrEmpty(modInfo.HomePage))
@@ -602,6 +607,29 @@ namespace UnityModManagerNet.Installer
         {
             CheckNexus(selectedMod);
             RefreshModList();
+        }
+
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var modInfo = selectedMod;
+            if (modInfo)
+            {
+                try
+                {
+                    var local = modInfo.AvailableVersions.FirstOrDefault();
+                    if (!string.IsNullOrEmpty(local.Value))
+                    {
+                        Directory.Delete(Directory.GetParent(local.Value).FullName, true);
+                        Log.Print($"Removing '{Directory.GetParent(local.Value).FullName}' - SUCCESS.");
+                        RefreshModList();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Print(ex.Message);
+                    Log.Print($"Error when removing '{modInfo.Id}'.");
+                }
+            }
         }
     }
 }

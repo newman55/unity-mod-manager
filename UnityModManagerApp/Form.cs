@@ -1592,5 +1592,16 @@ namespace UnityModManagerNet.Installer
             p.BeginOutputReadLine();
             p.WaitForExit();
         }
+
+        private void btnSetFolder_Click(object sender, EventArgs e)
+        {
+            var form = new SetFolder(selectedGameParams.Path);
+            var result = form.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                selectedGameParams.Path = form.textBox1.Text;
+                RefreshForm();
+            }
+        }
     }
 }
