@@ -164,6 +164,10 @@ namespace UnityModManagerNet
         /// Some elements use FlexibleSpace for alignment. This option will disable it. [0.29.0]
         /// </summary>
         public bool NoFlexibleSpace;
+        /// <summary>
+        /// Set random number if the popup field takes control of similar others. [0.32.2]
+        /// </summary>
+        public int Unique;
 
         public DrawAttribute()
         {
@@ -1329,7 +1333,7 @@ namespace UnityModManagerNet
                             }
                             else
                             {
-                                if (Draw(val, f.FieldType, mod, defaultMask, f.Name.GetHashCode() + unique))
+                                if (Draw(val, f.FieldType, mod, defaultMask, f.Name.GetHashCode() + a.Unique != 0 ? a.Unique : unique))
                                 {
                                     changed = true;
                                     f.SetValue(container, val);
@@ -1892,7 +1896,7 @@ namespace UnityModManagerNet
                         if (!a.Vertical)
                             GUILayout.Space(Scale(5));
                         var val = (int)f.GetValue(container);
-                        if (PopupToggleMulti(ref val, f.FieldType, fieldName, unique, null, options.ToArray()))
+                        if (PopupToggleMulti(ref val, f.FieldType, fieldName, a.Unique != 0 ? a.Unique : unique, null, options.ToArray()))
                         {
                             f.SetValue(container, val);
                             changed = true;
@@ -1926,7 +1930,7 @@ namespace UnityModManagerNet
                         var values = Enum.GetValues(f.FieldType);
                         var val = f.GetValue(container);
                         var index = Array.IndexOf(values, val);
-                        if (PopupToggleGroup(ref index, names, fieldName, unique, null, options.ToArray()))
+                        if (PopupToggleGroup(ref index, names, fieldName, a.Unique != 0 ? a.Unique : unique, null, options.ToArray()))
                         {
                             var v = Enum.Parse(f.FieldType, names[index]);
                             f.SetValue(container, v);
