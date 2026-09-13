@@ -3,3 +3,5 @@
 */bin
 .vs
 */*.csproj.user
+__pycache__/
+*.py[cod]
