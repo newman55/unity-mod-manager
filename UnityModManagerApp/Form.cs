@@ -41,7 +41,7 @@ namespace UnityModManagerNet.Installer
         {
             try
             {
-                if (CheckApplicationAlreadyRunning(out var process) && MessageBox.Show("Already running", "Notice", MessageBoxButtons.OK) == DialogResult.OK)
+                if (CheckApplicationAlreadyRunning(out var process) && MessageBox.Show(Localization.Get("Already running"), Localization.Get("Notice"), MessageBoxButtons.OK) == DialogResult.OK)
                 {
                     if (!Utils.IsUnixPlatform())
                         SetForegroundWindow(process.MainWindowHandle);
@@ -260,7 +260,7 @@ namespace UnityModManagerNet.Installer
             tabControl.TabPages[1].Enabled = false;
             installedVersion.Text = "-";
             btnRemFirewallGame.Enabled = false;
-            btnRemFirewallGame.Text = "For the game";
+            btnRemFirewallGame.Text = Localization.Get("For the game");
 
             foreach (var ctrl in installTypeGroup.Controls)
             {
@@ -275,7 +275,7 @@ namespace UnityModManagerNet.Installer
         {
             if (selectedGame == null)
             {
-                Log.Print("Select a game.");
+                Log.Print(Localization.Get("Select a game."));
                 return false;
             }
 
@@ -369,12 +369,12 @@ namespace UnityModManagerNet.Installer
                 return;
             }
 
-            btnInstall.Text = "Install";
+            btnInstall.Text = Localization.Get("Install");
             btnRestore.Enabled = false;
 
             if (!string.IsNullOrEmpty(selectedGame.GameExe))
             {
-                btnRemFirewallGame.Text = "For the " + selectedGame.Name;
+                btnRemFirewallGame.Text = Localization.Get("For the") + " " + selectedGame.Name;
                 btnRemFirewallGame.Enabled = true;
             }
 
@@ -386,7 +386,7 @@ namespace UnityModManagerNet.Installer
                 {
                     InactiveForm();
                     btnOpenFolder.ForeColor = System.Drawing.Color.FromArgb(192, 0, 0);
-                    btnOpenFolder.Text = "Select";
+                    btnOpenFolder.Text = Localization.Get("Select");
                     folderBrowserDialog.SelectedPath = null;
                     Log.Print($"Game folder '{selectedGame.Folder}' not found.");
                     return;
@@ -670,7 +670,7 @@ namespace UnityModManagerNet.Installer
             var managerInstalled = managerDef.Types.FirstOrDefault(x => x.Name == managerType.Name);
             if (managerInstalled != null && (hasInjectedAssembly || selectedGameParams.InstallType == InstallType.DoorstopProxy))
             {
-                btnInstall.Text = "Update";
+                btnInstall.Text = Localization.Get("Update");
                 btnInstall.Enabled = false;
                 btnRemove.Enabled = true;
 
@@ -779,7 +779,7 @@ namespace UnityModManagerNet.Installer
         {
             try
             {
-                if (btnDownloadUpdate.Text == "Home Page")
+                if (btnDownloadUpdate.Text == Localization.Get("Home Page"))
                 {
                     if (!string.IsNullOrEmpty(config.HomePage))
                         Process.Start(config.HomePage);
@@ -801,7 +801,7 @@ namespace UnityModManagerNet.Installer
         {
             if (showChoosePathNotice)
             {
-                MessageBox.Show("Choose path to the game, for example /Steam/steamapps/common/YourGame", "Game path", MessageBoxButtons.OK);
+                MessageBox.Show(Localization.Get("Choose path to the game, for example /Steam/steamapps/common/YourGame"), Localization.Get("Game path"), MessageBoxButtons.OK);
                 showChoosePathNotice = false;
             }
             var result = folderBrowserDialog.ShowDialog();

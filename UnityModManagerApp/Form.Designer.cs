@@ -188,7 +188,7 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(350, 408);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Install";
+            this.tabPage1.Text = UnityModManagerNet.Localization.Get("Install");
             // 
             // panel1
             // 
@@ -209,7 +209,7 @@
             this.additionallyGroupBox.Size = new System.Drawing.Size(343, 74);
             this.additionallyGroupBox.TabIndex = 20;
             this.additionallyGroupBox.TabStop = false;
-            this.additionallyGroupBox.Text = "Comment";
+            this.additionallyGroupBox.Text = UnityModManagerNet.Localization.Get("Comment");
             this.additionallyGroupBox.Visible = false;
             // 
             // notesTextBox
@@ -245,7 +245,7 @@
             this.extraFilesGroupBox.Size = new System.Drawing.Size(343, 74);
             this.extraFilesGroupBox.TabIndex = 21;
             this.extraFilesGroupBox.TabStop = false;
-            this.extraFilesGroupBox.Text = "Extra Files";
+            this.extraFilesGroupBox.Text = UnityModManagerNet.Localization.Get("Extra Files");
             // 
             // extraFilesManualButton
             // 
@@ -254,7 +254,7 @@
             this.extraFilesManualButton.Name = "extraFilesManualButton";
             this.extraFilesManualButton.Size = new System.Drawing.Size(60, 23);
             this.extraFilesManualButton.TabIndex = 21;
-            this.extraFilesManualButton.Text = "Manual";
+            this.extraFilesManualButton.Text = UnityModManagerNet.Localization.Get("Manual");
             this.extraFilesManualButton.UseVisualStyleBackColor = false;
             this.extraFilesManualButton.Click += new System.EventHandler(this.extraFilesManualButton_Click);
             // 
@@ -265,7 +265,7 @@
             this.extraFilesAutoButton.Name = "extraFilesAutoButton";
             this.extraFilesAutoButton.Size = new System.Drawing.Size(60, 23);
             this.extraFilesAutoButton.TabIndex = 20;
-            this.extraFilesAutoButton.Text = "Auto";
+            this.extraFilesAutoButton.Text = UnityModManagerNet.Localization.Get("Auto");
             this.extraFilesAutoButton.UseVisualStyleBackColor = false;
             this.extraFilesAutoButton.Click += new System.EventHandler(this.extraFilesAutoButton_Click);
             // 
@@ -296,7 +296,7 @@
             this.labelFolder.Name = "labelFolder";
             this.labelFolder.Size = new System.Drawing.Size(36, 13);
             this.labelFolder.TabIndex = 22;
-            this.labelFolder.Text = "Folder";
+            this.labelFolder.Text = UnityModManagerNet.Localization.Get("Folder");
             // 
             // labelGame
             // 
@@ -305,7 +305,7 @@
             this.labelGame.Name = "labelGame";
             this.labelGame.Size = new System.Drawing.Size(35, 13);
             this.labelGame.TabIndex = 21;
-            this.labelGame.Text = "Game";
+            this.labelGame.Text = UnityModManagerNet.Localization.Get("Game");
             // 
             // installTypeGroup
             // 
@@ -315,7 +315,7 @@
             this.installTypeGroup.Size = new System.Drawing.Size(343, 46);
             this.installTypeGroup.TabIndex = 18;
             this.installTypeGroup.TabStop = false;
-            this.installTypeGroup.Text = "Installation method";
+            this.installTypeGroup.Text = UnityModManagerNet.Localization.Get("Installation method");
             // 
             // btnRestore
             // 
@@ -327,7 +327,7 @@
             this.btnRestore.Name = "btnRestore";
             this.btnRestore.Size = new System.Drawing.Size(344, 45);
             this.btnRestore.TabIndex = 13;
-            this.btnRestore.Text = "Restore original files";
+            this.btnRestore.Text = UnityModManagerNet.Localization.Get("Restore original files");
             this.btnRestore.UseMnemonic = false;
             this.btnRestore.UseVisualStyleBackColor = true;
             // 
@@ -341,7 +341,7 @@
             this.btnDownloadUpdate.Name = "btnDownloadUpdate";
             this.btnDownloadUpdate.Size = new System.Drawing.Size(122, 26);
             this.btnDownloadUpdate.TabIndex = 12;
-            this.btnDownloadUpdate.Text = "Home Page";
+            this.btnDownloadUpdate.Text = UnityModManagerNet.Localization.Get("Home Page");
             this.btnDownloadUpdate.UseMnemonic = false;
             this.btnDownloadUpdate.UseVisualStyleBackColor = false;
             // 
@@ -354,7 +354,7 @@
             this.btnRemove.Name = "btnRemove";
             this.btnRemove.Size = new System.Drawing.Size(344, 45);
             this.btnRemove.TabIndex = 2;
-            this.btnRemove.Text = "Uninstall";
+            this.btnRemove.Text = UnityModManagerNet.Localization.Get("Uninstall");
             this.btnRemove.UseMnemonic = false;
             this.btnRemove.UseVisualStyleBackColor = true;
             // 
@@ -367,7 +367,7 @@
             this.btnOpenFolder.Name = "btnOpenFolder";
             this.btnOpenFolder.Size = new System.Drawing.Size(142, 26);
             this.btnOpenFolder.TabIndex = 9;
-            this.btnOpenFolder.Text = "Select";
+            this.btnOpenFolder.Text = UnityModManagerNet.Localization.Get("Select");
             this.btnOpenFolder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnOpenFolder.UseVisualStyleBackColor = true;
             // 
@@ -394,7 +394,7 @@
             this.btnInstall.Name = "btnInstall";
             this.btnInstall.Size = new System.Drawing.Size(344, 45);
             this.btnInstall.TabIndex = 1;
-            this.btnInstall.Text = "Install";
+            this.btnInstall.Text = UnityModManagerNet.Localization.Get("Install");
             this.btnInstall.UseMnemonic = false;
             this.btnInstall.UseVisualStyleBackColor = true;
             // 
@@ -406,7 +406,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(83, 13);
             this.label3.TabIndex = 7;
-            this.label3.Text = "Ingame Version:";
+            this.label3.Text = UnityModManagerNet.Localization.Get("Ingame Version:");
             // 
             // currentVersion
             // 
@@ -426,7 +426,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(82, 13);
             this.label2.TabIndex = 6;
-            this.label2.Text = "Current Version:";
+            this.label2.Text = UnityModManagerNet.Localization.Get("Current Version:");
             // 
             // installedVersion
             // 
@@ -448,7 +448,7 @@
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(350, 408);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Mods";
+            this.tabPage2.Text = UnityModManagerNet.Localization.Get("Mods");
             // 
             // splitContainerMods
             // 
@@ -494,22 +494,22 @@
             // 
             // columnHeader1
             // 
-            this.columnHeader1.Text = "Name";
+            this.columnHeader1.Text = UnityModManagerNet.Localization.Get("Name");
             this.columnHeader1.Width = 120;
             // 
             // columnHeader2
             // 
-            this.columnHeader2.Text = "Version";
+            this.columnHeader2.Text = UnityModManagerNet.Localization.Get("Version");
             this.columnHeader2.Width = 50;
             // 
             // columnHeader3
             // 
-            this.columnHeader3.Text = "Manager Version";
+            this.columnHeader3.Text = UnityModManagerNet.Localization.Get("Manager Version");
             this.columnHeader3.Width = 70;
             // 
             // columnHeader4
             // 
-            this.columnHeader4.Text = "Status";
+            this.columnHeader4.Text = UnityModManagerNet.Localization.Get("Status");
             this.columnHeader4.Width = 100;
             // 
             // ModcontextMenuStrip1
@@ -532,56 +532,56 @@
             // 
             this.installToolStripMenuItem.Name = "installToolStripMenuItem";
             this.installToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.installToolStripMenuItem.Text = "Install";
+            this.installToolStripMenuItem.Text = UnityModManagerNet.Localization.Get("Install");
             this.installToolStripMenuItem.Click += new System.EventHandler(this.installToolStripMenuItem_Click);
             // 
             // updateToolStripMenuItem
             // 
             this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
             this.updateToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.updateToolStripMenuItem.Text = "Update";
+            this.updateToolStripMenuItem.Text = UnityModManagerNet.Localization.Get("Update");
             this.updateToolStripMenuItem.Click += new System.EventHandler(this.updateToolStripMenuItem_Click);
             // 
             // revertToolStripMenuItem
             // 
             this.revertToolStripMenuItem.Name = "revertToolStripMenuItem";
             this.revertToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.revertToolStripMenuItem.Text = "Revert";
+            this.revertToolStripMenuItem.Text = UnityModManagerNet.Localization.Get("Revert");
             this.revertToolStripMenuItem.Click += new System.EventHandler(this.revertToolStripMenuItem_Click);
             // 
             // uninstallToolStripMenuItem
             // 
             this.uninstallToolStripMenuItem.Name = "uninstallToolStripMenuItem";
             this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.uninstallToolStripMenuItem.Text = "Uninstall";
+            this.uninstallToolStripMenuItem.Text = UnityModManagerNet.Localization.Get("Uninstall");
             this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             this.deleteToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.deleteToolStripMenuItem.Text = "Remove";
+            this.deleteToolStripMenuItem.Text = UnityModManagerNet.Localization.Get("Remove");
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
             // checkToolStripMenuItem
             // 
             this.checkToolStripMenuItem.Name = "checkToolStripMenuItem";
             this.checkToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.checkToolStripMenuItem.Text = "Check Update";
+            this.checkToolStripMenuItem.Text = UnityModManagerNet.Localization.Get("Check Update");
             this.checkToolStripMenuItem.Click += new System.EventHandler(this.checkToolStripMenuItem_Click);
             // 
             // wwwToolStripMenuItem1
             // 
             this.wwwToolStripMenuItem1.Name = "wwwToolStripMenuItem1";
             this.wwwToolStripMenuItem1.Size = new System.Drawing.Size(148, 22);
-            this.wwwToolStripMenuItem1.Text = "Home Page";
+            this.wwwToolStripMenuItem1.Text = UnityModManagerNet.Localization.Get("Home Page");
             this.wwwToolStripMenuItem1.Click += new System.EventHandler(this.wwwToolStripMenuItem1_Click);
             // 
             // openFolderToolStripMenuItem
             // 
             this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
             this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.openFolderToolStripMenuItem.Text = "Open Folder";
+            this.openFolderToolStripMenuItem.Text = UnityModManagerNet.Localization.Get("Open Folder");
             this.openFolderToolStripMenuItem.Click += new System.EventHandler(this.openFolderToolStripMenuItem_Click);
             // 
             // splitContainerModsInstall
@@ -612,7 +612,7 @@
             this.btnCheckUpdates.Name = "btnCheckUpdates";
             this.btnCheckUpdates.Size = new System.Drawing.Size(170, 45);
             this.btnCheckUpdates.TabIndex = 1;
-            this.btnCheckUpdates.Text = "Check Updates";
+            this.btnCheckUpdates.Text = UnityModManagerNet.Localization.Get("Check Updates");
             this.btnCheckUpdates.UseVisualStyleBackColor = true;
             this.btnCheckUpdates.Click += new System.EventHandler(this.btnCheckUpdates_Click);
             // 
@@ -624,7 +624,7 @@
             this.btnModInstall.Name = "btnModInstall";
             this.btnModInstall.Size = new System.Drawing.Size(174, 45);
             this.btnModInstall.TabIndex = 0;
-            this.btnModInstall.Text = "Install Mod";
+            this.btnModInstall.Text = UnityModManagerNet.Localization.Get("Install Mod");
             this.btnModInstall.UseVisualStyleBackColor = true;
             // 
             // tabPage3
@@ -636,7 +636,7 @@
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage3.Size = new System.Drawing.Size(350, 408);
             this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Log";
+            this.tabPage3.Text = UnityModManagerNet.Localization.Get("Log");
             // 
             // inputLog
             // 
@@ -664,7 +664,7 @@
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage4.Size = new System.Drawing.Size(350, 408);
             this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "Settings";
+            this.tabPage4.Text = UnityModManagerNet.Localization.Get("Settings");
             // 
             // resetFirewallGroup
             // 
@@ -675,7 +675,7 @@
             this.resetFirewallGroup.Size = new System.Drawing.Size(329, 94);
             this.resetFirewallGroup.TabIndex = 9;
             this.resetFirewallGroup.TabStop = false;
-            this.resetFirewallGroup.Text = "Reset firewall rules";
+            this.resetFirewallGroup.Text = UnityModManagerNet.Localization.Get("Reset firewall rules");
             // 
             // btnRemFirewallGame
             // 
@@ -683,7 +683,7 @@
             this.btnRemFirewallGame.Name = "btnRemFirewallGame";
             this.btnRemFirewallGame.Size = new System.Drawing.Size(319, 31);
             this.btnRemFirewallGame.TabIndex = 7;
-            this.btnRemFirewallGame.Text = "For the Game";
+            this.btnRemFirewallGame.Text = UnityModManagerNet.Localization.Get("For the Game");
             this.btnRemFirewallGame.UseVisualStyleBackColor = true;
             this.btnRemFirewallGame.Click += new System.EventHandler(this.btnRemFirewallGame_Click);
             // 
@@ -693,7 +693,7 @@
             this.btnRemFirewallInstaller.Name = "btnRemFirewallInstaller";
             this.btnRemFirewallInstaller.Size = new System.Drawing.Size(319, 31);
             this.btnRemFirewallInstaller.TabIndex = 8;
-            this.btnRemFirewallInstaller.Text = "For the Installer";
+            this.btnRemFirewallInstaller.Text = UnityModManagerNet.Localization.Get("For the Installer");
             this.btnRemFirewallInstaller.UseVisualStyleBackColor = true;
             this.btnRemFirewallInstaller.Click += new System.EventHandler(this.btnRemFirewallInstaller_Click);
             // 
@@ -705,7 +705,7 @@
             this.updateCheckingModeGroup.Size = new System.Drawing.Size(329, 57);
             this.updateCheckingModeGroup.TabIndex = 6;
             this.updateCheckingModeGroup.TabStop = false;
-            this.updateCheckingModeGroup.Text = "Check updates";
+            this.updateCheckingModeGroup.Text = UnityModManagerNet.Localization.Get("Check updates");
             // 
             // label4
             // 
@@ -713,8 +713,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(278, 58);
             this.label4.TabIndex = 3;
-            this.label4.Text = "Get API key on nexusmods, this will allow you to receive notifications about new " +
-    "versions of mods.";
+            this.label4.Text = UnityModManagerNet.Localization.Get("Get API key on nexusmods, this will allow you to receive notifications about new mod versions.");
             // 
             // btnGetApiKey
             // 
@@ -722,7 +721,7 @@
             this.btnGetApiKey.Name = "btnGetApiKey";
             this.btnGetApiKey.Size = new System.Drawing.Size(101, 30);
             this.btnGetApiKey.TabIndex = 2;
-            this.btnGetApiKey.Text = "Get API key";
+            this.btnGetApiKey.Text = UnityModManagerNet.Localization.Get("Get API key");
             this.btnGetApiKey.UseVisualStyleBackColor = true;
             this.btnGetApiKey.Click += new System.EventHandler(this.btnGetApiKey_Click);
             // 
@@ -742,7 +741,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 16);
             this.label1.TabIndex = 0;
-            this.label1.Text = "API key";
+            this.label1.Text = UnityModManagerNet.Localization.Get("API key");
             // 
             // statusStrip1
             // 
@@ -767,7 +766,7 @@
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.statusLabel.Size = new System.Drawing.Size(39, 15);
-            this.statusLabel.Text = "Ready";
+            this.statusLabel.Text = UnityModManagerNet.Localization.Get("Ready");
             this.statusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // folderBrowserDialog
@@ -803,7 +802,7 @@
             this.MinimumSize = new System.Drawing.Size(374, 508);
             this.Name = "UnityModManagerForm";
             this.ShowIcon = false;
-            this.Text = "UnityModManager Installer";
+            this.Text = UnityModManagerNet.Localization.Get("UnityModManager Installer");
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.UnityModLoaderForm_FormClosing);
             this.panelMain.ResumeLayout(false);
             this.splitContainerMain.Panel1.ResumeLayout(false);
@@ -898,4 +897,3 @@
         private System.Windows.Forms.Button btnSetFolder;
     }
 }
-

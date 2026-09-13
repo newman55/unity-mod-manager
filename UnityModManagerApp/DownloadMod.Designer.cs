@@ -46,7 +46,7 @@
             this.status.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.status.Size = new System.Drawing.Size(310, 54);
             this.status.TabIndex = 1;
-            this.status.Text = "Downloading";
+            this.status.Text = UnityModManagerNet.Localization.Get("Downloading");
             this.status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // DownloadMod
@@ -62,7 +62,7 @@
             this.Name = "DownloadMod";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "Mod";
+            this.Text = UnityModManagerNet.Localization.Get("Mod");
             this.TopMost = true;
             this.ResumeLayout(false);
 

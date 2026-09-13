@@ -555,12 +555,12 @@ namespace UnityModManagerNet
 
                 UnityAction buttons = () => { };
 
-                GUILayout.Label("Mod Manager " + version, h1);
+                GUILayout.Label(Localization.Get("Mod Manager") + " " + version, h1);
 
                 GUILayout.Space(3);
                 GUILayout.BeginHorizontal();
                 int tab = tabId;
-                tab = GUILayout.Toolbar(tab, tabs, button, GUILayout.ExpandWidth(false));
+                tab = GUILayout.Toolbar(tab, tabs.Select(x => Localization.Get(x)).ToArray(), button, GUILayout.ExpandWidth(false));
                 if (tab != tabId)
                 {
                     tabId = tab;
@@ -568,7 +568,7 @@ namespace UnityModManagerNet
                 GUILayout.FlexibleSpace();
                 if (tabId == 0)
                 {
-                    GUILayout.Label("Filter:");
+                    GUILayout.Label(Localization.Get("Filter:"));
                     mModFilter = GUILayout.TextField(mModFilter, GUILayout.Width(Scale(150)), GUILayout.Height(Scale(20)));
                     if (GUILayout.Button("X", button, GUILayout.Width(Scale(20)), GUILayout.Height(Scale(20))))
                     {
@@ -587,12 +587,12 @@ namespace UnityModManagerNet
                 GUILayout.FlexibleSpace();
                 GUILayout.Space(5);
                 GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Close", button, GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button(Localization.Get("Close"), button, GUILayout.ExpandWidth(false)))
                 {
                     ToggleWindow();
                 }
 
-                if (GUILayout.Button("Save", button, GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button(Localization.Get("Save"), button, GUILayout.ExpandWidth(false)))
                 {
                     SaveSettingsAndParams();
                 }
@@ -647,7 +647,7 @@ namespace UnityModManagerNet
                             {
                                 if (mColumns[i].skip)
                                     continue;
-                                GUILayout.Label(mColumns[i].name, colWidth[i]);
+                                GUILayout.Label(Localization.Get(mColumns[i].name), colWidth[i]);
                             }
                             
                             GUILayout.EndHorizontal();
@@ -730,9 +730,9 @@ namespace UnityModManagerNet
                                         var ver = item.Value;
                                         var foundMod = FindMod(id);
                                         mJoinList.Add(
-                                            foundMod == null ? "<color=\"#CD5C5C\">" + id + " (Missing)</color> " : 
-                                            !foundMod.Active ? "<color=\"#CD5C5C\">" + id + " (Inactive)</color> " : 
-                                            (ver != null && ver > foundMod.Version) ? "<color=\"#CD5C5C\">" + id + " (Outdated)</color> " : 
+                                            foundMod == null ? "<color=\"#CD5C5C\">" + id + " " + Localization.Get("(Missing)") + "</color> " :
+                                            !foundMod.Active ? "<color=\"#CD5C5C\">" + id + " " + Localization.Get("(Inactive)") + "</color> " :
+                                            (ver != null && ver > foundMod.Version) ? "<color=\"#CD5C5C\">" + id + " " + Localization.Get("(Outdated)") + "</color> " :
                                             id);
                                     }
                                     GUILayout.Label(string.Join(", ", mJoinList.ToArray()));
@@ -782,8 +782,8 @@ namespace UnityModManagerNet
                                 {
                                     if (mods[i].CanReload)
                                     {
-                                        GUILayout.Label("Debug", h2);
-                                        if (GUILayout.Button("Reload", button, GUILayout.ExpandWidth(false)))
+                                        GUILayout.Label(Localization.Get("Debug"), h2);
+                                        if (GUILayout.Button(Localization.Get("Reload"), button, GUILayout.ExpandWidth(false)))
                                         {
                                             mods[i].Reload();
                                         }
@@ -791,7 +791,7 @@ namespace UnityModManagerNet
                                     }
                                     if (mods[i].Active && mods[i].OnGUI != null)
                                     {
-                                        GUILayout.Label("Options", h2);
+                                        GUILayout.Label(Localization.Get("Options"), h2);
                                         try
                                         {
                                             mods[i].OnGUI(mods[i]);
@@ -822,35 +822,35 @@ namespace UnityModManagerNet
                             GUILayout.Space(10);
                             GUILayout.Box(Textures.SettingsNormal, settings);
                             GUILayout.Space(3);
-                            GUILayout.Label("Options", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Options"), GUILayout.ExpandWidth(false));
                             GUILayout.Space(15);
                             GUILayout.Box(Textures.WWW, www);
                             GUILayout.Space(3);
-                            GUILayout.Label("Home page", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Home page"), GUILayout.ExpandWidth(false));
                             GUILayout.Space(15);
                             GUILayout.Box(Textures.Updates, updates);
                             GUILayout.Space(3);
-                            GUILayout.Label("Available update", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Available update"), GUILayout.ExpandWidth(false));
                             GUILayout.Space(15);
                             GUILayout.Box(Textures.StatusActive, status);
                             GUILayout.Space(3);
-                            GUILayout.Label("Active", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Active"), GUILayout.ExpandWidth(false));
                             GUILayout.Space(10);
                             GUILayout.Box(Textures.StatusInactive, status);
                             GUILayout.Space(3);
-                            GUILayout.Label("Inactive", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Inactive"), GUILayout.ExpandWidth(false));
                             GUILayout.Space(10);
                             GUILayout.Box(Textures.StatusNeedRestart, status);
                             GUILayout.Space(3);
-                            GUILayout.Label("Need restart", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Need restart"), GUILayout.ExpandWidth(false));
                             GUILayout.Space(10);
                             GUILayout.Label("!!!", GUILayout.ExpandWidth(false));
                             GUILayout.Space(3);
-                            GUILayout.Label("Errors", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Errors"), GUILayout.ExpandWidth(false));
                             GUILayout.Space(10);
                             GUILayout.Label("[CTRL + LClick]", bold, GUILayout.ExpandWidth(false));
                             GUILayout.Space(3);
-                            GUILayout.Label("Drag window", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Drag window"), GUILayout.ExpandWidth(false));
                             //                        GUILayout.Space(10);
                             //                        GUI.color = new Color32(255, 81, 83, 255);
                             //                        GUILayout.Label("*", bold, GUILayout.ExpandWidth(false));
@@ -907,11 +907,11 @@ namespace UnityModManagerNet
 
                             buttons += delegate
                             {
-                                if (GUILayout.Button("Clear", button, GUILayout.ExpandWidth(false)))
+                                if (GUILayout.Button(Localization.Get("Clear"), button, GUILayout.ExpandWidth(false)))
                                 {
                                     Logger.Clear();
                                 }
-                                if (GUILayout.Button("Open detailed log", button, GUILayout.ExpandWidth(false)))
+                                if (GUILayout.Button(Localization.Get("Open detailed log"), button, GUILayout.ExpandWidth(false)))
                                 {
                                     OpenUnityFileLog();
                                 }
@@ -927,39 +927,39 @@ namespace UnityModManagerNet
                             GUILayout.BeginVertical("box");
 
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Hotkey (default Ctrl+F10)", GUILayout.ExpandWidth(false));
-                            DrawKeybindingSmart(Params.Hotkey, "UMM Hotkey", null, GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Hotkey (default Ctrl+F10)"), GUILayout.ExpandWidth(false));
+                            DrawKeybindingSmart(Params.Hotkey, Localization.Get("UMM Hotkey"), null, GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
 
                             GUILayout.Space(5);
 
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Check updates", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Check updates"), GUILayout.ExpandWidth(false));
                             ToggleGroup(Params.CheckUpdates, mCheckUpdateStrings, i => { Params.CheckUpdates = i; }, null, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true));
                             GUILayout.EndHorizontal();
 
                             GUILayout.Space(5);
 
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Show this window on startup", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Show this window on startup"), GUILayout.ExpandWidth(false));
                             ToggleGroup(Params.ShowOnStart, mShowOnStartStrings, i => { Params.ShowOnStart = i; }, null, GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
 
                             GUILayout.Space(5);
 
                             GUILayout.BeginVertical("box");
-                            GUILayout.Label("Window size", bold, GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Window size"), bold, GUILayout.ExpandWidth(false));
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Width ", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Width") + " ", GUILayout.ExpandWidth(false));
                             mExpectedWindowSize.x = GUILayout.HorizontalSlider(mExpectedWindowSize.x, Mathf.Min(Screen.width, 960), Screen.width, GUILayout.Width(200));
                             GUILayout.Label(" " + mExpectedWindowSize.x.ToString("f0") + " px ", GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Height", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Height"), GUILayout.ExpandWidth(false));
                             mExpectedWindowSize.y = GUILayout.HorizontalSlider(mExpectedWindowSize.y, Mathf.Min(Screen.height, 720), Screen.height, GUILayout.Width(200));
                             GUILayout.Label(" " + mExpectedWindowSize.y.ToString("f0") + " px ", GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
-                            if (GUILayout.Button("Apply", button, GUILayout.ExpandWidth(false)))
+                            if (GUILayout.Button(Localization.Get("Apply"), button, GUILayout.ExpandWidth(false)))
                             {
                                 mWindowSize.x = (int)mExpectedWindowSize.x;
                                 mWindowSize.y = (int)mExpectedWindowSize.y;
@@ -972,15 +972,15 @@ namespace UnityModManagerNet
                             GUILayout.Space(5);
 
                             GUILayout.BeginVertical("box");
-                            GUILayout.Label("UI", bold, GUILayout.ExpandWidth(false));
-                            GUILayout.Label("Font", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("UI"), bold, GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Font"), GUILayout.ExpandWidth(false));
                             PopupToggleGroup(ref mSelectedFont, mOSfonts, null, GUI.skin.button, GUILayout.Width(200));
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label("Scale", GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Scale"), GUILayout.ExpandWidth(false));
                             mExpectedUIScale = GUILayout.HorizontalSlider(mExpectedUIScale, 0.5f, 5f, GUILayout.Width(200));
                             GUILayout.Label(" " + mExpectedUIScale.ToString("f2"), GUILayout.ExpandWidth(false));
                             GUILayout.EndHorizontal();
-                            if (GUILayout.Button("Apply", button, GUILayout.ExpandWidth(false)))
+                            if (GUILayout.Button(Localization.Get("Apply"), button, GUILayout.ExpandWidth(false)))
                             {
                                 if (mUIScale != mExpectedUIScale || mOSfonts[mSelectedFont] != Params.UIFont)
                                 {
@@ -995,13 +995,13 @@ namespace UnityModManagerNet
                             GUILayout.Space(5);
 
                             GUILayout.BeginVertical("box");
-                            GUILayout.Label("Mods Hotkeys", bold, GUILayout.ExpandWidth(false));
+                            GUILayout.Label(Localization.Get("Mods Hotkeys"), bold, GUILayout.ExpandWidth(false));
                             var mods = modEntries;
                             for (int i = 0, c = mods.Count; i < c; i++)
                             {
                                 GUILayout.BeginHorizontal();
                                 GUILayout.Label($"{mods[i].Info.DisplayName}", GUILayout.Width(200));
-                                DrawKeybindingSmart(mods[i].Hotkey, "Hotkey", null, GUILayout.ExpandWidth(false));
+                                DrawKeybindingSmart(mods[i].Hotkey, Localization.Get("Hotkey"), null, GUILayout.ExpandWidth(false));
                                 GUILayout.EndHorizontal();
                                 GUILayout.Space(5);
                             }
@@ -1014,9 +1014,9 @@ namespace UnityModManagerNet
                 }
             }
 
-            private static string[] mCheckUpdateStrings = { "Disabled", "Once a day", "Everytime" };
+            private static string[] mCheckUpdateStrings = { Localization.Get("Disabled"), Localization.Get("Once a day"), Localization.Get("Everytime") };
             
-            private static string[] mShowOnStartStrings = { "No", "Yes" };
+            private static string[] mShowOnStartStrings = { Localization.Get("No"), Localization.Get("Yes") };
 
             [Obsolete]
             private static string[] mHotkeyNames = { "CTRL+F10", "ScrollLock", "Num *", "~" };
@@ -1175,4 +1175,3 @@ namespace UnityModManagerNet
         }
     }
 }
-

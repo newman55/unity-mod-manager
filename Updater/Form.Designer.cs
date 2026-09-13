@@ -45,7 +45,7 @@
             this.status.Name = "status";
             this.status.Size = new System.Drawing.Size(306, 43);
             this.status.TabIndex = 1;
-            this.status.Text = "Downloading...";
+            this.status.Text = UnityModManagerNet.Localization.Get("Downloading...");
             this.status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // DownloaderForm
@@ -59,7 +59,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DownloaderForm";
-            this.Text = "Updates";
+            this.Text = UnityModManagerNet.Localization.Get("Updates");
             this.ResumeLayout(false);
 
         }

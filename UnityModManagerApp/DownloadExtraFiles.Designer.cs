@@ -38,7 +38,7 @@
             this.status.Name = "status";
             this.status.Size = new System.Drawing.Size(306, 43);
             this.status.TabIndex = 2;
-            this.status.Text = "Downloading...";
+            this.status.Text = UnityModManagerNet.Localization.Get("Downloading...");
             this.status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // progressBar1
@@ -59,7 +59,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DownloadExtraFiles";
-            this.Text = "Extra Files";
+            this.Text = UnityModManagerNet.Localization.Get("Extra Files");
             this.ResumeLayout(false);
 
         }
