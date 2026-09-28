@@ -6,8 +6,8 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using System.Diagnostics;
 using System.Net;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace UnityModManagerNet.ConsoleInstaller
 {
@@ -93,10 +93,14 @@ namespace UnityModManagerNet.ConsoleInstaller
         static string injectedEntryPoint = null;
 
         static string gameExePath = null;
+        static OSPlatform gamePlatform = OSPlatform.Windows;
 
-        static string doorstopFilename = "winhttp.dll";
-        static string doorstopConfigFilename = "doorstop_config.ini";
+        static string doorstopWindowsConfigFilename = "doorstop_config.ini";
+        static string doorstopUnixConfigFilename = "run.sh";
         static string doorstopPath = null;
+        static string doorstopWindowsPath = null;
+        static string doorstopLinuxPath = null;
+        static string doorstopMacPath = null;
         static string doorstopConfigPath = null;
 
         static ModuleDefMD assemblyDef = null;
@@ -371,7 +375,7 @@ namespace UnityModManagerNet.ConsoleInstaller
             Utils.TryParseEntryPoint(selectedGame.EntryPoint, out var assemblyName);
 
             gamePath = selectedGameParams.Path;
-            if (File.Exists(Path.Combine(gamePath, "GameAssembly.dll")))
+            if (File.Exists(Path.Combine(gamePath, "GameAssembly.dll")) || File.Exists(Path.Combine(gamePath, "libil2cpp.so")) || File.Exists(Path.Combine(gamePath, "Contents", "Resources", "libil2cpp.dylib")))
             {
                 Log.Print("This game version (IL2CPP) is not supported.");
                 return;
@@ -400,9 +404,28 @@ namespace UnityModManagerNet.ConsoleInstaller
                 }
                 gameExePath = Path.Combine(gamePath, selectedGame.GameExe);
             }
+
+            if (string.IsNullOrEmpty(gameExePath) || !File.Exists(gameExePath))
+            {
+                gameExePath = Utils.FindUnityGameExecutable(gamePath);
+                Log.Print($"The executable file is auto-defined as {gameExePath}");
+            }
+
+            if (gameExePath.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                gamePlatform = OSPlatform.Windows;
+            }
+            else if (Utils.IsExecutableOnLinux(gameExePath))
+            {
+                gamePlatform = OSPlatform.Linux;
+            }
+            else if (Utils.IsExecutableOnMacOS(gameExePath))
+            {
+                gamePlatform = OSPlatform.OSX;
+            }
             else
             {
-                gameExePath = string.Empty;
+                throw new Exception($"Unknown executable file {gameExePath}");
             }
 
             if (File.Exists(Path.Combine(managedPath, "System.Xml.dll")))
@@ -447,8 +470,9 @@ namespace UnityModManagerNet.ConsoleInstaller
             }
 
             Refresh:
-            doorstopPath = Path.Combine(gamePath, doorstopFilename);
-            doorstopConfigPath = Path.Combine(gamePath, doorstopConfigFilename);
+            doorstopWindowsPath = Path.Combine(gamePath, "winhttp.dll");
+            doorstopLinuxPath = Path.Combine(gamePath, "libdoorstop.so");
+            doorstopMacPath = Path.Combine(gamePath, "libdoorstop.dylib");
             injectedEntryAssemblyPath = entryAssemblyPath;
             assemblyDef = null;
             injectedAssemblyDef = null;
@@ -530,22 +554,18 @@ namespace UnityModManagerNet.ConsoleInstaller
                 goto Rescan;
             }
 
-            if (Utils.IsUnixPlatform() || !File.Exists(gameExePath))
-            {
-                unavailableMethods.Add(InstallType.DoorstopProxy);
-                selectedGameParams.InstallType = InstallType.Assembly;
-            }
-            else if (File.Exists(doorstopPath))
-            {
-                disabledMethods.Add(InstallType.Assembly);
-                selectedGameParams.InstallType = InstallType.DoorstopProxy;
-            }
-
             if (hasInjectedAssembly)
             {
                 disabledMethods.Add(InstallType.DoorstopProxy);
                 selectedGameParams.InstallType = InstallType.Assembly;
             }
+            else if (File.Exists(doorstopWindowsPath) || File.Exists(doorstopLinuxPath) || File.Exists(doorstopMacPath))
+            {
+                disabledMethods.Add(InstallType.Assembly);
+                selectedGameParams.InstallType = InstallType.DoorstopProxy;
+            }
+
+            CorrectDoorstopPaths();
 
             managerDef = managerDef ?? injectedAssemblyDef;
 
@@ -556,12 +576,8 @@ namespace UnityModManagerNet.ConsoleInstaller
             }
 
             var managerInstalled = managerDef.Types.FirstOrDefault(x => x.Name == managerType.Name);
-            if (managerInstalled != null && (hasInjectedAssembly || selectedGameParams.InstallType == InstallType.DoorstopProxy))
+            if (managerInstalled != null && (hasInjectedAssembly || selectedGameParams.InstallType >= InstallType.DoorstopProxy))
             {
-                //btnInstall.Text = "Update";
-                //btnInstall.Enabled = false;
-                //btnRemove.Enabled = true;
-
                 Version version2;
                 if (v0_12_Installed != null)
                 {
@@ -573,10 +589,8 @@ namespace UnityModManagerNet.ConsoleInstaller
                     version2 = managerDef.Assembly.Version;
                 }
 
-                //installedVersion.Text = version2.ToString();
                 if (version > version2 && v0_12_Installed == null)
                 {
-                    //btnInstall.Enabled = true;
                     actions |= Actions.Update;
                 }
 
@@ -586,9 +600,6 @@ namespace UnityModManagerNet.ConsoleInstaller
             else
             {
                 Log.Print($"Manager-{version} is not installed on [{selectedGame}].");
-                //installedVersion.Text = "-";
-                //btnInstall.Enabled = true;
-                //btnRemove.Enabled = false;
                 actions |= Actions.Install;
             }
 
@@ -618,7 +629,7 @@ namespace UnityModManagerNet.ConsoleInstaller
                 if (k.Key == ConsoleKey.Y)
                 {
                     int i = 1;
-                    for (InstallType t = InstallType.Assembly; t <= InstallType.DoorstopProxy; t++)
+                    for (InstallType t = InstallType.Assembly; t < InstallType.Count; t++)
                     {
                         if (unavailableMethods.Contains(t) || disabledMethods.Contains(t))
                             continue;
@@ -637,7 +648,7 @@ namespace UnityModManagerNet.ConsoleInstaller
 
                     bool changed = false;
                     i = 1;
-                    for (InstallType t = InstallType.Assembly; t <= InstallType.DoorstopProxy; t++)
+                    for (InstallType t = InstallType.Assembly; t < InstallType.Count; t++)
                     {
                         if (unavailableMethods.Contains(t) || disabledMethods.Contains(t))
                             continue;
@@ -645,6 +656,7 @@ namespace UnityModManagerNet.ConsoleInstaller
                         if (c == i.ToString())
                         {
                             selectedGameParams.InstallType = t;
+                            CorrectDoorstopPaths();
                             changed = true;
                             param.Save();
                             break;
@@ -675,13 +687,13 @@ namespace UnityModManagerNet.ConsoleInstaller
                     Directory.CreateDirectory(modsPath);
                 }
 
-                if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
+                if (selectedGameParams.InstallType == InstallType.Assembly)
                 {
-                    InstallDoorstop(Actions.Install);
+                    InjectAssembly(Actions.Install, assemblyDef);
                 }
                 else
                 {
-                    InjectAssembly(Actions.Install, assemblyDef);
+                    InstallDoorstop(Actions.Install);
                 }
 
                 goto Refresh;
@@ -708,13 +720,13 @@ namespace UnityModManagerNet.ConsoleInstaller
                     Directory.CreateDirectory(modsPath);
                 }
 
-                if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
+                if (selectedGameParams.InstallType == InstallType.Assembly)
                 {
-                    InstallDoorstop(Actions.Install);
+                    InjectAssembly(Actions.Install, assemblyDef);
                 }
                 else
                 {
-                    InjectAssembly(Actions.Install, assemblyDef);
+                    InstallDoorstop(Actions.Install);
                 }
 
                 goto Refresh;
@@ -729,13 +741,13 @@ namespace UnityModManagerNet.ConsoleInstaller
                     return;
                 }
 
-                if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
+                if (selectedGameParams.InstallType == InstallType.Assembly)
                 {
-                    InstallDoorstop(Actions.Delete);
+                    InjectAssembly(Actions.Delete, injectedAssemblyDef);
                 }
                 else
                 {
-                    InjectAssembly(Actions.Delete, injectedAssemblyDef);
+                    InstallDoorstop(Actions.Delete);
                 }
 
                 goto Refresh;
@@ -762,6 +774,28 @@ namespace UnityModManagerNet.ConsoleInstaller
                 goto ReadAgain;
             }
 
+        }
+
+        static void CorrectDoorstopPaths()
+        {
+            if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
+            {
+                if (gamePlatform == OSPlatform.Windows)
+                {
+                    doorstopPath = doorstopWindowsPath;
+                    doorstopConfigPath = Path.Combine(gamePath, doorstopWindowsConfigFilename);
+                }
+                else if (gamePlatform == OSPlatform.Linux)
+                {
+                    doorstopPath = doorstopLinuxPath;
+                    doorstopConfigPath = Path.Combine(gamePath, doorstopUnixConfigFilename);
+                }
+                else if (gamePlatform == OSPlatform.OSX)
+                {
+                    doorstopPath = doorstopMacPath;
+                    doorstopConfigPath = Path.Combine(gamePath, doorstopUnixConfigFilename);
+                }
+            }
         }
 
         static void SelectGameFolder()
@@ -794,16 +828,16 @@ namespace UnityModManagerNet.ConsoleInstaller
         {
             var success = true;
 
-            if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
-            {
-                success &= Utils.RemoveReadOnly(doorstopPath);
-                success &= Utils.RemoveReadOnly(doorstopConfigPath);
-            }
-            else
+            if (selectedGameParams.InstallType == InstallType.Assembly)
             {
                 success &= Utils.RemoveReadOnly(entryAssemblyPath);
                 if (injectedEntryAssemblyPath != entryAssemblyPath)
                     success &= Utils.RemoveReadOnly(injectedEntryAssemblyPath);
+            }
+            else
+            {
+                success &= Utils.RemoveReadOnly(doorstopPath);
+                success &= Utils.RemoveReadOnly(doorstopConfigPath);
             }
 
             if (Directory.Exists(managerPath))
@@ -826,16 +860,16 @@ namespace UnityModManagerNet.ConsoleInstaller
                 success &= Utils.IsFileWritable(file);
             }
 
-            if (selectedGameParams.InstallType == InstallType.DoorstopProxy)
-            {
-                success &= Utils.IsFileWritable(doorstopPath);
-                success &= Utils.IsFileWritable(doorstopConfigPath);
-            }
-            else
+            if (selectedGameParams.InstallType == InstallType.Assembly)
             {
                 success &= Utils.IsFileWritable(entryAssemblyPath);
                 if (injectedEntryAssemblyPath != entryAssemblyPath)
                     success &= Utils.IsFileWritable(injectedEntryAssemblyPath);
+            }
+            else
+            {
+                success &= Utils.IsFileWritable(doorstopPath);
+                success &= Utils.IsFileWritable(doorstopConfigPath);
             }
 
             return success;
@@ -894,14 +928,41 @@ namespace UnityModManagerNet.ConsoleInstaller
                         }
 
                         Log.Print($"Copying files to game...");
-                        var arch = Utils.UnmanagedDllIs64Bit(gameExePath);
-                        var filename = arch == true ? "winhttp_x64.dll" : "winhttp_x86.dll";
-                        Log.Print($"  '{filename}'");
-                        File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename), doorstopPath, true);
-                        Log.Print($"  '{doorstopConfigFilename}'");
-                        var relativeManagerAssemblyPath = managerAssemblyPath.Substring(gamePath.Length).Trim(Path.DirectorySeparatorChar);
-                        File.WriteAllText(doorstopConfigPath, "[General]" + Environment.NewLine + "enabled = true" + Environment.NewLine + "target_assembly = " + relativeManagerAssemblyPath);
-
+                        if (gamePlatform == OSPlatform.Windows)
+                        {
+                            var arch = Utils.UnmanagedDllIs64Bit(gameExePath);
+                            var filename = arch == true ? "winhttp_x64.dll" : "winhttp_x86.dll";
+                            Log.Print($"  '{filename}'");
+                            File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename), doorstopPath, true);
+                            Log.Print($"  '{Path.GetFileName(doorstopConfigPath)}'");
+                            var relativeManagerAssemblyPath = managerAssemblyPath.Substring(gamePath.Length).Trim(Path.DirectorySeparatorChar);
+                            File.WriteAllText(doorstopConfigPath, "[General]" + Environment.NewLine + "enabled = true" + Environment.NewLine + "target_assembly = " + relativeManagerAssemblyPath);
+                        }
+                        else if (gamePlatform == OSPlatform.Linux)
+                        {
+                            var arch = Utils.LinuxFileIs64Bit(gameExePath);
+                            var filename = arch == true ? "libdoorstop_x64.so" : "libdoorstop_x86.so";
+                            Log.Print($"  '{filename}'");
+                            File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename), doorstopPath, true);
+                            Log.Print($"  '{Path.GetFileName(doorstopConfigPath)}'");
+                            var relativeManagerAssemblyPath = managerAssemblyPath.Substring(gamePath.Length).Trim(Path.DirectorySeparatorChar);
+                            var configText = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(doorstopConfigPath)));
+                            configText = Regex.Replace(configText, @"target_assembly=""Doorstop.dll""", $"target_assembly=\"{relativeManagerAssemblyPath}\"", RegexOptions.Multiline);
+                            configText = Regex.Replace(configText, @"executable_name=""""", $"executable_name=\"{Path.GetFileName(gameExePath)}\"", RegexOptions.Multiline);
+                            File.WriteAllText(doorstopConfigPath, configText);
+                        }
+                        else if (gamePlatform == OSPlatform.OSX)
+                        {
+                            var filename = "libdoorstop.dylib";
+                            Log.Print($"  '{filename}'");
+                            File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename), doorstopPath, true);
+                            Log.Print($"  '{Path.GetFileName(doorstopConfigPath)}'");
+                            var relativeManagerAssemblyPath = managerAssemblyPath.Substring(gamePath.Length).Trim(Path.DirectorySeparatorChar);
+                            var configText = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(doorstopConfigPath)));
+                            configText = Regex.Replace(configText, @"target_assembly=""Doorstop.dll""", $"target_assembly=\"{relativeManagerAssemblyPath}\"", RegexOptions.Multiline);
+                            configText = Regex.Replace(configText, @"executable_name=""""", $"executable_name=\"{Path.GetFileName(gamePath)}\"", RegexOptions.Multiline);
+                            File.WriteAllText(doorstopConfigPath, configText);
+                        }
                         DoactionLibraries(Actions.Install);
                         DoactionGameConfig(Actions.Install);
                         Log.Print("Installation was successful.");
@@ -937,9 +998,9 @@ namespace UnityModManagerNet.ConsoleInstaller
                         }
 
                         Log.Print($"Deleting files from game...");
-                        Log.Print($"  '{doorstopFilename}'");
+                        Log.Print($"  '{Path.GetFileName(doorstopPath)}'");
                         File.Delete(doorstopPath);
-                        Log.Print($"  '{doorstopConfigFilename}'");
+                        Log.Print($"  '{Path.GetFileName(doorstopConfigPath)}'");
                         File.Delete(doorstopConfigPath);
 
                         if (write)

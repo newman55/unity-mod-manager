@@ -384,7 +384,7 @@ namespace UnityModManagerNet.ConsoleInstaller
             string[] disks = new string[] { @"C:\", @"D:\", @"E:\", @"F:\" };
             string[] roots = new string[] { "Games", "Program files", "Program files (x86)", "" };
             string[] folders = new string[] { @"Steam\SteamApps\common", @"GoG Galaxy\Games", "" };
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            if (Utils.IsUnixPlatform())
             {
                 disks = new string[] { Environment.GetEnvironmentVariable("HOME") };
                 roots = new string[] { "Library/Application Support", ".steam" };
@@ -420,7 +420,7 @@ namespace UnityModManagerNet.ConsoleInstaller
 
         public static string FindManagedFolder(string path)
         {
-            if (Utils.IsMacPlatform())
+            if (path.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
             {
                 var dir = $"{path}/Contents/Resources/Data/Managed";
                 if (Directory.Exists(dir))
@@ -450,6 +450,103 @@ namespace UnityModManagerNet.ConsoleInstaller
             return null;
         }
 
+        public static string FindUnityGameExecutable(string gameDirectory)
+        {
+            if (!Directory.Exists(gameDirectory)) return null;
+
+            if (gameDirectory.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
+            {
+                return FindMacOSAppExecutable(gameDirectory);
+            }
+            else
+            {
+                foreach (var file in Directory.GetFiles(gameDirectory, "*", SearchOption.TopDirectoryOnly))
+                {
+                    var fileName = Path.GetFileName(file);
+
+                    if (fileName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!fileName.StartsWith("UnityCrashHandler", StringComparison.OrdinalIgnoreCase) &&
+                            !fileName.StartsWith("UnityPlayer", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return file;
+                        }
+                    }
+
+                    if (fileName.EndsWith(".x86_64", StringComparison.OrdinalIgnoreCase) ||
+                        fileName.EndsWith(".x86", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return file;
+                    }
+
+                    if (!fileName.Contains(".") && IsExecutableOnLinux(file))
+                    {
+                        return file;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static string FindMacOSAppExecutable(string appPath)
+        {
+            if (!Directory.Exists(appPath)) return null;
+
+            var macosPath = Path.Combine(appPath, "Contents/MacOS");
+            if (!Directory.Exists(macosPath)) return null;
+
+            var files = Directory.GetFiles(macosPath);
+
+            foreach (var file in files)
+            {
+                var fileName = Path.GetFileName(file);
+
+                if (fileName.EndsWith(".dylib", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (IsExecutableOnMacOS(file))
+                    return file;
+            }
+
+            return null;
+        }
+
+        public static bool IsExecutableOnLinux(string filePath)
+        {
+            try
+            {
+                using var fs = File.OpenRead(filePath);
+                var buffer = new byte[4];
+                if (fs.Read(buffer, 0, 4) < 4) return false;
+
+                return buffer[0] == 0x7F && buffer[1] == 0x45 &&
+                       buffer[2] == 0x4C && buffer[3] == 0x46;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool IsExecutableOnMacOS(string filePath)
+        {
+            try
+            {
+                using var fs = File.OpenRead(filePath);
+                var buffer = new byte[4];
+                if (fs.Read(buffer, 0, 4) < 4) return false;
+
+                uint magic = BitConverter.ToUInt32(buffer, 0);
+                return magic == 0xFEEDFACE || magic == 0xFEEDFACF ||
+                       magic == 0xCAFEBABE || magic == 0xBEBAFECA;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static bool IsDirty(ModuleDefMD assembly)
         {
             return assembly.Types.FirstOrDefault(x => x.FullName == typeof(Marks.IsDirty).FullName || x.Name == typeof(UnityModManager).Name) != null;
@@ -461,6 +558,25 @@ namespace UnityModManagerNet.ConsoleInstaller
             var typeDef = moduleDef.Types.FirstOrDefault(x => x.FullName == typeof(Marks.IsDirty).FullName);
             moduleDef.Types.Remove(typeDef);
             assembly.Types.Add(typeDef);
+        }
+
+        public static bool LinuxFileIs64Bit(string path)
+        {
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read);
+            using var reader = new BinaryReader(fs);
+
+            if (fs.Length < 5)
+                throw new Exception($"File too small: {path}");
+
+            byte[] header = reader.ReadBytes(5);
+
+            if (header[0] == 0x7F && header[1] == 0x45 &&
+                header[2] == 0x4C && header[3] == 0x46)
+            {
+                return header[4] == 2;
+            }
+
+            throw new Exception($"Not a valid ELF file: {path}");
         }
 
         public enum MachineType : ushort
