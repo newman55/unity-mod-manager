@@ -21,9 +21,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="dnlib" Version="3.1.0" ExcludeAssets="All" GeneratePathProperty="true" />
-    <PackageReference Include="Lib.Harmony" Version="2.3.6.0" ExcludeAssets="All" GeneratePathProperty="true" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="dnlib" Version="4.5.0"/>
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Ionic.Zip-1.9.1.8" Version="1.9.1.8" />
   </ItemGroup>
 
@@ -33,12 +33,6 @@
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\lib\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="dnlib net35">
-        <HintPath>$(Pkgdnlib)\lib\net35\dnlib.dll</HintPath>
-    </Reference>
-    <Reference Include="Harmony net48">
-        <HintPath>$(PkgLib_Harmony)\lib\net48\0Harmony.dll</HintPath>
     </Reference>
   </ItemGroup>
 
